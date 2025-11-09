@@ -24,9 +24,10 @@ dnf5 install -y mc hunspell-it cockpit distrobox fastfetch
 systemctl enable podman.socket
 systemctl enable cockpit.socket
 
+BUILD_DATE=$(date +'%Y%m%d')
 cat > /etc/xdg/kcm-about-distrorc <<EOF
 [General]
 Website=https://github.com/itotm/horizon-os
-Variant=HorizonOS ${BUILD_ID}
+Variant=HorizonOS ${BUILD_DATE}
 END
 EOF
