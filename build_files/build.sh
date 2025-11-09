@@ -16,20 +16,23 @@ SERVER_PACKAGES=(
     cockpit
     cockpit-machines
     cockpit-podman
-    distrobox
     fastfetch
     syncthing
     tailscale
+    gimp
+    libreoffice
+    thunderbird
+    qt6-qdbusviewer
 )
 
 dnf5 install -y "${SERVER_PACKAGES[@]}"
 
 # Use a COPR Example:
 #
-# dnf5 -y copr enable ublue-os/staging
-# dnf5 -y install package
+dnf5 -y copr enable lizardbyte/stable
+dnf5 -y install Sunshine
 # Disable COPRs so they don't end up enabled on the final image:
-# dnf5 -y copr disable ublue-os/staging
+dnf5 -y copr disable lizardbyte/stable
 
 #### Example for enabling a System Unit File
 
