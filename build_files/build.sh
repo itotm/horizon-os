@@ -9,8 +9,20 @@ set -ouex pipefail
 # List of rpmfusion packages can be found here:
 # https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/39/x86_64/repoview/index.html&protocol=https&redirect=1
 
-# this installs a package from fedora repos
-dnf5 install -y mc hunspell-it cockpit distrobox fastfetch
+SERVER_PACKAGES=(
+    mc
+    hunspell-it
+    qemu
+    cockpit
+    cockpit-machines
+    cockpit-podman
+    distrobox
+    fastfetch
+    syncthing
+    tailscale
+)
+
+dnf5 install -y "${SERVER_PACKAGES[@]}"
 
 # Use a COPR Example:
 #
@@ -27,7 +39,7 @@ systemctl enable cockpit.socket
 BUILD_DATE=$(date +'%Y%m%d')
 cat > /etc/xdg/kcm-about-distrorc <<EOF
 [General]
-Website=https://github.com/itotm/horizon-os
 Variant=HorizonOS ${BUILD_DATE}
+Website=https://github.com/itotm/horizon-os
 END
 EOF
