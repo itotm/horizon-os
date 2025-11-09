@@ -24,7 +24,7 @@ dnf5 install -y mc hunspell-it cockpit distrobox fastfetch
 systemctl enable podman.socket
 systemctl enable cockpit.socket
 
-RUN < /etc/xdg/kcm-about-distrorc <<'END'
+cat > /etc/xdg/kcm-about-distrorc <<EOF
 [General]
 Website=https://github.com/itotm/horizon-os
 Variant=HorizonOS ${BUILD_ID}
