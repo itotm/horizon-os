@@ -2,13 +2,6 @@
 
 set -ouex pipefail
 
-### Install packages
-
-# Packages can be installed from any enabled yum repo on the image.
-# RPMfusion repos are available by default in ublue main images
-# List of rpmfusion packages can be found here:
-# https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/39/x86_64/repoview/index.html&protocol=https&redirect=1
-
 SERVER_PACKAGES=(
     mc
     hunspell-it
@@ -27,17 +20,16 @@ SERVER_PACKAGES=(
 
 dnf5 install -y "${SERVER_PACKAGES[@]}"
 
-# Use a COPR Example:
-#
+
 dnf5 -y copr enable lizardbyte/stable
-dnf5 -y install Sunshine
-# Disable COPRs so they don't end up enabled on the final image:
+#dnf5 -y install Sunshine
+dnf5 search Sunshine
 dnf5 -y copr disable lizardbyte/stable
 
-#### Example for enabling a System Unit File
 
 systemctl enable podman.socket
 systemctl enable cockpit.socket
+
 
 BUILD_DATE=$(date +'%Y%m%d')
 cat > /etc/xdg/kcm-about-distrorc <<EOF
