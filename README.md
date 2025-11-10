@@ -1,3 +1,3 @@
 # HorizonOS
 
-A custom Fedora Kinoite image built with Universal Blue
+A custom Fedora image based on Kinoite and built with Universal Blue template.
