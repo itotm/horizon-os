@@ -3,10 +3,20 @@
 set -ouex pipefail
 
 # Flatpak
-rm -rf /var/lib/flatpak /etc/flatpak/remotes.d/*
-flatpak remote-add --system --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+flatpak uninstall --system --all --delete-data -y || true
+flatpak pin --system --remove-all || true
+flatpak uninstall --system --unused -y || true
+flatpak remote-delete --system fedora --force || true
+
+flatpak remote-add --system flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak remote-modify --system --enable flathub
 
 # Packages
+REMOVE_PACKAGES=(
+    plasma-discover-rpm-ostree
+)
+dnf5 -y remove "${REMOVE_PACKAGES[@]}"
+
 INSTALL_PACKAGES=(
     cascadia-fonts-all
     mc
@@ -36,22 +46,23 @@ INSTALL_PACKAGES=(
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
 
-REMOVE_PACKAGES=(
-    plasma-discover-rpm-ostree
-)
-dnf5 -y remove "${REMOVE_PACKAGES[@]}"
 
 # RPM Fusion
-dnf5 -y install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
-dnf5 -y install rpmfusion-free-release-tainted rpmfusion-nonfree-release-tainted
-dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=1
-
-dnf5 -y install intel-media-driver
-dnf5 -y install libdvdcss
-
-dnf5 -y swap ffmpeg-free ffmpeg
+dnf5 -y install \
+    https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+    https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 
 dnf5 -y install \
+    rpmfusion-free-release-tainted \
+    rpmfusion-nonfree-release-tainted
+
+dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=1
+
+dnf5 -y swap ffmpeg-free ffmpeg --allowerasing
+
+dnf5 -y install \
+    intel-media-driver \
+    libdvdcss \
     gstreamer1-plugin-libav \
     gstreamer1-plugins-bad-free-extras \
     gstreamer1-plugins-bad-freeworld \
@@ -60,7 +71,7 @@ dnf5 -y install \
 
 # Sunshine
 dnf5 -y copr enable lizardbyte/beta
-dnf5 -y install Sunshine
+dnf5 -y install Sunshine || echo "Warning: Sunshine installation failed"
 dnf5 -y copr disable lizardbyte/beta
 
 # Services
@@ -80,7 +91,6 @@ cat > /etc/xdg/kcm-about-distrorc <<EOF
 [General]
 Variant=HorizonOS ${BUILD_DATE}
 Website=https://github.com/itotm/horizon-os
-END
 EOF
 
 dnf5 clean all
