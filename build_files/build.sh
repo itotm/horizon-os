@@ -32,7 +32,6 @@ INSTALL_PACKAGES=(
     distrobox
     syncthing
     tailscale
-    thunderbird
     qt6-qdbusviewer
 
     kate
@@ -43,6 +42,10 @@ INSTALL_PACKAGES=(
     krdc
     okular
     skanpage
+
+    thunderbird
+    gimp
+    libreoffice
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
 
@@ -85,12 +88,18 @@ cat > /etc/inputrc <<EOF
 set completion-ignore-case On
 EOF
 
-# Info
+# Version info
 BUILD_DATE=$(date +'%Y%m%d')
+BUILD_NUMBER=${BUILD_NUMBER:-1}
+VERSION="${BUILD_DATE}.${BUILD_NUMBER}"
+
 cat > /etc/xdg/kcm-about-distrorc <<EOF
 [General]
-Variant=HorizonOS ${BUILD_DATE}
+Variant=HorizonOS ${VERSION}
 Website=https://github.com/itotm/horizon-os
 EOF
+
+# Save version info for reference
+echo "${VERSION}" > /etc/horizon-version
 
 dnf5 clean all
