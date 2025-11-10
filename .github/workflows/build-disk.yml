@@ -14,7 +14,7 @@ on:
         type: choice
         options:
           - amd64
-          - arm64
+          #- arm64
   pull_request:
     branches:
       - main
@@ -40,7 +40,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        disk-type: ["qcow2", "anaconda-iso"]
+        #disk-type: ["qcow2", "anaconda-iso"]
+        disk-type: ["anaconda-iso"]
     permissions:
       contents: read
       packages: read
