@@ -5,6 +5,10 @@ COPY build_files /
 # Base Image
 FROM quay.io/fedora/fedora-kinoite:latest
 
+# Version arguments
+ARG BUILD_NUMBER=1
+ENV BUILD_NUMBER=${BUILD_NUMBER}
+
 LABEL org.opencontainers.image.title="HorizonOS"
 LABEL org.opencontainers.image.description="Custom Fedora Kinoite image with enhanced packages"
 LABEL org.opencontainers.image.source="https://github.com/itotm/horizon-os"
