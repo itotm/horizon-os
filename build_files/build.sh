@@ -2,13 +2,24 @@
 
 set -ouex pipefail
 
+# Flatpak
+flatpak uninstall --all --delete-data -y
+flatpak uninstall --unused -y
+flatpak pin --remove-all
+flatpak remote-delete fedora --force
+sudo rm -rf /var/tmp/flatpak-cache-*
+rm -rf ~/.local/share/flatpak
+
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak remote-modify --enable flathub
+
+# Packages
 INSTALL_PACKAGES=(
     cascadia-fonts-all
     mc
     htop
     fastfetch
     hwinfo
-    kate
     hunspell-it
     qemu-kvm
     cifs-utils
@@ -20,6 +31,15 @@ INSTALL_PACKAGES=(
     tailscale
     thunderbird
     qt6-qdbusviewer
+
+    kate
+    elisa-player
+    gwenview
+    kcalc
+    kolourpaint
+    krdc
+    okular
+    skanpage
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
 
@@ -36,18 +56,7 @@ dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=1
 dnf5 -y install intel-media-driver
 dnf5 -y install libdvdcss
 
-dnf5 -y remove \
-    fdk-aac-free \
-    libavcodec-free \
-    libavdevice-free \
-    libavfilter-free \
-    libavformat-free \
-    libavutil-free \
-    libpostproc-free \
-    libswresample-free \
-    libswscale-free \
-    ffmpeg-free
-dnf5 -y install ffmpeg
+dnf5 -y swap ffmpeg-free ffmpeg
 
 dnf5 -y install \
     gstreamer1-plugin-libav \
@@ -61,9 +70,9 @@ dnf5 -y copr enable lizardbyte/beta
 dnf5 -y install Sunshine
 dnf5 -y copr disable lizardbyte/beta
 
+# Services
 systemctl enable podman.socket
 systemctl enable cockpit.socket
-
 systemctl enable sshd
 systemctl enable tailscaled
 
