@@ -21,22 +21,22 @@ INSTALL_PACKAGES=(
     thunderbird
     qt6-qdbusviewer
 )
-dnf5 install -y "${INSTALL_PACKAGES[@]}"
+dnf5 -y install "${INSTALL_PACKAGES[@]}"
 
 REMOVE_PACKAGES=(
     plasma-discover-rpm-ostree
 )
-dnf5 remove -y "${REMOVE_PACKAGES[@]}"
+dnf5 -y remove "${REMOVE_PACKAGES[@]}"
 
 # RPM Fusion
-dnf5 install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
-dnf5 install rpmfusion-free-release-tainted rpmfusion-nonfree-release-tainted
-dnf5 config-manager setopt fedora-cisco-openh264.enabled=1
+dnf5 -y install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+dnf5 -y install rpmfusion-free-release-tainted rpmfusion-nonfree-release-tainted
+dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=1
 
-dnf5 install intel-media-driver
-dnf5 install libdvdcss
+dnf5 -y install intel-media-driver
+dnf5 -y install libdvdcss
 
-dnf5 remove \
+dnf5 -y remove \
     fdk-aac-free \
     libavcodec-free \
     libavdevice-free \
@@ -47,9 +47,9 @@ dnf5 remove \
     libswresample-free \
     libswscale-free \
     ffmpeg-free
-dnf5 install ffmpeg
+dnf5 -y install ffmpeg
 
-dnf5 install \
+dnf5 -y install \
     gstreamer1-plugin-libav \
     gstreamer1-plugins-bad-free-extras \
     gstreamer1-plugins-bad-freeworld \
