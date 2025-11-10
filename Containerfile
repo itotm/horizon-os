@@ -5,6 +5,10 @@ COPY build_files /
 # Base Image
 FROM quay.io/fedora/fedora-kinoite:latest
 
+LABEL org.opencontainers.image.title="HorizonOS"
+LABEL org.opencontainers.image.description="Custom Fedora Kinoite image with enhanced packages"
+LABEL org.opencontainers.image.source="https://github.com/itotm/horizon-os"
+
 ### [IM]MUTABLE /opt
 ## Some bootable images, like Fedora, have /opt symlinked to /var/opt, in order to
 ## make it mutable/writable for users. However, some packages write files to this directory,
@@ -21,8 +25,8 @@ FROM quay.io/fedora/fedora-kinoite:latest
 ## the following RUN directive does all the things required to run "build.sh" as recommended.
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
-    --mount=type=cache,dst=/var/cache \
-    --mount=type=cache,dst=/var/log \
+    --mount=type=cache,dst=/var/cache/dnf5,sharing=locked \
+    --mount=type=cache,dst=/var/log,sharing=locked \
     --mount=type=tmpfs,dst=/tmp \
     /ctx/build.sh
     
