@@ -4,11 +4,9 @@ set -ouex pipefail
 
 # Flatpak
 flatpak uninstall --all --delete-data -y
-flatpak uninstall --unused -y
 flatpak pin --remove-all
+flatpak uninstall --unused -y
 flatpak remote-delete fedora --force
-sudo rm -rf /var/tmp/flatpak-cache-*
-rm -rf ~/.local/share/flatpak
 
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 flatpak remote-modify --enable flathub
