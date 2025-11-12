@@ -48,7 +48,7 @@ on:
       install_wine:
         description: "Wine"
         required: false
-        default: false
+        default: true
         type: boolean
 
 env:
@@ -150,7 +150,7 @@ jobs:
             ./Containerfile
           # Postfix image name with -custom to make it a little more descriptive
           # Syntax: https://docs.github.com/en/actions/learn-github-actions/expressions#format
-          image: ${{ env.IMAGE_NAME }}
+          image: localhost/${{ env.IMAGE_NAME }}
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
           build-args: |
@@ -173,7 +173,7 @@ jobs:
         uses: hhd-dev/rechunk@5fbe1d3a639615d2548d83bc888360de6267b1a2 # v1.2.4
         with:
           rechunk: 'ghcr.io/hhd-dev/rechunk:v1.2.4'
-          ref: "${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}"
+          ref: "localhost/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}"
           prev-ref: "${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}"
           skip_compression: true
           labels: ${{ steps.metadata.outputs.labels }}
@@ -184,7 +184,7 @@ jobs:
           IMAGE=$(podman pull ${{ steps.rechunk.outputs.ref }})
           sudo rm -rf ${{ steps.rechunk.outputs.output }}
           for tag in ${{ steps.metadata.outputs.tags }}; do
-            podman tag $IMAGE ${{ env.IMAGE_NAME }}:$tag
+            podman tag $IMAGE localhost/${{ env.IMAGE_NAME }}:$tag
           done
 
       # These `if` statements are so that pull requests for your custom images do not make it publish any packages under your name without you knowing
@@ -210,6 +210,8 @@ jobs:
           tags: ${{ steps.metadata.outputs.tags }}
           username: ${{ env.REGISTRY_USER }}
           password: ${{ env.REGISTRY_PASSWORD }}
+          extra-args: |
+            --compression-format=zstd:chunked
 
       # This section is optional and only needs to be enabled if you plan on distributing
       # your project for others to consume. You will need to create a public and private key
