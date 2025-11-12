@@ -95,7 +95,7 @@ jobs:
         continue-on-error: true 
         with:
           target-dir: /var/lib/containers
-          mount-opts: compress-force=zstd:2
+          mount-opts: compress-force=zstd:3
 
       - name: Get current date
         id: date
