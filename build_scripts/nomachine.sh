@@ -6,6 +6,6 @@ NOMACHINE_URL="https://web9001.nomachine.com/download/9.2/Linux/${NOMACHINE_RPM}
 
 wget "${NOMACHINE_URL}"
 
-dnf5 -y install "${NOMACHINE_RPM}"
+rpm -i "${NOMACHINE_RPM}"
 
 rm -f "${NOMACHINE_RPM}"
