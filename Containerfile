@@ -16,6 +16,7 @@ ARG INSTALL_FLATHUB=false
 ARG INSTALL_GIMP=false
 ARG INSTALL_KDEAPPS=false
 ARG INSTALL_LIBREOFFICE=false
+ARG INSTALL_NOMACHINE=false
 ARG INSTALL_RPMFUSION=false
 ARG INSTALL_SUNSHINE=false
 ARG INSTALL_THUNDERBIRD=false
@@ -32,6 +33,9 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh INSTALL_LIBREOFFICE /ctx/libreoffice.sh
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
+    /ctx/runner.sh INSTALL_NOMACHINE /ctx/nomachine.sh
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh INSTALL_GIMP /ctx/gimp.sh
