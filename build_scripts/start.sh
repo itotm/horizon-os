@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ouex pipefail
 
-rm /opt && mkdir /opt
+# rm /opt && mkdir /opt
 
 # Bash configuration
 cat > /etc/inputrc <<EOF
