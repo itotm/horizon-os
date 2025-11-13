@@ -21,3 +21,5 @@ RPMFUSION_PACKAGES=(
     gstreamer1-vaapi
 )
 dnf5 -y install "${RPMFUSION_PACKAGES[@]}"
+
+./ctx/cleanup.sh

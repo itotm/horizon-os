@@ -8,3 +8,5 @@ wget --no-hsts https://raw.githubusercontent.com/Winetricks/winetricks/master/sr
 chmod +x ./winetricks
 mkdir -p /var/usrlocal/bin
 mv ./winetricks /var/usrlocal/bin/winetricks
+
+./ctx/cleanup.sh

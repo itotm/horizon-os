@@ -13,3 +13,5 @@ KDE_PACKAGES=(
     qt6-qdbusviewer
 )
 dnf5 -y install "${KDE_PACKAGES[@]}"
+
+./ctx/cleanup.sh
