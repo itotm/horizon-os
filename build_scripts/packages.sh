@@ -13,7 +13,6 @@ INSTALL_PACKAGES=(
     fastfetch
     hwinfo
     lm_sensors
-    curl
     fzf
     zoxide
     ripgrep
@@ -25,6 +24,7 @@ INSTALL_PACKAGES=(
     distrobox
     syncthing
     tailscale
+    plymouth-plugin-two-step
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
 

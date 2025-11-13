@@ -13,7 +13,7 @@ on:
       install_gimp:
         description: "GIMP"
         required: false
-        default: false
+        default: true
         type: boolean
       install_kdeapps:
         description: "KDE Apps"
@@ -23,12 +23,12 @@ on:
       install_libreoffice:
         description: "LibreOffice"
         required: false
-        default: false
+        default: true
         type: boolean
       install_nomachine:
         description: "NoMachine"
         required: false
-        default: false
+        default: true
         type: boolean
       install_rpmfusion:
         description: "RPM Fusion"
@@ -59,9 +59,9 @@ on:
 env:
   IMAGE_DESC: "HorizonOS - Customized Fedora Kinoite Image"
   IMAGE_KEYWORDS: "bootc,fedora, kinoite,atomic"
-  # IMAGE_LOGO_URL: "https://avatars.githubusercontent.com/u/120078124?s=200&v=4"  # Put your own image here for a fancy profile on https://artifacthub.io/!
-  IMAGE_NAME: "${{ github.event.repository.name }}"  # output image name, usually same as repo name
-  IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"  # do not edit
+  IMAGE_LOGO_URL: "https://horizon-os.itotm.org/logo.png"
+  IMAGE_NAME: "${{ github.event.repository.name }}"
+  IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
   DEFAULT_TAG: "latest"
 
 concurrency:
@@ -94,16 +94,16 @@ jobs:
       - name: Maximize build space
         uses: ublue-os/remove-unwanted-software@695eb75bc387dbcd9685a8e72d23439d8686cba6
 
-      - name: Mount BTRFS for podman storage
-        id: container-storage-action
-        uses: ublue-os/container-storage-action@911baca08baf30c8654933e9e9723cb399892140
+      #- name: Mount BTRFS for podman storage
+      #  id: container-storage-action
+      #  uses: ublue-os/container-storage-action@911baca08baf30c8654933e9e9723cb399892140
 
         # Fallback to the remove-unwanted-software-action if github doesn't allocate enough space
         # See: https://github.com/ublue-os/container-storage-action/pull/11
-        continue-on-error: true 
-        with:
-          target-dir: /var/lib/containers
-          mount-opts: compress-force=zstd:1
+      #  continue-on-error: true 
+      #  with:
+      #    target-dir: /var/lib/containers
+      #    mount-opts: compress-force=zstd:1
 
       - name: Get current date
         id: date
@@ -168,6 +168,7 @@ jobs:
             INSTALL_SUNSHINE=${{ github.event.inputs.install_sunshine }}
             INSTALL_THUNDERBIRD=${{ github.event.inputs.install_thunderbird }}
             INSTALL_WINE=${{ github.event.inputs.install_wine }}
+          layers: true
           oci: false
 
       # These `if` statements are so that pull requests for your custom images do not make it publish any packages under your name without you knowing
@@ -193,8 +194,6 @@ jobs:
           tags: ${{ steps.metadata.outputs.tags }}
           username: ${{ env.REGISTRY_USER }}
           password: ${{ env.REGISTRY_PASSWORD }}
-          extra-args: |
-            --compression-format=zstd:chunked
 
       # This section is optional and only needs to be enabled if you plan on distributing
       # your project for others to consume. You will need to create a public and private key
