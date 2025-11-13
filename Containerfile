@@ -1,6 +1,6 @@
 FROM alpine AS ctx
-COPY build_scripts ctx
-RUN chmod +x ./ctx/*.sh
+COPY build_scripts /
+RUN chmod +x ./*.sh
 
 FROM quay.io/fedora/fedora-kinoite:latest
 
