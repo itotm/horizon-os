@@ -2,4 +2,4 @@
 set -ouex pipefail
 
 dnf5 -y clean all
-dnf5 config-manager --disable \*
+sed -i 's/^enabled=.*/enabled=0/' /etc/yum.repos.d/*.repo
