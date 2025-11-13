@@ -2,7 +2,7 @@
 name: Build container image
 on:
   schedule:
-    - cron: '20 4 * * 5'  # 4:20am UTC on Friday
+    - cron: '20 4 * * *'  # Runs at 04:20 UTC every day
   workflow_dispatch:
     inputs:
       install_flathub:
@@ -28,7 +28,7 @@ on:
       install_nomachine:
         description: "NoMachine"
         required: false
-        default: true
+        default: false
         type: boolean
       install_rpmfusion:
         description: "RPM Fusion"

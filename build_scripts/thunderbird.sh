@@ -2,3 +2,4 @@
 set -ouex pipefail
 
 dnf5 -y install thunderbird
+./ctx/cleanup.sh

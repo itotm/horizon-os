@@ -41,3 +41,5 @@ systemctl enable cockpit.socket
 systemctl enable podman.socket
 systemctl enable sshd
 systemctl enable tailscaled
+
+./ctx/cleanup.sh
