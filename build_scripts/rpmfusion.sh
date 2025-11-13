@@ -9,13 +9,15 @@ dnf5 -y install \
     rpmfusion-free-release-tainted \
     rpmfusion-nonfree-release-tainted
 
-dnf -y groupupdate multimedia --setop="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin
-dnf -y groupupdate sound-and-video
-
 dnf5 -y swap ffmpeg-free ffmpeg --allowerasing
 
 RPMFUSION_PACKAGES=(
     intel-media-driver
     libdvdcss
+    gstreamer1-plugin-libav
+    gstreamer1-plugins-bad-free-extras
+    gstreamer1-plugins-bad-freeworld
+    gstreamer1-plugins-ugly
+    gstreamer1-vaapi
 )
 dnf5 -y install "${RPMFUSION_PACKAGES[@]}"

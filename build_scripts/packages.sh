@@ -1,9 +1,6 @@
 #!/bin/bash
 set -ouex pipefail
 
-dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=1
-dnf5 -y install openh264 mozilla-openh264
-
 # Packages
 REMOVE_PACKAGES=(
     plasma-discover-rpm-ostree
@@ -15,9 +12,8 @@ INSTALL_PACKAGES=(
     htop
     fastfetch
     hwinfo
-    ethtool
     lm_sensors
-    wget
+    curl
     fzf
     zoxide
     ripgrep
@@ -35,6 +31,10 @@ dnf5 -y install "${INSTALL_PACKAGES[@]}"
 dnf5 -y copr enable terjeros/eza
 dnf5 -y install eza
 dnf5 -y copr disable terjeros/eza
+
+dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=1
+dnf5 -y install openh264 mozilla-openh264
+dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=0
 
 # Services
 systemctl enable cockpit.socket
