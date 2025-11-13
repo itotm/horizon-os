@@ -6,5 +6,4 @@ dnf5 -y install winehq-staging
 
 wget --no-hsts https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
 chmod +x ./winetricks
-mkdir -p /usr/local/bin
 mv ./winetricks /var/usrlocal/bin/winetricks
