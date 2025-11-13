@@ -62,7 +62,8 @@ download_contents( ) {
             # Use a temporary file for the download to handle permissions safely.
             local temp_download=$(mktemp)
             curl -s -L "$download_url" -o "$temp_download"
-            sudo mv "$temp_download" "$local_filepath"
+            mv "$temp_download" "$local_filepath"
+            chmod +r "$local_filepath"
             # No need to trap/rm here, mv cleans it up. If mv fails, set -e stops the script.
 
         elif [ "$type" == "dir" ]; then
