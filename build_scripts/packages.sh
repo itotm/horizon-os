@@ -2,6 +2,7 @@
 set -ouex pipefail
 
 dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=1
+dnf5 -y install openh264 mozilla-openh264
 
 # Packages
 REMOVE_PACKAGES=(
@@ -10,21 +11,30 @@ REMOVE_PACKAGES=(
 dnf5 -y remove "${REMOVE_PACKAGES[@]}"
 
 INSTALL_PACKAGES=(
-    cascadia-fonts-all
     mc
     htop
     fastfetch
     hwinfo
+    ethtool
+    lm_sensors
+    wget
+    fzf
+    zoxide
+    ripgrep
+    fd
+    cascadia-fonts-all
     hunspell-it
-    qemu-kvm
     cockpit
-    cockpit-machines
     cockpit-podman
     distrobox
     syncthing
     tailscale
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
+
+dnf5 -y copr enable terjeros/eza
+dnf5 -y install eza
+dnf5 -y copr disable terjeros/eza
 
 # Services
 systemctl enable cockpit.socket

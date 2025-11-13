@@ -13,7 +13,7 @@ on:
       install_gimp:
         description: "GIMP"
         required: false
-        default: true
+        default: false
         type: boolean
       install_kdeapps:
         description: "KDE Apps"
@@ -23,22 +23,27 @@ on:
       install_libreoffice:
         description: "LibreOffice"
         required: false
-        default: true
+        default: false
         type: boolean
       install_nomachine:
         description: "NoMachine"
         required: false
-        default: true
+        default: false
         type: boolean
       install_rpmfusion:
         description: "RPM Fusion"
         required: false
         default: true
         type: boolean
+      install_qemu:
+        description: "QEmu"
+        required: false
+        default: true
+        type: boolean
       install_sunshine:
         description: "Sunshine"
         required: false
-        default: false
+        default: true
         type: boolean
       install_thunderbird:
         description: "Thunderbird"
@@ -98,7 +103,7 @@ jobs:
         continue-on-error: true 
         with:
           target-dir: /var/lib/containers
-          mount-opts: compress-force=zstd:3
+          mount-opts: compress-force=zstd:1
 
       - name: Get current date
         id: date
@@ -150,7 +155,7 @@ jobs:
             ./Containerfile
           # Postfix image name with -custom to make it a little more descriptive
           # Syntax: https://docs.github.com/en/actions/learn-github-actions/expressions#format
-          image: localhost/${{ env.IMAGE_NAME }}
+          image: ${{ env.IMAGE_NAME }}
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
           build-args: |

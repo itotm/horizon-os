@@ -17,6 +17,7 @@ ARG INSTALL_GIMP=false
 ARG INSTALL_KDEAPPS=false
 ARG INSTALL_LIBREOFFICE=false
 ARG INSTALL_NOMACHINE=false
+ARG INSTALL_QEMU=false
 ARG INSTALL_RPMFUSION=false
 ARG INSTALL_SUNSHINE=false
 ARG INSTALL_THUNDERBIRD=false
@@ -32,22 +33,25 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/
     /ctx/runner.sh INSTALL_FLATHUB /ctx/flathub.sh
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
+    /ctx/runner.sh INSTALL_GIMP /ctx/gimp.sh
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
+    /ctx/runner.sh INSTALL_KDEAPPS /ctx/kde-apps.sh
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh INSTALL_LIBREOFFICE /ctx/libreoffice.sh
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh INSTALL_NOMACHINE /ctx/nomachine.sh
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh INSTALL_GIMP /ctx/gimp.sh
-
-RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh INSTALL_SUNSHINE /ctx/sunshine.sh
-
-RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh INSTALL_KDEAPPS /ctx/kde-apps.sh
+    /ctx/runner.sh INSTALL_QEMU /ctx/qemu.sh
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh INSTALL_RPMFUSION /ctx/rpmfusion.sh
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
+    /ctx/runner.sh INSTALL_SUNSHINE /ctx/sunshine.sh
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh INSTALL_THUNDERBIRD /ctx/thunderbird.sh
