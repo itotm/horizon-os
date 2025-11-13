@@ -1,11 +1,17 @@
 #!/bin/bash
 set -ouex pipefail
 
-NOMACHINE_RPM="nomachine_9.2.18_3_x86_64.rpm"
-NOMACHINE_URL="https://web9001.nomachine.com/download/9.2/Linux/${NOMACHINE_RPM}"
+PACKAGE_NAME="nomachine_9.2.18_3_x86_64.tar.gz"
+INSTALL_PATH="/var/opt/nomachine"
 
-wget "${NOMACHINE_URL}"
+mkdir -p "$INSTALL_PATH"
 
-rpm -i "${NOMACHINE_RPM}" --nodigest
+cd /tmp
+wget "https://download.nomachine.com/download/9.2/Linux/$PACKAGE_NAME"
+tar xfz "$PACKAGE_NAME"
+cd NX
+NX_INSTALL_PREFIX="$INSTALL_PATH" ./nxserver --install
 
-rm -f "${NOMACHINE_RPM}"
+cd /tmp
+rm -f "$PACKAGE_NAME"
+rm -rf NX
