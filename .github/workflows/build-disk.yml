@@ -9,7 +9,7 @@ on:
       upload-to-s3:
         description: "Upload to S3"
         required: false
-        default: false
+        default: true
         type: boolean
       platform:
         required: true
