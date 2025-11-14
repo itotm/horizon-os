@@ -5,15 +5,6 @@ on:
     - cron: '20 4 * * *'  # Runs at 04:20 UTC every day
   workflow_dispatch:
     inputs:
-      fedora_version:
-        description: "Fedora base image"
-        required: true
-        default: '43'
-        type: choice
-        options:
-          - 'latest'
-          - '43'
-          - '42'
       install_flathub:
         description: "Flathub"
         required: false
@@ -80,7 +71,7 @@ env:
   DEFAULT_FEDORA: "43"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-${{ inputs.brand_name}}-${{ inputs.stream_name }}
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
@@ -148,7 +139,7 @@ jobs:
             type=raw,value=${{ steps.date.outputs.version }}
             type=raw,value=${{ env.DEFAULT_TAG }}.{{date 'YYYYMMDD'}}
             type=raw,value={{date 'YYYYMMDD'}}
-            type=raw,value=f${{ github.event.inputs.fedora_version || env.DEFAULT_FEDORA }}
+            type=raw,value=f${{ env.DEFAULT_FEDORA }}
             type=sha,enable=${{ github.event_name == 'pull_request' }}
             type=ref,event=pr
           labels: |
@@ -183,7 +174,6 @@ jobs:
           labels: ${{ steps.metadata.outputs.labels }}
           build-args: |
             BUILD_NUMBER=${{ github.run_number }}
-            FEDORA_VERSION=${{ github.event.inputs.fedora_version || env.DEFAULT_FEDORA }}
             INSTALL_FLATHUB=${{ github.event.inputs.install_flathub }}
             INSTALL_GIMP=${{ github.event.inputs.install_gimp }}
             INSTALL_KDEAPPS=${{ github.event.inputs.install_kdeapps }}

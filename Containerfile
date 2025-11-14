@@ -2,8 +2,7 @@ FROM alpine AS ctx
 COPY build_scripts /
 RUN chmod +x ./*.sh
 
-ARG FEDORA_VERSION=latest
-FROM quay.io/fedora/fedora-kinoite:${FEDORA_VERSION}
+FROM quay.io/fedora/fedora-kinoite:43
 
 ARG BUILD_NUMBER=1
 ENV BUILD_NUMBER=${BUILD_NUMBER}
