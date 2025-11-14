@@ -8,7 +8,7 @@ on:
       fedora_version:
         description: "Fedora base image"
         required: false
-        default: '43'
+        default: 'latest'
         type: choice
         options:
           - '42'

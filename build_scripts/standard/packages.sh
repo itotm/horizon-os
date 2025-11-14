@@ -1,11 +1,9 @@
 #!/bin/bash
 set -ouex pipefail
 
-# Flahub
 flatpak remote-add --system flathub https://flathub.org/repo/flathub.flatpakrepo
 flatpak remote-modify --system --enable flathub
 
-# Packages
 REMOVE_PACKAGES=(
     plasma-discover-rpm-ostree
 )
@@ -23,11 +21,7 @@ INSTALL_PACKAGES=(
     fd
     cascadia-fonts-all
     hunspell-it
-    cockpit
-    cockpit-podman
     distrobox
-    syncthing
-    tailscale
     iscan-firmware
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
@@ -39,10 +33,6 @@ dnf5 -y copr disable terjeros/eza
 dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=1
 dnf5 -y install openh264 mozilla-openh264
 
-# Services
-systemctl enable cockpit.socket
 systemctl enable podman.socket
-systemctl enable sshd
-systemctl enable tailscaled
 
 ./ctx/cleanup.sh

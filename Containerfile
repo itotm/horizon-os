@@ -1,8 +1,5 @@
 ARG FEDORA_VERSION=latest
 
-ARG BUILD_NUMBER=1
-ENV BUILD_NUMBER=${BUILD_NUMBER}
-
 ARG ENABLE_COMMON=false
 ARG ENABLE_STANDARD=false
 ARG ENABLE_EXTENDED=false
@@ -15,6 +12,9 @@ COPY build_scripts /
 RUN chmod +x ./*.sh
 
 FROM quay.io/fedora/fedora-kinoite:${FEDORA_VERSION}
+
+ARG BUILD_NUMBER=1
+ENV BUILD_NUMBER=${BUILD_NUMBER}
 
 ARG ENABLE_COMMON
 ARG ENABLE_STANDARD
@@ -29,6 +29,12 @@ LABEL org.opencontainers.image.source="https://github.com/itotm/horizon-os"
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_STANDARD /ctx/standard/packages.sh
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
+    /ctx/runner.sh ENABLE_STANDARD /ctx/standard/cockpit.sh
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
+    /ctx/runner.sh ENABLE_STANDARD /ctx/standard/syncthing.sh
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
+    /ctx/runner.sh ENABLE_STANDARD /ctx/standard/tailscale.sh
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_STANDARD /ctx/standard/kde-apps.sh
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
