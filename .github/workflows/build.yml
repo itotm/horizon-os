@@ -33,11 +33,11 @@ on:
         required: false
         default: false
         type: boolean
-      install_nomachine:
-        description: "NoMachine"
-        required: false
-        default: false
-        type: boolean
+      # install_nomachine:
+      #   description: "NoMachine"
+      #   required: false
+      #   default: false
+      #   type: boolean
       install_rpmfusion:
         description: "RPM Fusion"
         required: false
@@ -63,11 +63,11 @@ on:
         required: false
         default: true
         type: boolean
-      install_wine:
-        description: "Wine"
-        required: false
-        default: false
-        type: boolean
+      # install_wine:
+      #   description: "Wine"
+      #   required: false
+      #   default: false
+      #   type: boolean
 
 env:
   IMAGE_DESC: "HorizonOS - Customized Fedora Kinoite Image"
@@ -187,12 +187,12 @@ jobs:
             INSTALL_GIMP=${{ github.event.inputs.install_gimp }}
             INSTALL_KDEAPPS=${{ github.event.inputs.install_kdeapps }}
             INSTALL_LIBREOFFICE=${{ github.event.inputs.install_libreoffice }}
-            INSTALL_NOMACHINE=${{ github.event.inputs.install_nomachine }}
+            # INSTALL_NOMACHINE=${{ github.event.inputs.install_nomachine }}
             INSTALL_RPMFUSION=${{ github.event.inputs.install_rpmfusion }}
             INSTALL_SUNSHINE=${{ github.event.inputs.install_sunshine }}
             INSTALL_THUNDERBIRD=${{ github.event.inputs.install_thunderbird }}
             INSTALL_VLC=${{ github.event.inputs.install_vlc }}
-            INSTALL_WINE=${{ github.event.inputs.install_wine }}
+            # INSTALL_WINE=${{ github.event.inputs.install_wine }}
           layers: true
           oci: false
 
