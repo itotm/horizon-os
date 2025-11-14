@@ -2,7 +2,8 @@ FROM alpine AS ctx
 COPY build_scripts /
 RUN chmod +x ./*.sh
 
-FROM quay.io/fedora/fedora-kinoite:latest
+ARG FEDORA_VERSION=latest
+FROM quay.io/fedora/fedora-kinoite:${FEDORA_VERSION}
 
 ARG BUILD_NUMBER=1
 ENV BUILD_NUMBER=${BUILD_NUMBER}
@@ -20,6 +21,7 @@ ARG INSTALL_QEMU=false
 ARG INSTALL_RPMFUSION=false
 ARG INSTALL_SUNSHINE=false
 ARG INSTALL_THUNDERBIRD=false
+ARG INSTALL_VLC=false
 ARG INSTALL_WINE=false
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
@@ -54,6 +56,9 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh INSTALL_THUNDERBIRD /ctx/thunderbird.sh
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
+    /ctx/runner.sh INSTALL_VLC /ctx/vlc.sh
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh INSTALL_WINE /ctx/wine.sh
