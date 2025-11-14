@@ -156,6 +156,7 @@ jobs:
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
           build-args: |
+            FEDORA_VERSION=${{ github.event.inputs.fedora_version }}
             BUILD_NUMBER=${{ github.run_number }}
             ENABLE_COMMON=${{ github.event.inputs.enable_common }}
             ENABLE_STANDARD=${{ github.event.inputs.enable_standard }}

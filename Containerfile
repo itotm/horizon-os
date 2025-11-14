@@ -1,5 +1,8 @@
 ARG FEDORA_VERSION=latest
+
 ARG BUILD_NUMBER=1
+ENV BUILD_NUMBER=${BUILD_NUMBER}
+
 ARG ENABLE_COMMON=false
 ARG ENABLE_STANDARD=false
 ARG ENABLE_EXTENDED=false
@@ -13,7 +16,12 @@ RUN chmod +x ./*.sh
 
 FROM quay.io/fedora/fedora-kinoite:${FEDORA_VERSION}
 
-ENV BUILD_NUMBER=${BUILD_NUMBER}
+ARG ENABLE_COMMON
+ARG ENABLE_STANDARD
+ARG ENABLE_EXTENDED
+ARG ENABLE_DEVTOOLS
+ARG ENABLE_EXPERIMENTAL
+ARG ENABLE_TESTING
 
 LABEL org.opencontainers.image.title="HorizonOS"
 LABEL org.opencontainers.image.description="Custom Fedora Kinoite image"
