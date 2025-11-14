@@ -7,10 +7,11 @@ on:
     inputs:
       fedora_version:
         description: "Fedora base image"
-        required: false
+        required: true
         default: '43'
         type: choice
         options:
+          - 'latest'
           - '43'
           - '42'
       install_flathub:
@@ -187,12 +188,10 @@ jobs:
             INSTALL_GIMP=${{ github.event.inputs.install_gimp }}
             INSTALL_KDEAPPS=${{ github.event.inputs.install_kdeapps }}
             INSTALL_LIBREOFFICE=${{ github.event.inputs.install_libreoffice }}
-            # INSTALL_NOMACHINE=${{ github.event.inputs.install_nomachine }}
             INSTALL_RPMFUSION=${{ github.event.inputs.install_rpmfusion }}
             INSTALL_SUNSHINE=${{ github.event.inputs.install_sunshine }}
             INSTALL_THUNDERBIRD=${{ github.event.inputs.install_thunderbird }}
             INSTALL_VLC=${{ github.event.inputs.install_vlc }}
-            # INSTALL_WINE=${{ github.event.inputs.install_wine }}
           layers: true
           oci: false
 
