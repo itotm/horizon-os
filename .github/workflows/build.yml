@@ -44,7 +44,7 @@ on:
       enable_testing:
         description: "Testing"
         required: false
-        default: true
+        default: false
         type: boolean
 
 env:
