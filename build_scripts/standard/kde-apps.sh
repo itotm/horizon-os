@@ -8,6 +8,8 @@ KDE_PACKAGES=(
     kcalc
     kolourpaint
     krdc
+    kjournald
+    ksystemlog
     okular
     skanpage
     qt6-qdbusviewer
