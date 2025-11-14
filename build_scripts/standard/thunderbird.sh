@@ -1,5 +1,6 @@
 #!/bin/bash
 set -ouex pipefail
 
-dnf5 -y install vlc
+dnf5 -y install thunderbird
+
 ./ctx/cleanup.sh

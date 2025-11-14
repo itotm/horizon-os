@@ -2,69 +2,50 @@
 name: Build container image
 on:
   schedule:
-    - cron: '20 4 * * *'  # Runs at 04:20 UTC every day
+    - cron: '20 3 * * *'  # Runs at 03:20 UTC every day
   workflow_dispatch:
     inputs:
-      install_flathub:
-        description: "Flathub"
+      fedora_version:
+        description: "Fedora base image"
+        required: false
+        default: '43'
+        type: choice
+        options:
+          - '42'
+          - '43'
+          - '44'
+          - 'latest'
+          - 'rawhide'
+      enable_common:
+        description: "Common"
         required: false
         default: true
         type: boolean
-      install_gimp:
-        description: "GIMP"
+      enable_standard:
+        description: "Standard"
+        required: false
+        default: true
+        type: boolean
+      enable_extended:
+        description: "Extended"
         required: false
         default: false
         type: boolean
-      install_kdeapps:
-        description: "KDE Apps"
+      enable_devtools:
+        description: "Developer Tools"
         required: false
         default: true
         type: boolean
-      install_libreoffice:
-        description: "LibreOffice"
+      enable_experimental:
+        description: "Experimental"
         required: false
         default: false
         type: boolean
-      # install_nomachine:
-      #   description: "NoMachine"
-      #   required: false
-      #   default: false
-      #   type: boolean
-      install_rpmfusion:
-        description: "RPM Fusion"
+      enable_testing:
+        description: "Testing"
         required: false
         default: true
         type: boolean
-      install_qemu:
-        description: "QEmu"
-        required: false
-        default: true
-        type: boolean
-      install_sunshine:
-        description: "Sunshine"
-        required: false
-        default: true
-        type: boolean
-      install_thunderbird:
-        description: "Thunderbird"
-        required: false
-        default: true
-        type: boolean
-      install_vlc:
-        description: "VLC"
-        required: false
-        default: true
-        type: boolean
-      install_vscode:
-        description: "Visual Studio Code"
-        required: false
-        default: false
-        type: boolean
-      # install_wine:
-      #   description: "Wine"
-      #   required: false
-      #   default: false
-      #   type: boolean
 
 env:
   IMAGE_DESC: "HorizonOS - Customized Fedora Kinoite Image"
@@ -73,7 +54,6 @@ env:
   IMAGE_NAME: "${{ github.event.repository.name }}"
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
   DEFAULT_TAG: "latest"
-  DEFAULT_FEDORA: "43"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
@@ -144,7 +124,7 @@ jobs:
             type=raw,value=${{ steps.date.outputs.version }}
             type=raw,value=${{ env.DEFAULT_TAG }}.{{date 'YYYYMMDD'}}
             type=raw,value={{date 'YYYYMMDD'}}
-            type=raw,value=f${{ env.DEFAULT_FEDORA }}
+            type=raw,value=fedora_${{ inputs.fedora_version }}
             type=sha,enable=${{ github.event_name == 'pull_request' }}
             type=ref,event=pr
           labels: |
@@ -172,23 +152,18 @@ jobs:
         with:
           containerfiles: |
             ./Containerfile
-          # Postfix image name with -custom to make it a little more descriptive
-          # Syntax: https://docs.github.com/en/actions/learn-github-actions/expressions#format
           image: ${{ env.IMAGE_NAME }}
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
           build-args: |
             BUILD_NUMBER=${{ github.run_number }}
-            INSTALL_FLATHUB=${{ github.event.inputs.install_flathub }}
-            INSTALL_GIMP=${{ github.event.inputs.install_gimp }}
-            INSTALL_KDEAPPS=${{ github.event.inputs.install_kdeapps }}
-            INSTALL_LIBREOFFICE=${{ github.event.inputs.install_libreoffice }}
-            INSTALL_RPMFUSION=${{ github.event.inputs.install_rpmfusion }}
-            INSTALL_SUNSHINE=${{ github.event.inputs.install_sunshine }}
-            INSTALL_THUNDERBIRD=${{ github.event.inputs.install_thunderbird }}
-            INSTALL_VLC=${{ github.event.inputs.install_vlc }}
-            INSTALL_VSCODE=${{ github.event.inputs.install_vscode }}
-          layers: true
+            ENABLE_COMMON=${{ github.event.inputs.enable_common }}
+            ENABLE_STANDARD=${{ github.event.inputs.enable_standard }}
+            ENABLE_EXTENDED=${{ github.event.inputs.enable_extended }}
+            ENABLE_DEVTOOLS=${{ github.event.inputs.enable_devtools }}
+            ENABLE_EXPERIMENTAL=${{ github.event.inputs.enable_experimental }}
+            ENABLE_TESTING=${{ github.event.inputs.enable_testing }}
+          layers: true # keeps the image layers separate for better caching
           oci: false
 
       # These `if` statements are so that pull requests for your custom images do not make it publish any packages under your name without you knowing
@@ -215,10 +190,6 @@ jobs:
           username: ${{ env.REGISTRY_USER }}
           password: ${{ env.REGISTRY_PASSWORD }}
 
-      # This section is optional and only needs to be enabled if you plan on distributing
-      # your project for others to consume. You will need to create a public and private key
-      # using Cosign and save the private key as a repository secret in Github for this workflow
-      # to consume. For more details, review the image signing section of the README.
       - name: Install Cosign
         uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)

@@ -1,68 +1,53 @@
+ARG FEDORA_VERSION=latest
+ARG BUILD_NUMBER=1
+ARG ENABLE_COMMON=false
+ARG ENABLE_STANDARD=false
+ARG ENABLE_EXTENDED=false
+ARG ENABLE_DEVTOOLS=false
+ARG ENABLE_EXPERIMENTAL=false
+ARG ENABLE_TESTING=false
+
 FROM alpine AS ctx
 COPY build_scripts /
 RUN chmod +x ./*.sh
 
-FROM quay.io/fedora/fedora-kinoite:43
+FROM quay.io/fedora/fedora-kinoite:${FEDORA_VERSION}
 
-ARG BUILD_NUMBER=1
 ENV BUILD_NUMBER=${BUILD_NUMBER}
 
 LABEL org.opencontainers.image.title="HorizonOS"
 LABEL org.opencontainers.image.description="Custom Fedora Kinoite image"
 LABEL org.opencontainers.image.source="https://github.com/itotm/horizon-os"
 
-ARG INSTALL_FLATHUB=false
-ARG INSTALL_GIMP=false
-ARG INSTALL_KDEAPPS=false
-ARG INSTALL_LIBREOFFICE=false
-ARG INSTALL_NOMACHINE=false
-ARG INSTALL_QEMU=false
-ARG INSTALL_RPMFUSION=false
-ARG INSTALL_SUNSHINE=false
-ARG INSTALL_THUNDERBIRD=false
-ARG INSTALL_VLC=false
-ARG INSTALL_WINE=false
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
+    /ctx/runner.sh ENABLE_STANDARD /ctx/standard/packages.sh
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
+    /ctx/runner.sh ENABLE_STANDARD /ctx/standard/kde-apps.sh
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
+    /ctx/runner.sh ENABLE_STANDARD /ctx/standard/rpmfusion.sh
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
+    /ctx/runner.sh ENABLE_STANDARD /ctx/standard/thunderbird.sh
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
+    /ctx/runner.sh ENABLE_STANDARD /ctx/standard/vlc.sh
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
+    /ctx/runner.sh ENABLE_STANDARD /ctx/standard/sunshine.sh
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/start.sh
+    /ctx/runner.sh ENABLE_EXTENDED /ctx/extended/gimp.sh
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
+    /ctx/runner.sh ENABLE_EXTENDED /ctx/extended/libreoffice.sh
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/packages.sh
+    /ctx/runner.sh ENABLE_EXPERIMENTAL /ctx/experimental/nomachine.sh
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
+    /ctx/runner.sh ENABLE_EXPERIMENTAL /ctx/experimental/wine.sh
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh INSTALL_FLATHUB /ctx/flathub.sh
+    /ctx/runner.sh ENABLE_DEVTOOLS /ctx/devtools/qemu.sh
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
+    /ctx/runner.sh ENABLE_DEVTOOLS /ctx/devtools/vscode.sh
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh INSTALL_GIMP /ctx/gimp.sh
-
-RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh INSTALL_KDEAPPS /ctx/kde-apps.sh
-
-RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh INSTALL_LIBREOFFICE /ctx/libreoffice.sh
-
-RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh INSTALL_NOMACHINE /ctx/nomachine.sh
-
-RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh INSTALL_QEMU /ctx/qemu.sh
-
-RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh INSTALL_RPMFUSION /ctx/rpmfusion.sh
-
-RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh INSTALL_SUNSHINE /ctx/sunshine.sh
-
-RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh INSTALL_THUNDERBIRD /ctx/thunderbird.sh
-
-RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh INSTALL_VLC /ctx/vlc.sh
-
-RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh INSTALL_WINE /ctx/wine.sh
-
-RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/end.sh
+    /ctx/runner.sh ENABLE_COMMON /ctx/common.sh
 
 RUN bootc container lint

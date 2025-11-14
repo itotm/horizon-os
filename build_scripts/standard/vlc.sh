@@ -1,6 +1,6 @@
 #!/bin/bash
 set -ouex pipefail
 
-dnf5 -y install iscan-firmware
+dnf5 -y install vlc
 
 ./ctx/cleanup.sh
