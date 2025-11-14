@@ -55,6 +55,11 @@ on:
         required: false
         default: true
         type: boolean
+      install_vscode:
+        description: "Visual Studio Code"
+        required: false
+        default: false
+        type: boolean
       # install_wine:
       #   description: "Wine"
       #   required: false
@@ -182,6 +187,7 @@ jobs:
             INSTALL_SUNSHINE=${{ github.event.inputs.install_sunshine }}
             INSTALL_THUNDERBIRD=${{ github.event.inputs.install_thunderbird }}
             INSTALL_VLC=${{ github.event.inputs.install_vlc }}
+            INSTALL_VSCODE=${{ github.event.inputs.install_vscode }}
           layers: true
           oci: false
 
