@@ -8,13 +8,11 @@ on:
       fedora_version:
         description: "Fedora base image"
         required: false
-        default: 'latest'
+        default: '43'
         type: choice
         options:
           - '42'
           - '43'
-          - '44'
-          - 'latest'
           - 'rawhide'
       enable_common:
         description: "Common"
