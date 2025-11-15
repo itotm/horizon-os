@@ -1,6 +1,8 @@
 #!/bin/bash
 set -ouex pipefail
 
+rsync -rvK /ctx/sys_files/ /
+
 if [ "${DISABLE_REPOS:-true}" = "true" ]; then
 	sed -i 's/^enabled=.*/enabled=0/' /etc/yum.repos.d/*.repo
 fi
