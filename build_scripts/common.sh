@@ -1,7 +1,9 @@
 #!/bin/bash
 set -ouex pipefail
 
-# sed -i 's/^enabled=.*/enabled=0/' /etc/yum.repos.d/*.repo
+if [ "${DISABLE_REPOS:-true}" = "true" ]; then
+	sed -i 's/^enabled=.*/enabled=0/' /etc/yum.repos.d/*.repo
+fi
 
 systemctl enable sshd
 

@@ -46,6 +46,11 @@ on:
         required: false
         default: false
         type: boolean
+      disable_repos:
+        description: "Disable repos"
+        required: false
+        default: true
+        type: boolean
 
 env:
   IMAGE_DESC: "HorizonOS - Customized Fedora Kinoite Image"
