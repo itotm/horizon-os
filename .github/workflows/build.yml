@@ -2,7 +2,7 @@
 name: Build container image
 on:
   schedule:
-    - cron: '45 7 * * *'  # Runs at 07:45 UTC every day
+    - cron: '45 9 * * *'
   workflow_dispatch:
     inputs:
       fedora_version:
@@ -159,14 +159,15 @@ jobs:
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
           build-args: |
-            FEDORA_VERSION=${{ github.event.inputs.fedora_version }}
+            FEDORA_VERSION=${{ github.event.inputs.fedora_version || '43' }}
             BUILD_NUMBER=${{ github.run_number }}
-            ENABLE_COMMON=${{ github.event.inputs.enable_common }}
-            ENABLE_STANDARD=${{ github.event.inputs.enable_standard }}
-            ENABLE_EXTENDED=${{ github.event.inputs.enable_extended }}
-            ENABLE_DEVTOOLS=${{ github.event.inputs.enable_devtools }}
-            ENABLE_EXPERIMENTAL=${{ github.event.inputs.enable_experimental }}
-            ENABLE_TESTING=${{ github.event.inputs.enable_testing }}
+            ENABLE_COMMON=${{ github.event.inputs.enable_common || true }}
+            ENABLE_STANDARD=${{ github.event.inputs.enable_standard || true }}
+            ENABLE_EXTENDED=${{ github.event.inputs.enable_extended || false }}
+            ENABLE_DEVTOOLS=${{ github.event.inputs.enable_devtools || true }}
+            ENABLE_EXPERIMENTAL=${{ github.event.inputs.enable_experimental || false }}
+            ENABLE_TESTING=${{ github.event.inputs.enable_testing || false }}
+            DISABLE_REPOS=${{ github.event.inputs.disable_repos || true }}
           layers: true # keeps the image layers separate for better caching
           oci: false
 
