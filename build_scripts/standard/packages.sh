@@ -23,7 +23,6 @@ INSTALL_PACKAGES=(
     hunspell-it
     distrobox
     iscan-firmware
-    eza
     bat
     du-dust
     duf
