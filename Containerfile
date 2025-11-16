@@ -11,7 +11,7 @@ ARG DISABLE_REPOS=true
 FROM alpine AS ctx
 COPY build_scripts /
 RUN chmod +x ./*.sh
-COPY /sys_files /sys_files
+# COPY /sys_files /sys_files
 
 FROM quay.io/fedora/fedora-kinoite:${FEDORA_VERSION}
 
