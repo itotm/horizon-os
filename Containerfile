@@ -13,7 +13,8 @@ COPY build_scripts /
 RUN chmod +x ./*.sh
 COPY /sys_files /sys_files
 
-FROM quay.io/fedora/fedora-kinoite:${FEDORA_VERSION}
+# FROM quay.io/fedora/fedora-kinoite:${FEDORA_VERSION}
+FROM ghcr.io/ublue-os/kinoite-main:${FEDORA_VERSION}
 
 ARG BUILD_NUMBER=1
 ENV BUILD_NUMBER=${BUILD_NUMBER}
