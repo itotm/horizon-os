@@ -23,26 +23,16 @@ INSTALL_PACKAGES=(
     hunspell-it
     distrobox
     iscan-firmware
-    cargo
-)
-dnf5 -y install "${INSTALL_PACKAGES[@]}"
-
-CARGO_PACKAGES=(
     eza
     bat
-    dust
-    fd
+    du-dust
     duf
     procs
     hyperfine
-    bottom
     tldr
-    broot
     lsd
 )
-for pkg in "${CARGO_PACKAGES[@]}"; do
-    cargo install "$pkg" || echo "Failed to install $pkg"
-done
+dnf5 -y install "${INSTALL_PACKAGES[@]}"
 
 dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=1
 dnf5 -y install openh264 mozilla-openh264
