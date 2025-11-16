@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ouex pipefail
 
-flatpak remote-add --system flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak remote-add --system --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 flatpak remote-modify --system --enable flathub
 
 REMOVE_PACKAGES=(
