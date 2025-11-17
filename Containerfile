@@ -56,8 +56,8 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_EXTENDED /ctx/extended/libreoffice.sh
 
-RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh ENABLE_EXPERIMENTAL /ctx/experimental/nomachine.sh
+# RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
+#     /ctx/runner.sh ENABLE_EXPERIMENTAL /ctx/experimental/nomachine.sh
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_EXPERIMENTAL /ctx/experimental/wine.sh
 

@@ -1,11 +1,17 @@
 #!/bin/bash
 set -ouex pipefail
 
-# Usa la versione di Fedora da variabile d'ambiente, fallback a 43
 FEDORA_VERSION=${FEDORA_VERSION:-43}
+
+mv /opt /opt_
+mkdir /opt
 
 dnf5 -y config-manager addrepo --from-repofile=https://dl.winehq.org/wine-builds/fedora/${FEDORA_VERSION}/winehq.repo
 dnf5 -y install winehq-staging
+
+mkdir -p /var/opt
+mv /opt/* /var/opt/
+mv /opt_ /opt
 
 wget --no-hsts https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
 chmod +x ./winetricks

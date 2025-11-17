@@ -30,6 +30,7 @@ INSTALL_PACKAGES=(
     hyperfine
     tldr
     lsd
+    cargo
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
 
