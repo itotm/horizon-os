@@ -1,0 +1,11 @@
+[Unit]
+Description=Setup HorizonOS user aliases, completions and shell enhancements
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/horizon-user-setup.sh
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target

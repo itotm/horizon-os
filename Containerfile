@@ -11,7 +11,6 @@ ARG DISABLE_REPOS=true
 FROM alpine AS ctx
 COPY build_scripts /
 RUN chmod +x ./*.sh
-# COPY /sys_files /sys_files
 
 FROM quay.io/fedora/fedora-kinoite:${FEDORA_VERSION}
 
@@ -56,10 +55,10 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_EXTENDED /ctx/extended/libreoffice.sh
 
-# RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-#     /ctx/runner.sh ENABLE_EXPERIMENTAL /ctx/experimental/nomachine.sh
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh ENABLE_EXPERIMENTAL /ctx/experimental/wine.sh
+    /ctx/runner.sh ENABLE_EXPERIMENTAL /ctx/experimental/nomachine.sh
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
+    /ctx/runner.sh ENABLE_TESTING /ctx/experimental/wine.sh
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_DEVTOOLS /ctx/devtools/qemu.sh
