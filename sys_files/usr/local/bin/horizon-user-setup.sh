@@ -2,7 +2,6 @@
 #!/bin/bash
 set -ouex pipefail
 
-# horizon-user-setup.sh: aggiunge alias, shell enhancements e completions all'utente
 USER_HOME="/root"
 if [ "$SUDO_USER" ]; then
     USER_HOME="$(getent passwd "$SUDO_USER" | cut -d: -f6)"
@@ -32,10 +31,10 @@ fi
 if [ -f /usr/share/fzf/shell/completion.bash ]; then
     source /usr/share/fzf/shell/completion.bash
 fi
-# Bash completion (aggiunta da packages)
-if [ -f /etc/bash_completion ]; then
-    source /etc/bash_completion
-fi
+EOF
+
+cat > "$USER_HOME/.inputrc" <<EOF
+set completion-ignore-case On
 EOF
 
 touch "$MARKER"

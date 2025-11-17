@@ -22,7 +22,6 @@ INSTALL_PACKAGES=(
     cascadia-fonts-all
     hunspell-it
     distrobox
-    iscan-firmware
     bat
     du-dust
     duf
@@ -32,6 +31,7 @@ INSTALL_PACKAGES=(
     lsd
     ncdu
     cargo
+    iscan-firmware
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
 
