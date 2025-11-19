@@ -24,6 +24,3 @@ Website=https://github.com/itotm/horizon-os
 EOF
 
 echo "${VERSION}" > /etc/horizon-version
-
-dnf5 -y clean all
-echo "Build script completed successfully."

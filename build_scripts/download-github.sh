@@ -146,7 +146,7 @@ if is_archive_url "$URL"; then
         exit 1
     fi
     
-    extract_archive "$TEMP_ARCHIVE" "$DESTINATION"
+    extract_archive "$TEMP_ARCHIVE" "$DESTINATION" "$EXTENSION"
     
     echo "Archive extracted successfully."
     
