@@ -30,7 +30,6 @@ INSTALL_PACKAGES=(
     tldr
     lsd
     ncdu
-    cargo
     iscan-firmware
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
