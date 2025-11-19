@@ -181,7 +181,7 @@ jobs:
         uses: hhd-dev/rechunk@v1.2.4
         with:
           rechunk: 'ghcr.io/hhd-dev/rechunk:v1.2.4'
-          ref: "localhost/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}"
+          ref: "docker-daemon:${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}"
           prev-ref: "${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}"
           skip_compression: true
           labels: ${{ steps.metadata.outputs.labels }} # Rechunk strips out all the labels during build, this needs to be reapplied here with newline separator
