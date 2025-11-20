@@ -4,8 +4,6 @@
 
 A custom Fedora image based on Kinoite and built with Universal Blue template.
 
-Warning, still **WIP**!
-
 ## Features
 
 - a bunch of [cli tools](./build_scripts/standard/packages.sh)

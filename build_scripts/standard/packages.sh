@@ -37,6 +37,7 @@ dnf5 -y install openh264 mozilla-openh264
 systemctl enable podman.socket
 
 cp -r /ctx/sys_files/* /
-systemctl enable horizon-user-setup.service
+
+systemctl enable horizon-setup.service
 
 ./ctx/cleanup.sh
