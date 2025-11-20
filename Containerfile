@@ -12,6 +12,7 @@ FROM alpine AS ctx
 COPY build_scripts /
 RUN chmod +x ./*.sh
 COPY sys_files sys_files
+RUN chmod +x ./sys_files/usr/bin/*.sh
 
 FROM quay.io/fedora/fedora-kinoite:${FEDORA_VERSION}
 
