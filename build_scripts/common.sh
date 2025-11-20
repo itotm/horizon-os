@@ -6,11 +6,15 @@ if [ "${DISABLE_REPOS:-true}" = "true" ]; then
 fi
 dnf5 -y clean all
 
-./ctx/download-github.sh https://github.com/itotm/plasma-colors/tree/main/color-schemes /usr/share/color-schemes
-./ctx/download-github.sh https://github.com/itotm/plasma-colors/tree/main/ClearSimple /usr/share/plasma/desktoptheme/ClearSimple
-./ctx/download-github.sh https://github.com/itotm/plasma-colors/tree/main/colored-plasma-logo /usr/share/plasma/look-and-feel/colored-plasma-logo
-./ctx/download-github.sh https://github.com/itotm/plymouth-themes/tree/main/fedora-logo/fedora-logo /usr/share/plymouth/themes/fedora-logo
 ./ctx/download-github.sh https://github.com/itotm/eleven-twilight/releases/download/1.0/ElevenTwilight.tar.gz /usr/share/icons
+sleep 5
+./ctx/download-github.sh https://github.com/itotm/plasma-colors/tree/main/color-schemes /usr/share/color-schemes
+sleep 5
+./ctx/download-github.sh https://github.com/itotm/plasma-colors/tree/main/ClearSimple /usr/share/plasma/desktoptheme/ClearSimple
+sleep 5
+./ctx/download-github.sh https://github.com/itotm/plasma-colors/tree/main/colored-plasma-logo /usr/share/plasma/look-and-feel/colored-plasma-logo
+sleep 5
+./ctx/download-github.sh https://github.com/itotm/plymouth-themes/tree/main/fedora-logo/fedora-logo /usr/share/plymouth/themes/fedora-logo
 
 systemctl enable sshd
 systemctl enable bootc-fetch-apply-updates.timer
