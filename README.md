@@ -11,7 +11,7 @@ A custom Fedora image based on Kinoite and built with Universal Blue template.
 - selected [KDE apps](./build_scripts/standard/kde-apps.sh)
 - Cockpit, Tailscale, Syncthing, Sunshine, Thunderbird, VLC preinstalled
 - dev tools: QEMU, dotnet, VSCode
-- Flathub with [selected packages](./sys_files/var/usrlocal/sbin/setup-flatpak.sh)
+- Flathub with [selected packages](./sys_files/usr/bin/setup-flatpak.sh)
 - my custom colors and icons
 - scheduled to update weekly
 - designed to be modular (fork the repo to try!)
