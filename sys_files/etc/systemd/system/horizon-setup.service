@@ -1,0 +1,13 @@
+[Unit]
+Description=Setup HorizonOS user aliases, completions and shell enhancements (one-time)
+After=network.target
+ConditionPathExists=!/var/lib/horizon-setup.done
+
+[Service]
+Type=oneshot
+ExecStart=/var/usrlocal/sbin/horizon-setup.sh
+ExecStartPost=/bin/sh -c 'touch /var/lib/horizon-setup.done'
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
