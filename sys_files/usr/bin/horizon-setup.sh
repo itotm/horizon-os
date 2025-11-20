@@ -24,4 +24,4 @@ echo 'set completion-ignore-case On' | sudo tee -a /etc/inputrc
     echo "fi"
 } | sudo tee -a /etc/bashrc
 
-./setup-flatpak.sh
+/usr/bin/setup-flatpak.sh

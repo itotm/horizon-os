@@ -5,7 +5,7 @@ ConditionPathExists=!/var/lib/horizon-setup.done
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/horizon-setup.sh
+ExecStart=/bin/sh -c '/usr/bin/horizon-setup.sh'
 ExecStartPost=/bin/sh -c 'touch /var/lib/horizon-setup.done'
 RemainAfterExit=true
 
