@@ -40,7 +40,7 @@ sudo ostree admin pin 0
 sudo bootc switch ghcr.io/itotm/horizon-os:latest
 ```
 
-- reboot (**note**: the first reboot will be slow as flatpaks are installed)
+- reboot (**note**: after the first reboot, wait until Flatpak apps finish installing)
 
 ## AI disclaimer
 
