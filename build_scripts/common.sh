@@ -6,13 +6,14 @@ if [ "${DISABLE_REPOS:-true}" = "true" ]; then
 fi
 dnf5 -y clean all
 
-systemctl enable sshd
-
 ./ctx/download-github.sh https://github.com/itotm/plasma-colors/tree/main/color-schemes /usr/share/color-schemes
 ./ctx/download-github.sh https://github.com/itotm/plasma-colors/tree/main/ClearSimple /usr/share/plasma/desktoptheme/ClearSimple
 ./ctx/download-github.sh https://github.com/itotm/plasma-colors/tree/main/colored-plasma-logo /usr/share/plasma/look-and-feel/colored-plasma-logo
 ./ctx/download-github.sh https://github.com/itotm/plymouth-themes/tree/main/fedora-logo/fedora-logo /usr/share/plymouth/themes/fedora-logo
 ./ctx/download-github.sh https://github.com/itotm/eleven-twilight/releases/download/1.0/ElevenTwilight.tar.gz /usr/share/icons
+
+systemctl enable sshd
+systemctl enable bootc-fetch-apply-updates.timer
 
 BUILD_DATE=$(date +'%Y%m%d')
 BUILD_NUMBER=${BUILD_NUMBER:-1}
