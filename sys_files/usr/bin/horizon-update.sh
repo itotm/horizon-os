@@ -50,7 +50,7 @@ fi
 
 log "Updating Distrobox containers..."
 if command -v distrobox &> /dev/null; then
-    distrobox-upgrade --all 2>&1 | tee -a "$LOG_FILE"
+    distrobox-upgrade --all --root 2>&1 | tee -a "$LOG_FILE"
     log "All Distrobox containers updated"
 else
     log "WARNING: Distrobox not found"
