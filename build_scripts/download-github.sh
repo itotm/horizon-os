@@ -1,7 +1,5 @@
 #!/bin/bash
-# set -e: Exit immediately if a command exits with a non-zero status.
-# set -u: Treat unset variables as an error when substituting.
-set -eu
+set -ouex pipefail
 
 if [ "$#" -ne 2 ]; then
     echo "Usage: $0 <GITHUB_URL> <DESTINATION_FOLDER>"
@@ -14,7 +12,6 @@ URL=$1
 DESTINATION=$2
 TEMP_DIR=""
 
-# Funzione di pulizia per rimuovere la cartella temporanea
 cleanup() {
     if [ -n "$TEMP_DIR" ] && [ -d "$TEMP_DIR" ]; then
         echo "Cleaning up temporary directory: $TEMP_DIR"
@@ -22,10 +19,8 @@ cleanup() {
     fi
 }
 
-# Registra la funzione di pulizia per essere eseguita all'uscita
 trap cleanup EXIT
 
-# Verifica se l'URL punta a un file compresso
 is_archive_url() {
     local url=$1
     if [[ "$url" =~ \.(zip|tar\.gz|tgz|tar\.bz2|tar\.xz)$ ]] || [[ "$url" =~ /raw/ ]]; then
@@ -34,7 +29,6 @@ is_archive_url() {
     return 1
 }
 
-# Estrae l'estensione del file dall'URL
 get_extension() {
     local url=$1
     if [[ "$url" =~ \.(zip)$ ]]; then
@@ -50,7 +44,6 @@ get_extension() {
     fi
 }
 
-# Decomprimi l'archivio nella destinazione
 extract_archive() {
     local archive_file=$1
     local dest_path=$2
@@ -114,6 +107,7 @@ download_contents() {
             curl -s -L "$download_url" -o "$temp_download"
             mv "$temp_download" "$local_filepath"
             chmod +r "$local_filepath"
+            sleep 2
         elif [ "$type" == "dir" ]; then
             local next_api_url=$(echo "$item" | jq -r '.url')
             echo " -> Exploring directory: $path"
@@ -122,23 +116,18 @@ download_contents() {
     done
 }
 
-# Controlla se l'URL punta a un file compresso
 if is_archive_url "$URL"; then
     echo "Detected archive URL: $URL"
     
-    # Crea una cartella temporanea
     TEMP_DIR=$(mktemp -d)
     echo "Created temporary directory: $TEMP_DIR"
     
-    # Estrai il nome del file dall'URL
     ARCHIVE_NAME=$(basename "$URL")
     TEMP_ARCHIVE="$TEMP_DIR/$ARCHIVE_NAME"
     
-    # Scarica l'archivio
     echo "Downloading archive..."
     curl -L -o "$TEMP_ARCHIVE" "$URL"
     
-    # Determina l'estensione e decomprime
     EXTENSION=$(get_extension "$URL")
     
     if [ "$EXTENSION" == "unknown" ]; then
@@ -151,7 +140,6 @@ if is_archive_url "$URL"; then
     echo "Archive extracted successfully."
     
 else
-    # URL di cartella GitHub standard
     if [[ ! "$URL" =~ ^https://github.com/([^/]+)/([^/]+)/tree/([^/]+)/(.*)$ ]]; then
         echo "Invalid GitHub URL. Please ensure it is in the correct format."
         echo "Example: https://github.com/username/reponame/tree/main/path/to/folder"

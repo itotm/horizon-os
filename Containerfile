@@ -48,8 +48,6 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_STANDARD /ctx/standard/cockpit.sh
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh ENABLE_STANDARD /ctx/standard/syncthing.sh
-RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_STANDARD /ctx/standard/tailscale.sh
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \

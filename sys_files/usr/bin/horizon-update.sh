@@ -1,0 +1,96 @@
+#!/bin/bash
+set -ouex pipefail
+
+LOG_FILE="/var/log/horizon-update.log"
+BOOTC_UPDATED=false
+
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
+}
+
+send_notification() {
+    local title="$1"
+    local message="$2"
+    
+    for user in $(who | awk '{print $1}' | sort -u); do
+        user_id=$(id -u "$user")
+        display=$(who | grep "^$user " | awk '{print $NF}' | grep -o ':[0-9]*' | head -n1)
+        
+        if [ -n "$display" ]; then
+            sudo -u "$user" DISPLAY="$display" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$user_id/bus" \
+                notify-send -a "System Update" -i system-software-update "$title" "$message"
+        fi
+    done
+}
+
+log "=== Starting automatic system update ==="
+
+log "Checking bootc updates..."
+if command -v bootc &> /dev/null; then
+    bootc_output=$(bootc upgrade 2>&1) || true
+    
+    if echo "$bootc_output" | grep -qi "staged\|queued\|updated"; then
+        BOOTC_UPDATED=true
+        log "bootc upgrade completed: system updated"
+        send_notification "System Updated" "A new bootc update is available. Reboot to apply it."
+    else
+        log "No bootc updates available"
+    fi
+else
+    log "WARNING: bootc not found"
+fi
+
+log "Updating Flatpak packages..."
+if command -v flatpak &> /dev/null; then
+    flatpak update -y --noninteractive 2>&1 | tee -a "$LOG_FILE"
+    log "Flatpak update completed"
+else
+    log "WARNING: Flatpak not found"
+fi
+
+log "Updating Distrobox containers..."
+if command -v distrobox &> /dev/null; then
+    distroboxes=$(distrobox list --no-color | tail -n +2 | awk '{print $3}')
+    
+    if [ -n "$distroboxes" ]; then
+        for box in $distroboxes; do
+            log "Updating distrobox: $box"
+            distrobox upgrade "$box" -Y 2>&1 | tee -a "$LOG_FILE"
+        done
+        log "All Distrobox containers updated"
+    else
+        log "No Distrobox containers found"
+    fi
+else
+    log "WARNING: Distrobox not found"
+fi
+
+log "Updating Podman images..."
+if command -v podman &> /dev/null; then
+    images=$(podman images --format "{{.Repository}}:{{.Tag}}" | grep -v "<none>" || true)
+    
+    if [ -n "$images" ]; then
+        for image in $images; do
+            log "Updating image: $image"
+            podman pull "$image" 2>&1 | tee -a "$LOG_FILE" || log "ERROR updating $image"
+        done
+        
+        log "Pruning dangling images..."
+        podman image prune -f 2>&1 | tee -a "$LOG_FILE"
+        log "Podman images update completed"
+    else
+        log "No Podman images found"
+    fi
+else
+    log "WARNING: Podman not found"
+fi
+
+log "=== Automatic system update completed ==="
+
+if [ "$BOOTC_UPDATED" = true ]; then
+    send_notification "Updates Completed" "All system components have been updated. Reboot to apply bootc updates."
+else
+    send_notification "Updates Completed" "All system components have been updated."
+fi
+
+exit 0

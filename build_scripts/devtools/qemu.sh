@@ -1,7 +1,12 @@
 #!/bin/bash
 set -ouex pipefail
 
-dnf5 -y install qemu-kvm
-dnf5 -y install cockpit-machines
+QEMU_PACKAGES=(
+    qemu
+    quickemu
+    libvirt
+    cockpit-machines
+)
+dnf5 -y install "${QEMU_PACKAGES[@]}"
 
 ./ctx/cleanup.sh

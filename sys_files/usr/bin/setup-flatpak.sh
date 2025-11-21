@@ -31,6 +31,7 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
 flatpak remote-modify --enable flathub
 
 FLATPAK_PACKAGES=(
+    com.calibre_ebook.calibre
     com.github.PintaProject.Pinta
     com.github.tchx84.Flatseal
     com.ranfdev.DistroShelf
@@ -39,13 +40,22 @@ FLATPAK_PACKAGES=(
     io.github.flattool.Warehouse
     net.cozic.joplin_desktop
     net.lutris.Lutris
+    net.mediaarea.MediaInfo
     net.nokyan.Resources
+    no.mifi.losslesscut
     org.audacityteam.Audacity
+    org.avidemux.Avidemux
     org.bunkus.mkvtoolnix-gui
     org.deskflow.deskflow
     org.fkoehler.KTailctl
     org.gimp.GIMP
     org.inkscape.Inkscape
+    org.kde.kgeography
+    org.kde.kid3
+    org.kde.kmahjongg
+    org.kde.kmines
+    org.kde.kpat
+    org.kde.marble
     org.libreoffice.LibreOffice
     org.qbittorrent.qBittorrent
     org.virt_manager.virt-manager

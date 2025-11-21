@@ -1,0 +1,15 @@
+[Unit]
+Description=Automatic system update (bootc, flatpak, distrobox, podman)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/horizon-update.sh
+StandardOutput=journal
+StandardError=journal
+Nice=19
+IOSchedulingClass=idle
+
+[Install]
+WantedBy=multi-user.target
