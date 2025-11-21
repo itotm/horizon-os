@@ -50,17 +50,8 @@ fi
 
 log "Updating Distrobox containers..."
 if command -v distrobox &> /dev/null; then
-    distroboxes=$(distrobox list --no-color | tail -n +2 | awk '{print $3}')
-    
-    if [ -n "$distroboxes" ]; then
-        for box in $distroboxes; do
-            log "Updating distrobox: $box"
-            distrobox upgrade "$box" -Y 2>&1 | tee -a "$LOG_FILE"
-        done
-        log "All Distrobox containers updated"
-    else
-        log "No Distrobox containers found"
-    fi
+    distrobox-upgrade --all 2>&1 | tee -a "$LOG_FILE"
+    log "All Distrobox containers updated"
 else
     log "WARNING: Distrobox not found"
 fi

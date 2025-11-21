@@ -1,3 +1,12 @@
+#!/bin/bash
+set -ouex pipefail
+
+QUADLET_DIR="$HOME/.config/containers/systemd"
+QUADLET_FILE="$QUADLET_DIR/syncthing.container"
+
+mkdir -p "$QUADLET_DIR"
+
+cat > "$QUADLET_FILE" <<'EOF'
 [Unit]
 Description=Syncthing
 After=network-online.target
@@ -32,3 +41,18 @@ SecurityLabelDisable=true
 
 [Install]
 WantedBy=default.target
+EOF
+
+echo "Quadlet file created successfully!"
+
+echo "Reloading systemd..."
+systemctl --user daemon-reload
+
+echo "Enabling and starting Syncthing..."
+systemctl --user enable --now syncthing.service
+
+echo "Syncthing has been enabled and started!"
+echo ""
+echo "To check the status: systemctl --user status syncthing.service"
+echo "Access the web UI at: http://localhost:8384"
+echo "Your sync folders will be in: $HOME/Sync"

@@ -9,9 +9,10 @@ A custom Fedora image based on Kinoite and built with Universal Blue template.
 - a bunch of [cli tools](./build_scripts/standard/packages.sh)
 - media codecs from [RPM Fusion](https://rpmfusion.org/)
 - selected [KDE apps](./build_scripts/standard/kde-apps.sh)
-- Cockpit, Tailscale, Syncthing, Sunshine, Thunderbird, VLC preinstalled
-- dev tools: QEMU, dotnet, VSCode
+- Cockpit, Tailscale, Sunshine, Thunderbird, VLC preinstalled
+- dev tools: QEmu, dotnet, VSCode
 - Flathub with [selected packages](./sys_files/usr/bin/setup-flatpak.sh)
+- Syncthing as Quadlet
 - my custom colors and icons
 - scheduled to update weekly
 - designed to be modular (fork the repo to try!)
@@ -41,6 +42,14 @@ sudo bootc switch ghcr.io/itotm/horizon-os:latest
 ```
 
 - reboot (**note**: after the first reboot, wait until Flatpak apps finish installing)
+
+## Post install
+
+- enable syncthing
+
+```bash
+enable-syncthing
+```
 
 ## AI disclaimer
 
