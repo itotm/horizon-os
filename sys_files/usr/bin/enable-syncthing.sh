@@ -48,10 +48,7 @@ echo "Quadlet file created successfully!"
 echo "Reloading systemd..."
 systemctl --user daemon-reload
 
-echo "Enabling and starting Syncthing..."
-systemctl --user enable --now syncthing.service
-
-echo "Syncthing has been enabled and started!"
+echo "Syncthing has been enabled, reboot to activate it."
 echo ""
 echo "To check the status: systemctl --user status syncthing.service"
 echo "Access the web UI at: http://localhost:8384"

@@ -48,7 +48,7 @@ sudo bootc switch ghcr.io/itotm/horizon-os:latest
 - enable syncthing
 
 ```bash
-enable-syncthing
+enable-syncthing.sh
 ```
 
 ## AI disclaimer

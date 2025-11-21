@@ -27,7 +27,7 @@ log "=== Starting automatic system update ==="
 
 log "Checking bootc updates..."
 if command -v bootc &> /dev/null; then
-    bootc_output=$(bootc upgrade 2>&1) || true
+    bootc_output=$(bootc upgrade --apply --quiet 2>&1) || true
     
     if echo "$bootc_output" | grep -qi "staged\|queued\|updated"; then
         BOOTC_UPDATED=true
@@ -50,7 +50,7 @@ fi
 
 log "Updating Distrobox containers..."
 if command -v distrobox &> /dev/null; then
-    distrobox-upgrade --all --root 2>&1 | tee -a "$LOG_FILE"
+    distrobox-upgrade --root --all --root 2>&1 | tee -a "$LOG_FILE"
     log "All Distrobox containers updated"
 else
     log "WARNING: Distrobox not found"

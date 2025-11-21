@@ -30,6 +30,9 @@ flatpak uninstall --unused -y 2>/dev/null || true
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 flatpak remote-modify --enable flathub
 
+flatpak override --user --filesystem=xdg-config/gtk-3.0:ro
+flatpak override --user --filesystem=xdg-config/gtk-4.0:ro
+
 FLATPAK_PACKAGES=(
     com.calibre_ebook.calibre
     com.github.PintaProject.Pinta
