@@ -7,27 +7,28 @@ REMOVE_PACKAGES=(
 dnf5 -y remove "${REMOVE_PACKAGES[@]}"
 
 INSTALL_PACKAGES=(
-    mc
-    htop
-    fastfetch
-    hwinfo
-    lm_sensors
-    fzf
-    zoxide
-    ripgrep
-    fd
-    cascadia-fonts-all
-    hunspell-it
-    distrobox
     bat
+    cascadia-fonts-all
+    distrobox
     du-dust
     duf
-    procs
+    fastfetch
+    fd
+    fzf
+    htop
+    hunspell-it
+    hwinfo
     hyperfine
-    tldr
-    lsd
-    ncdu
     iscan-firmware
+    lm_sensors
+    lsd
+    mc
+    ncdu
+    procs
+    rclone
+    ripgrep
+    tldr
+    zoxide
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
 
