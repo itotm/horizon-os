@@ -2,7 +2,9 @@
 
 ![HorizonOS](./logo.png)
 
-A custom Fedora image based on Kinoite and built with Universal Blue template.
+A custom image based on Fedora Kinoite 43 and built with Universal Blue template.
+
+**WARNING:** not (yet) ready, builds are unstable and experimental. Use at your own risk.
 
 ## Features
 
@@ -50,6 +52,10 @@ sudo bootc switch ghcr.io/itotm/horizon-os:latest
 ```bash
 enable-syncthing.sh
 ```
+
+## TODO
+
+Better post-install and post-update automation.
 
 ## AI disclaimer
 
