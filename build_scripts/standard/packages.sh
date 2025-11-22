@@ -20,6 +20,7 @@ INSTALL_PACKAGES=(
     hwinfo
     hyperfine
     iscan-firmware
+    libfuse
     lm_sensors
     lsd
     mc

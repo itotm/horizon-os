@@ -43,6 +43,7 @@ FLATPAK_PACKAGES=(
     com.usebottles.bottles
     fr.handbrake.ghb
     io.github.flattool.Warehouse
+    io.github.zarestia_dev.rclone-manager
     net.cozic.joplin_desktop
     net.lutris.Lutris
     net.mediaarea.MediaInfo

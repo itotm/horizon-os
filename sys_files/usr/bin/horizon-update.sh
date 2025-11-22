@@ -18,7 +18,7 @@ send_notification() {
         
         if [ -n "$display" ]; then
             sudo -u "$user" DISPLAY="$display" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$user_id/bus" \
-                notify-send -a "System Update" -i system-software-update -t 20000 "$title" "$message"
+                notify-send -a "System Update" -i system-software-update -u critical "$title" "$message"
         fi
     done
 }

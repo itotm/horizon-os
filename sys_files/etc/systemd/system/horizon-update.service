@@ -1,5 +1,5 @@
 [Unit]
-Description=Automatic system update (bootc, flatpak, distrobox, podman)
+Description=Automatic system update (bootc, flatpak, podman)
 After=network-online.target
 Wants=network-online.target
 
