@@ -1,31 +1,33 @@
 #!/bin/bash
 set -ouex pipefail
 
-flatpak list --app --columns=application | while read -r app; do
-    if [ -n "$app" ]; then
-        flatpak uninstall -y "$app" 2>/dev/null || true
-    fi
-done
+if flatpak remotes | grep -q "^fedora"; then
+    flatpak list --app --columns=application | while read -r app; do
+        if [ -n "$app" ]; then
+            flatpak uninstall -y "$app" 2>/dev/null || true
+        fi
+    done
 
-flatpak list --runtime --columns=application | while read -r runtime; do
-    if [ -n "$runtime" ]; then
-        flatpak mask --remove "$runtime" 2>/dev/null || true
-    fi
-done
+    flatpak list --runtime --columns=application | while read -r runtime; do
+        if [ -n "$runtime" ]; then
+            flatpak mask --remove "$runtime" 2>/dev/null || true
+        fi
+    done
 
-flatpak list --runtime --columns=application | while read -r runtime; do
-    if [ -n "$runtime" ]; then
-        flatpak uninstall -y "$runtime" 2>/dev/null || true
-    fi
-done
+    flatpak list --runtime --columns=application | while read -r runtime; do
+        if [ -n "$runtime" ]; then
+            flatpak uninstall -y "$runtime" 2>/dev/null || true
+        fi
+    done
 
-for remote in fedora fedora-testing; do
-    if flatpak remotes | grep -q "^$remote"; then
-        flatpak remote-delete "$remote" 2>/dev/null || true
-    fi
-done
+    for remote in fedora fedora-testing; do
+        if flatpak remotes | grep -q "^$remote"; then
+            flatpak remote-delete "$remote" 2>/dev/null || true
+        fi
+    done
 
-flatpak uninstall --unused -y 2>/dev/null || true
+    flatpak uninstall --unused -y 2>/dev/null || true
+fi
 
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 flatpak remote-modify --enable flathub
@@ -51,8 +53,10 @@ FLATPAK_PACKAGES=(
     org.bunkus.mkvtoolnix-gui
     org.deskflow.deskflow
     org.fkoehler.KTailctl
+    org.gnome.meld
     org.gimp.GIMP
     org.inkscape.Inkscape
+    org.kde.kdiff3
     org.kde.kgeography
     org.kde.kid3
     org.kde.kmahjongg
@@ -65,5 +69,7 @@ FLATPAK_PACKAGES=(
 )
 
 for package in "${FLATPAK_PACKAGES[@]}"; do
-    flatpak install -y "$package"
+    if ! flatpak list --app --columns=application | grep -Fxq "$package"; then
+        flatpak install -y "$package"
+    fi
 done

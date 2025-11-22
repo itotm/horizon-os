@@ -18,7 +18,7 @@ send_notification() {
         
         if [ -n "$display" ]; then
             sudo -u "$user" DISPLAY="$display" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$user_id/bus" \
-                notify-send -a "System Update" -i system-software-update "$title" "$message"
+                notify-send -a "System Update" -i system-software-update -t 20000 "$title" "$message"
         fi
     done
 }
@@ -48,13 +48,13 @@ else
     log "WARNING: Flatpak not found"
 fi
 
-log "Updating Distrobox containers..."
-if command -v distrobox &> /dev/null; then
-    distrobox-upgrade --root --all --root 2>&1 | tee -a "$LOG_FILE"
-    log "All Distrobox containers updated"
-else
-    log "WARNING: Distrobox not found"
-fi
+# log "Updating Distrobox containers..."
+# if command -v distrobox &> /dev/null; then
+#     distrobox-upgrade --root --all --root 2>&1 | tee -a "$LOG_FILE"
+#     log "All Distrobox containers updated"
+# else
+#     log "WARNING: Distrobox not found"
+# fi
 
 log "Updating Podman images..."
 if command -v podman &> /dev/null; then
