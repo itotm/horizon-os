@@ -57,9 +57,7 @@ FLATPAK_PACKAGES=(
     org.gnome.meld
     org.gimp.GIMP
     org.inkscape.Inkscape
-    org.kde.kdiff3
     org.kde.kgeography
-    org.kde.kid3
     org.kde.kmahjongg
     org.kde.kmines
     org.kde.kpat
@@ -74,3 +72,7 @@ for package in "${FLATPAK_PACKAGES[@]}"; do
         flatpak install -y "$package"
     fi
 done
+
+flatpak override --user --env=WEBKIT_DISABLE_COMPOSITING_MODE=1 io.github.zarestia_dev.rclone-manager
+flatpak override --user io.github.zarestia_dev.rclone-manager --talk-name=org.freedesktop.Flatpak
+flatpak override --user io.github.zarestia_dev.rclone-manager --filesystem=~/.config/autostart:create

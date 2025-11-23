@@ -26,6 +26,7 @@ INSTALL_PACKAGES=(
     ncdu
     procs
     rclone
+    rclone-browser
     ripgrep
     tldr
     zoxide

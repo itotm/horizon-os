@@ -3,6 +3,8 @@ set -ouex pipefail
 
 KDE_PACKAGES=(
     kate
+    kdiff3
+    kid3
     elisa-player
     gwenview
     kcalc
@@ -11,7 +13,6 @@ KDE_PACKAGES=(
     ksystemlog
     okular
     skanpage
-    qt6-qdbusviewer
 )
 dnf5 -y install "${KDE_PACKAGES[@]}"
 

@@ -3,6 +3,7 @@ set -ouex pipefail
 
 QEMU_PACKAGES=(
     qemu-kvm
+    quickemu
     libvirt
     cockpit-machines
 )
