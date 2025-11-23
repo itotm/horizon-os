@@ -16,6 +16,10 @@ dnf5 -y clean all
 ./ctx/download-github.sh https://github.com/itotm/plymouth-themes/tree/main/fedora-logo/fedora-logo /usr/share/plymouth/themes/fedora-logo
 
 systemctl enable sshd
+systemctl enable podman.socket
+
+cp -r /ctx/sys_files/* /
+systemctl enable horizon-setup.service
 systemctl enable horizon-update.timer
 
 BUILD_DATE=$(date +'%Y%m%d')
