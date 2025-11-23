@@ -1,0 +1,6 @@
+#!/bin/bash
+set -ouex pipefail
+
+echo "Horizon OS post-update"
+
+/usr/libexec/horizon-install-flatpaks

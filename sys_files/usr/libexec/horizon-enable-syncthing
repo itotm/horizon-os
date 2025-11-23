@@ -4,6 +4,11 @@ set -ouex pipefail
 QUADLET_DIR="$HOME/.config/containers/systemd"
 QUADLET_FILE="$QUADLET_DIR/syncthing.container"
 
+if [ -f "$QUADLET_FILE" ]; then
+	echo "Quadlet file $QUADLET_FILE already exists. Exiting."
+	exit 0
+fi
+
 mkdir -p "$QUADLET_DIR"
 
 cat > "$QUADLET_FILE" <<'EOF'

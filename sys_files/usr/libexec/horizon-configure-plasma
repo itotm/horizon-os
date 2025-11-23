@@ -1,0 +1,28 @@
+#!/bin/bash
+set -ouex pipefail
+
+plasma-apply-lookandfeel -a org.kde.breezetwilight.desktop
+plasma-apply-colorscheme -a ClearSimple
+plasma-apply-desktoptheme -a ClearSimple
+plasma-apply-cursortheme Breeze_Light
+
+# Breeze settings
+kwriteconfig6 --file breezerc --group "Common" --key "OutlineIntensity" "OutlineOff"
+kwriteconfig6 --file breezerc --group "Windeco" --key "ButtonSize" "ButtonSmall"
+
+# Konsole profile settings
+kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "Appearance" --key "ColorScheme" "BreezeBlue"
+kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "General" --key "Name" "Default"
+kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "General" --key "Parent" "FALLBACK/"
+kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "General" --key "SemanticInputClick" true
+kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "General" --key "SemanticUpDown" true
+kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "General" --key "StartInCurrentSessionDir" false
+kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "General" --key "TerminalColumns" 120
+kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "General" --key "TerminalRows" 43
+kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "Interaction Options" --key "AutoCopySelectedText" true
+kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "Interaction Options" --key "MiddleClickPasteMode" 1
+kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "Interaction Options" --key "TrimLeadingSpacesInSelectedText" true
+kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "Interaction Options" --key "TrimTrailingSpacesInSelectedText" true
+kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "Interaction Options" --key "TripleClickMode" 1
+kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "Scrolling" --key "HistoryMode" 2
+kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "Terminal Features" --key "UrlHintsModifiers" 67108864

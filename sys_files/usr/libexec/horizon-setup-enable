@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e
+
+SERVICE="horizon-setup.service"
+UNIT="/usr/lib/systemd/user/$SERVICE"
+
+USER=$(awk -F: '$3 >= 1000 && $1 !~ /^systemd-/ {print $1; exit}' /etc/passwd)
+
+if [ -z "$USER" ]; then
+    echo "No user found"
+    exit 1
+fi
+
+HOMEDIR=$(eval echo "~$USER")
+WANTS="$HOMEDIR/.config/systemd/user/default.target.wants"
+
+mkdir -p "$WANTS"
+
+if [ ! -e "$WANTS/$SERVICE" ]; then
+    ln -sf "$UNIT" "$WANTS/$SERVICE"
+    chown -R "$USER:$USER" "$HOMEDIR/.config/systemd"
+fi

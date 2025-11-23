@@ -1,0 +1,26 @@
+#!/bin/bash
+set -ouex pipefail
+
+EXPECTED_FILE="/etc/horizon-version"
+ACTUAL_FILE="$HOME/.horizon-version"
+
+if [ ! -f "$EXPECTED_FILE" ]; then
+    echo "ERROR: Version file not found: $EXPECTED_FILE" >&2
+    exit 10
+fi
+EXPECTED=$(cat "$EXPECTED_FILE")
+
+if [ ! -f "$ACTUAL_FILE" ]; then
+    echo "HorizonOS installed with version: $EXPECTED"
+    exit 1
+fi
+
+ACTUAL=$(cat "$ACTUAL_FILE")
+
+if [ "$ACTUAL" = "$EXPECTED" ]; then
+    echo "HorizonOS running current version: $EXPECTED"
+    exit 0
+else
+    echo "HorizonOS updated from $ACTUAL to $EXPECTED"
+    exit 2
+fi

@@ -5,7 +5,7 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/horizon-update.sh
+ExecStart=/usr/libexec/horizon-update
 StandardOutput=journal
 StandardError=journal
 Nice=19

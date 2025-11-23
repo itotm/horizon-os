@@ -57,6 +57,7 @@ FLATPAK_PACKAGES=(
     org.gnome.meld
     org.gimp.GIMP
     org.inkscape.Inkscape
+    org.kde.kalzium
     org.kde.kgeography
     org.kde.kmahjongg
     org.kde.kmines
