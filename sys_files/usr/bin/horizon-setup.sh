@@ -5,6 +5,7 @@ set -ouex pipefail
 echo 'set completion-ignore-case On' | sudo tee -a /etc/inputrc
 
 {
+    echo ""
     echo "# HorizonOS aliases and shell enhancements"
     echo "alias bat='batcat'"
     echo "alias fd='fdfind'"
@@ -24,4 +25,4 @@ echo 'set completion-ignore-case On' | sudo tee -a /etc/inputrc
     echo "fi"
 } | sudo tee -a /etc/bashrc
 
-/usr/bin/setup-flatpak.sh
+/usr/bin/horizon-install-flatpaks.sh

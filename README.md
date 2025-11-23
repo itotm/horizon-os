@@ -13,7 +13,7 @@ A custom image based on Fedora Kinoite 43 and built with Universal Blue template
 - selected [KDE apps](./build_scripts/standard/kde-apps.sh)
 - Cockpit, Tailscale, Sunshine, Thunderbird, VLC preinstalled
 - dev tools: QEmu, dotnet, VSCode
-- Flathub with [selected packages](./sys_files/usr/bin/setup-flatpak.sh)
+- Flathub with selected [packages](./sys_files/usr/bin/horizon-install-flatpaks.sh)
 - Syncthing as Quadlet
 - my custom colors and icons
 - scheduled to update weekly
@@ -50,7 +50,7 @@ sudo bootc switch ghcr.io/itotm/horizon-os:latest
 - enable syncthing
 
 ```bash
-enable-syncthing.sh
+horizon-enable-syncthing.sh
 ```
 
 ## TODO

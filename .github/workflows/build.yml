@@ -2,7 +2,7 @@
 name: Build container image
 on:
   schedule:
-    - cron: '0 3 * * 5' # At 03:00 on Friday
+    - cron: '0 3 * * *' # Daily at 03:00 UTC
   workflow_dispatch:
     inputs:
       fedora_version:
@@ -13,7 +13,6 @@ on:
         options:
           - '42'
           - '43'
-          - 'rawhide'
       enable_common:
         description: "Common"
         required: false
@@ -98,7 +97,7 @@ jobs:
         continue-on-error: true 
         with:
           target-dir: /var/lib/containers
-          mount-opts: compress-force=zstd:1
+          mount-opts: compress-force=zstd:3
 
       - name: Get current date and version
         id: date
@@ -170,7 +169,7 @@ jobs:
             ENABLE_TESTING=${{ github.event.inputs.enable_testing || false }}
             DISABLE_REPOS=${{ github.event.inputs.disable_repos || true }}
           layers: false
-          oci: true
+          oci: false
 
       # Rechunk is a script that we use on Universal Blue to make sure there isnt a single huge layer when your image gets published.
       # This does not make your image faster to download, just provides better resumability and fixes a few errors.
