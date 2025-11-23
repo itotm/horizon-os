@@ -171,6 +171,13 @@ jobs:
           layers: false
           oci: false
 
+      - name: Log image size
+        run: |
+          IMAGE_ID=$(buildah images --format "{{.ID}}" ${{ env.IMAGE_NAME }} | head -n 1)
+          IMAGE_SIZE=$(buildah images --format "{{.Size}}" ${{ env.IMAGE_NAME }} | head -n 1)
+          echo "Built image ID: $IMAGE_ID"
+          echo "Image size: $IMAGE_SIZE"
+
       # Rechunk is a script that we use on Universal Blue to make sure there isnt a single huge layer when your image gets published.
       # This does not make your image faster to download, just provides better resumability and fixes a few errors.
       # Documentation for Rechunk is provided on their github repository at https://github.com/hhd-dev/rechunk
