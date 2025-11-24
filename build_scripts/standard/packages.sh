@@ -7,6 +7,7 @@ REMOVE_PACKAGES=(
 dnf5 -y remove "${REMOVE_PACKAGES[@]}"
 
 INSTALL_PACKAGES=(
+    atuin
     bat
     cascadia-fonts-all
     du-dust

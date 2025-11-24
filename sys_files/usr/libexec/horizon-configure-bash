@@ -12,10 +12,10 @@ if ! grep -q "# HorizonOS aliases and shell enhancements" ~/.bashrc; then
         echo "alias ps='procs'"
         echo "alias grep='rg'"
         echo "alias tldr='tldr --color'"
+        echo "eval \"\$(atuin init bash)\""
         echo "eval \"\$(zoxide init bash)\""
         echo "eval \"\$(fzf --bash)\""
     } | tee -a ~/.bashrc
 else
     echo "HorizonOS aliases already present in ~/.bashrc"
 fi
-
