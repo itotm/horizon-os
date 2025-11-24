@@ -1,0 +1,4 @@
+#!/bin/bash
+set -ouex pipefail
+
+echo "HorizonOS user post update"

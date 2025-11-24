@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ouex pipefail
 
-echo "Horizon OS post-install"
+echo "HorizonOS user post install"
 
 /usr/libexec/horizon-enable-syncthing
 /usr/libexec/horizon-configure-bash

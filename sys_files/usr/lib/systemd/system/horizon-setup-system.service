@@ -1,10 +1,10 @@
 [Unit]
 Description=Enable horizon-setup user service for existing users
-After=multi-user.target
+After=basic.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/libexec/horizon-setup-enable
+ExecStart=/usr/libexec/horizon-setup-system
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=basic.target

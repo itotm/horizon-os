@@ -107,7 +107,6 @@ download_contents() {
             curl -s -L "$download_url" -o "$temp_download"
             mv "$temp_download" "$local_filepath"
             chmod +r "$local_filepath"
-            sleep 2
         elif [ "$type" == "dir" ]; then
             local next_api_url=$(echo "$item" | jq -r '.url')
             echo " -> Exploring directory: $path"
@@ -116,53 +115,50 @@ download_contents() {
     done
 }
 
+
+# Gestione file semplice raw (non archivio)
+EXTENSION=$(get_extension "$URL")
 if is_archive_url "$URL"; then
-    echo "Detected archive URL: $URL"
-    
-    TEMP_DIR=$(mktemp -d)
-    echo "Created temporary directory: $TEMP_DIR"
-    
-    ARCHIVE_NAME=$(basename "$URL")
-    TEMP_ARCHIVE="$TEMP_DIR/$ARCHIVE_NAME"
-    
-    echo "Downloading archive..."
-    curl -L -o "$TEMP_ARCHIVE" "$URL"
-    
-    EXTENSION=$(get_extension "$URL")
-    
-    if [ "$EXTENSION" == "unknown" ]; then
-        echo "Error: Unable to determine archive format from URL"
-        exit 1
+    if [ "$EXTENSION" != "unknown" ]; then
+        echo "Detected archive URL: $URL"
+        TEMP_DIR=$(mktemp -d)
+        echo "Created temporary directory: $TEMP_DIR"
+        ARCHIVE_NAME=$(basename "$URL")
+        TEMP_ARCHIVE="$TEMP_DIR/$ARCHIVE_NAME"
+        echo "Downloading archive..."
+        curl -L -o "$TEMP_ARCHIVE" "$URL"
+        extract_archive "$TEMP_ARCHIVE" "$DESTINATION" "$EXTENSION"
+        echo "Archive extracted successfully."
+    else
+        # File raw non compresso
+        echo "Detected raw file (not archive): $URL"
+        sudo mkdir -p "$DESTINATION"
+        FILE_NAME=$(basename "$URL")
+        DEST_FILE="$DESTINATION/$FILE_NAME"
+        echo "Downloading file..."
+        curl -L -o "$DEST_FILE" "$URL"
+        chmod +r "$DEST_FILE"
+        echo "File downloaded successfully."
     fi
-    
-    extract_archive "$TEMP_ARCHIVE" "$DESTINATION" "$EXTENSION"
-    
-    echo "Archive extracted successfully."
-    
 else
     if [[ ! "$URL" =~ ^https://github.com/([^/]+)/([^/]+)/tree/([^/]+)/(.*)$ ]]; then
         echo "Invalid GitHub URL. Please ensure it is in the correct format."
         echo "Example: https://github.com/username/reponame/tree/main/path/to/folder"
         exit 1
     fi
-    
     USER="${BASH_REMATCH[1]}"
     REPO="${BASH_REMATCH[2]}"
     BRANCH="${BASH_REMATCH[3]}"
     FOLDER_PATH=$(echo "${BASH_REMATCH[4]}" | sed 's:/*$::')
-    
     API_URL="https://api.github.com/repos/$USER/$REPO/contents/$FOLDER_PATH?ref=$BRANCH"
-    
     echo "Downloading contents from: $URL"
     echo "To destination folder: $DESTINATION"
-    
     if ! command -v jq &> /dev/null; then
         echo "Error: 'jq' is not installed. Please install it to continue."
         echo "On Debian/Ubuntu: sudo apt-get install jq"
         echo "On macOS (with Homebrew): brew install jq"
         exit 1
     fi
-    
     download_contents "$API_URL" "$DESTINATION"
 fi
 

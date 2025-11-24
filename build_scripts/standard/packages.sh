@@ -9,7 +9,6 @@ dnf5 -y remove "${REMOVE_PACKAGES[@]}"
 INSTALL_PACKAGES=(
     bat
     cascadia-fonts-all
-    distrobox
     du-dust
     duf
     fastfetch

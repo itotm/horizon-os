@@ -2,7 +2,11 @@
 set -ouex pipefail
 
 EXPECTED_FILE="/etc/horizon-version"
-ACTUAL_FILE="$HOME/.horizon-version"
+if [ -z "$1" ]; then
+    echo "ERROR: ACTUAL_FILE path required as first argument" >&2
+    exit 11
+fi
+ACTUAL_FILE="$1"
 
 if [ ! -f "$EXPECTED_FILE" ]; then
     echo "ERROR: Version file not found: $EXPECTED_FILE" >&2

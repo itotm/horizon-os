@@ -3,6 +3,7 @@ ARG FEDORA_VERSION=43
 ARG ENABLE_COMMON=true
 ARG ENABLE_STANDARD=true
 ARG ENABLE_EXTENDED=false
+ARG ENABLE_VIRTTOOLS=true
 ARG ENABLE_DEVTOOLS=true
 ARG ENABLE_EXPERIMENTAL=false
 ARG ENABLE_TESTING=false
@@ -24,6 +25,7 @@ ENV DISABLE_REPOS=${DISABLE_REPOS}
 ARG ENABLE_COMMON
 ARG ENABLE_STANDARD
 ARG ENABLE_EXTENDED
+ARG ENABLE_VIRTTOOLS
 ARG ENABLE_DEVTOOLS
 ARG ENABLE_EXPERIMENTAL
 ARG ENABLE_TESTING
@@ -56,9 +58,10 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/
     /ctx/runner.sh ENABLE_EXTENDED /ctx/extended/libreoffice.sh
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh ENABLE_DEVTOOLS /ctx/devtools/devtools.sh
+    /ctx/runner.sh ENABLE_VIRTTOOLS /ctx/virttools/qemu.sh
+
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh ENABLE_DEVTOOLS /ctx/devtools/qemu.sh
+    /ctx/runner.sh ENABLE_DEVTOOLS /ctx/devtools/devtools.sh
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_DEVTOOLS /ctx/devtools/dotnet.sh
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \

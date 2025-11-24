@@ -1,0 +1,45 @@
+#!/bin/bash
+set -ouex pipefail
+
+SERVICE="horizon-setup-user.service"
+UNIT="/usr/lib/systemd/user/$SERVICE"
+
+USER=$(awk -F: '$3 >= 1000 && $1 !~ /^systemd-/ {print $1; exit}' /etc/passwd)
+
+if [ -z "$USER" ]; then
+    echo "No user found"
+    exit 1
+fi
+
+HOMEDIR=$(eval echo "~$USER")
+WANTS="$HOMEDIR/.config/systemd/user/default.target.wants"
+
+mkdir -p "$WANTS"
+
+if [ ! -e "$WANTS/$SERVICE" ]; then
+    ln -sf "$UNIT" "$WANTS/$SERVICE"
+    chown -R "$USER:$USER" "$HOMEDIR/.config/systemd"
+fi
+
+/usr/libexec/horizon-check-version /etc/horizon-version-actual
+EXIT_CODE=$?
+
+case $EXIT_CODE in
+    0)
+        ;;
+    1)
+        /usr/libexec/horizon-post-install-system
+        /usr/libexec/horizon-post-update-system
+        ;;
+    2)
+        /usr/libexec/horizon-post-update-system
+        ;;
+    10)
+        exit 10
+        ;;
+    *)
+        exit 99
+        ;;
+esac
+
+\cp -f /etc/horizon-version /etc/horizon-version-actual
