@@ -130,9 +130,7 @@ jobs:
           tags: |
             type=raw,value=${{ env.DEFAULT_TAG }}
             type=raw,value=${{ steps.date.outputs.version }}
-            type=raw,value=${{ env.DEFAULT_TAG }}.{{date 'YYYYMMDD'}}
-            type=raw,value={{date 'YYYYMMDD'}}
-            type=raw,value=f${{ inputs.fedora_version }}
+            type=raw,value=f${{ inputs.fedora_version || '43' }}
             type=sha,enable=${{ github.event_name == 'pull_request' }}
             type=ref,event=pr
           labels: |
@@ -166,6 +164,7 @@ jobs:
           build-args: |
             FEDORA_VERSION=${{ github.event.inputs.fedora_version || '43' }}
             BUILD_NUMBER=${{ github.run_number }}
+            IMAGE_VERSION=${{ steps.date.outputs.version }}
             ENABLE_COMMON=${{ github.event.inputs.enable_common || true }}
             ENABLE_STANDARD=${{ github.event.inputs.enable_standard || true }}
             ENABLE_EXTENDED=${{ github.event.inputs.enable_extended || false }}
