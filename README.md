@@ -12,10 +12,10 @@ A custom image based on Fedora Kinoite 43 and built with Universal Blue template
 - media codecs from [RPM Fusion](https://rpmfusion.org/)
 - selected [KDE apps](./build_scripts/standard/kde-apps.sh)
 - Cockpit, Tailscale, Sunshine, Thunderbird, VLC preinstalled
-- dev tools: QEmu, dotnet, VSCode
 - Flathub with selected [packages](./sys_files/usr/bin/horizon-install-flatpaks.sh)
 - Syncthing as Quadlet
-- my custom colors and icons
+- optional tools: QEmu, dotnet, VSCode
+- [my](https://github.com/itotm/plasma-colors) custom colors and icons
 - scheduled to update weekly
 - designed to be modular (fork the repo to try!)
 
@@ -45,17 +45,9 @@ sudo bootc switch ghcr.io/itotm/horizon-os:latest
 
 - reboot (**note**: after the first reboot, wait until Flatpak apps finish installing)
 
-## Post install
-
-- enable syncthing
-
-```bash
-horizon-enable-syncthing.sh
-```
-
 ## TODO
 
-Better post-install and post-update automation.
+Testing.
 
 ## AI disclaimer
 
