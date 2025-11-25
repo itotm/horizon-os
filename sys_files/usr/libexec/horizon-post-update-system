@@ -3,4 +3,4 @@ set -ouex pipefail
 
 logger -t horizon "HorizonOS system post update"
 
-/usr/libexec/horizon-install-flatpaks
+-/usr/libexec/horizon-install-flatpaks

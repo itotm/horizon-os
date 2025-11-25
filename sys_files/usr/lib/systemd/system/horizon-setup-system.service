@@ -1,10 +1,10 @@
 [Unit]
-Description=Enable horizon-setup user service for existing users
-After=basic.target
+Description=Setup HorizonOS after installation or update
+After=network-online.target
 
 [Service]
 Type=oneshot
 ExecStart=/usr/libexec/horizon-setup-system
 
 [Install]
-WantedBy=basic.target
+WantedBy=multi-user.target
