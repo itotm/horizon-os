@@ -4,8 +4,8 @@ set -ouex pipefail
 logger -t horizon "Configuring Plasma desktop settings for user"
 
 plasma-apply-lookandfeel -a org.kde.breezetwilight.desktop
-plasma-apply-colorscheme -a ClearSimple
-plasma-apply-desktoptheme -a ClearSimple
+plasma-apply-colorscheme ClearSimple
+plasma-apply-desktoptheme ClearSimple
 plasma-apply-cursortheme Breeze_Light
 
 # Breeze settings

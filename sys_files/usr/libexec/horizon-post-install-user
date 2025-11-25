@@ -3,6 +3,6 @@ set -ouex pipefail
 
 logger -t horizon "HorizonOS user post install"
 
--/usr/libexec/horizon-enable-syncthing
--/usr/libexec/horizon-configure-bash
--/usr/libexec/horizon-configure-plasma
+/usr/libexec/horizon-enable-syncthing
+/usr/libexec/horizon-configure-bash
+/usr/libexec/horizon-configure-plasma

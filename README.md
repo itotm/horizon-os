@@ -47,7 +47,7 @@ sudo bootc switch ghcr.io/itotm/horizon-os:latest
 
 ## TODO
 
-Testing.
+Test and refine post install and post update scripts.
 
 ## AI disclaimer
 

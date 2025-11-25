@@ -34,9 +34,6 @@ fi
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 flatpak remote-modify --enable flathub
 
-flatpak override --user --filesystem=xdg-config/gtk-3.0:ro
-flatpak override --user --filesystem=xdg-config/gtk-4.0:ro
-
 FLATPAK_PACKAGES=(
     com.calibre_ebook.calibre
     com.github.PintaProject.Pinta
@@ -76,6 +73,9 @@ for package in "${FLATPAK_PACKAGES[@]}"; do
         flatpak install -y "$package"
     fi
 done
+
+flatpak override --user --filesystem=xdg-config/gtk-3.0:ro
+flatpak override --user --filesystem=xdg-config/gtk-4.0:ro
 
 flatpak override --user --env=WEBKIT_DISABLE_COMPOSITING_MODE=1 io.github.zarestia_dev.rclone-manager
 flatpak override --user io.github.zarestia_dev.rclone-manager --talk-name=org.freedesktop.Flatpak

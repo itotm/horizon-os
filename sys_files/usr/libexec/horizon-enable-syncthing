@@ -51,9 +51,7 @@ SecurityLabelDisable=true
 WantedBy=default.target
 EOF
 
-
 systemctl --user daemon-reload
-systemctl --user enable syncthing.service --now
 
 DESKTOP_FILE="$HOME/.local/share/applications/syncthing-webui.desktop"
 mkdir -p "$HOME/.local/share/applications"
