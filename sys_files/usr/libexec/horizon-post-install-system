@@ -1,4 +1,4 @@
 #!/bin/bash
 set -ouex pipefail
 
-echo "HorizonOS system post install"
+logger -t horizon "HorizonOS system post install"

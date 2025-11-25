@@ -4,9 +4,8 @@ set -ouex pipefail
 QEMU_PACKAGES=(
     qemu-kvm
     libvirt
-    distrobox
     cockpit-machines
-#    quickemu
+    quickemu
 )
 dnf5 -y install "${QEMU_PACKAGES[@]}"
 

@@ -2,6 +2,7 @@
 set -ouex pipefail
 
 REMOVE_PACKAGES=(
+    kjournald
     plasma-discover-rpm-ostree
 )
 dnf5 -y remove "${REMOVE_PACKAGES[@]}"
@@ -10,6 +11,7 @@ INSTALL_PACKAGES=(
     atuin
     bat
     cascadia-fonts-all
+    distrobox
     du-dust
     duf
     fastfetch
@@ -25,6 +27,7 @@ INSTALL_PACKAGES=(
     mc
     ncdu
     procs
+    qt6-qdbusviewer
     rclone
     rclone-browser
     ripgrep

@@ -2,6 +2,8 @@
 #!/bin/bash
 set -ouex pipefail
 
+logger -t horizon "Configuring Bash aliases and enhancements for user"
+
 if ! grep -q "# HorizonOS aliases and shell enhancements" ~/.bashrc; then
     {
         echo ""

@@ -1,6 +1,8 @@
 #!/bin/bash
 set -ouex pipefail
 
+logger -t horizon "Starting automatic system update"
+
 LOG_FILE="/var/log/horizon-update.log"
 BOOTC_UPDATED=false
 

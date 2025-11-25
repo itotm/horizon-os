@@ -1,6 +1,8 @@
 #!/bin/bash
 set -ouex pipefail
 
+logger -t horizon "Enabling Syncthing container service for user"
+
 QUADLET_DIR="$HOME/.config/containers/systemd"
 QUADLET_FILE="$QUADLET_DIR/syncthing.container"
 
@@ -9,6 +11,7 @@ if [ -f "$QUADLET_FILE" ]; then
 	exit 0
 fi
 
+mkdir -p "$HOME/Sync"
 mkdir -p "$QUADLET_DIR"
 
 cat > "$QUADLET_FILE" <<'EOF'
@@ -48,13 +51,20 @@ SecurityLabelDisable=true
 WantedBy=default.target
 EOF
 
-echo "Quadlet file created successfully!"
 
-echo "Reloading systemd..."
 systemctl --user daemon-reload
+systemctl --user enable syncthing.service --now
 
-echo "Syncthing has been enabled, reboot to activate it."
-echo ""
-echo "To check the status: systemctl --user status syncthing.service"
-echo "Access the web UI at: http://localhost:8384"
-echo "Your sync folders will be in: $HOME/Sync"
+DESKTOP_FILE="$HOME/.local/share/applications/syncthing-webui.desktop"
+mkdir -p "$HOME/.local/share/applications"
+cat > "$DESKTOP_FILE" <<EOF
+[Desktop Entry]
+Type=Application
+Name=Syncthing Web UI
+Comment=Open Syncthing Web Interface
+Exec=xdg-open http://localhost:8384
+Icon=applications-internet
+Icon=folder-sync
+Categories=Network;Utility;
+Terminal=false
+EOF

@@ -1,12 +1,15 @@
 #!/bin/bash
 set -ouex pipefail
 
-/usr/libexec/horizon-check-version $HOME/.horizon-version-actual
-EXIT_CODE=$?
+logger -t horizon "Starting HorizonOS user setup"
+
+if /usr/libexec/horizon-check-version $HOME/.horizon-version-actual; then
+    exit 0
+else
+    EXIT_CODE=$?
+fi
 
 case $EXIT_CODE in
-    0)
-        ;;
     1)
         /usr/libexec/horizon-post-install-user
         /usr/libexec/horizon-post-update-user
@@ -14,12 +17,10 @@ case $EXIT_CODE in
     2)
         /usr/libexec/horizon-post-update-user
         ;;
-    10)
-        exit 10
-        ;;
     *)
-        exit 99
+        exit $EXIT_CODE
         ;;
 esac
 
 \cp -f /etc/horizon-version $HOME/.horizon-version-actual
+exit 0

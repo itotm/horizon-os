@@ -1,4 +1,4 @@
 #!/bin/bash
 set -ouex pipefail
 
-echo "HorizonOS user post update"
+logger -t horizon "HorizonOS user post update"
