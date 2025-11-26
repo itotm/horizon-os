@@ -3,8 +3,7 @@ Description=Timer for automatic system update
 Requires=horizon-update.service
 
 [Timer]
-# OnCalendar=Fri 06:00
-OnCalendar=06:00
+OnCalendar=Fri 06:00
 Persistent=true
 RandomizedDelaySec=15min
 AccuracySec=5min

@@ -32,7 +32,6 @@ INSTALL_PACKAGES=(
     rclone-browser
     ripgrep
     tldr
-    zoxide
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
 

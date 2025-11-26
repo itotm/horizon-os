@@ -31,3 +31,7 @@ EOF
 
 echo "${IMAGE_VERSION}" > /etc/horizon-version
 
+echo "Disk space after build:"
+df -h
+echo "Block devices:"
+lsblk -f

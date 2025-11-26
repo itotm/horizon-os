@@ -31,12 +31,12 @@ on:
       enable_virttools:
         description: "Virtualization Tools"
         required: false
-        default: false
+        default: true
         type: boolean
       enable_devtools:
         description: "Developer Tools"
         required: false
-        default: false
+        default: true
         type: boolean
       enable_experimental:
         description: "Experimental"
@@ -176,8 +176,8 @@ jobs:
             ENABLE_COMMON=${{ github.event.inputs.enable_common || true }}
             ENABLE_STANDARD=${{ github.event.inputs.enable_standard || true }}
             ENABLE_EXTENDED=${{ github.event.inputs.enable_extended || false }}
-            ENABLE_VIRTTOOLS=${{ github.event.inputs.enable_devtools || false }}
-            ENABLE_DEVTOOLS=${{ github.event.inputs.enable_devtools || false }}
+            ENABLE_VIRTTOOLS=${{ github.event.inputs.enable_devtools || true }}
+            ENABLE_DEVTOOLS=${{ github.event.inputs.enable_devtools || true }}
             ENABLE_EXPERIMENTAL=${{ github.event.inputs.enable_experimental || false }}
             ENABLE_TESTING=${{ github.event.inputs.enable_testing || false }}
             DISABLE_REPOS=${{ github.event.inputs.disable_repos || true }}
@@ -190,10 +190,6 @@ jobs:
           IMAGE_SIZE=$(buildah images --format "{{.Size}}" ${{ env.IMAGE_NAME }} | head -n 1)
           echo "Built image ID: $IMAGE_ID"
           echo "Image size: $IMAGE_SIZE"
-          echo "Disk space after build:"
-          df -h
-          echo "Block devices:"
-          lsblk -f
 
       # Rechunk is a script that we use on Universal Blue to make sure there isnt a single huge layer when your image gets published.
       # This does not make your image faster to download, just provides better resumability and fixes a few errors.

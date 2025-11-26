@@ -5,7 +5,7 @@ QEMU_PACKAGES=(
     qemu-kvm
     libvirt
     cockpit-machines
-    quickemu
+    virt-manager
 )
 dnf5 -y install "${QEMU_PACKAGES[@]}"
 

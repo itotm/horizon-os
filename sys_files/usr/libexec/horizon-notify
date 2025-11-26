@@ -1,0 +1,19 @@
+#!/bin/bash
+set -e
+
+send_notification() {
+    local title="$1"
+    local message="$2"
+    for user in $(who | awk '{print $1}' | sort -u); do
+        user_id=$(id -u "$user")
+        display=$(who | grep "^$user " | awk '{print $NF}' | grep -o ':[0-9]*' | head -n1)
+        if [ -n "$display" ]; then
+            sudo -u "$user" DISPLAY="$display" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$user_id/bus" \
+                notify-send -a "HorizonOS" -i system-software-update -u critical "$title" "$message"
+        fi
+    done
+}
+
+if [[ "$#" -ge 2 ]]; then
+    send_notification "$1" "$2"
+fi
