@@ -104,6 +104,13 @@ jobs:
           target-dir: /var/lib/containers
           mount-opts: compress-force=zstd:3
 
+      - name: Show free disk space
+        run: |
+          echo "Disk space before build:"
+          df -h
+          echo "Block devices:"
+          lsblk -f
+
       - name: Get current date and version
         id: date
         run: |
@@ -182,6 +189,10 @@ jobs:
           IMAGE_SIZE=$(buildah images --format "{{.Size}}" ${{ env.IMAGE_NAME }} | head -n 1)
           echo "Built image ID: $IMAGE_ID"
           echo "Image size: $IMAGE_SIZE"
+          echo "Disk space after build:"
+          df -h
+          echo "Block devices:"
+          lsblk -f
 
       # Rechunk is a script that we use on Universal Blue to make sure there isnt a single huge layer when your image gets published.
       # This does not make your image faster to download, just provides better resumability and fixes a few errors.

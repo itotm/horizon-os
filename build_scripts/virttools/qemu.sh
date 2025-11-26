@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ouex pipefail
+set -oue pipefail
 
 QEMU_PACKAGES=(
     qemu-kvm

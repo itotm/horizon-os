@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ouex pipefail
+set -oue pipefail
 
 if [ "$#" -ne 2 ]; then
     echo "Usage: $0 <GITHUB_URL> <DESTINATION_FOLDER>"

@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ouex pipefail
+set -oue pipefail
 
 # Usage: install-opt <package-name>
 # Installs the given package, moves /opt contents to /var/opt, then restores /opt

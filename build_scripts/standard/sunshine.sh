@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ouex pipefail
+set -oue pipefail
 
 dnf5 -y copr enable lizardbyte/stable
 if dnf5 -y install Sunshine; then

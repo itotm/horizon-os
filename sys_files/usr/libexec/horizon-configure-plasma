@@ -1,7 +1,7 @@
 #!/bin/bash
-set -ouex pipefail
+set -oue pipefail
 
-logger -t horizon "Configuring Plasma desktop settings for user"
+logger "Configuring Plasma desktop settings for user"
 
 plasma-apply-lookandfeel -a org.kde.breezetwilight.desktop
 plasma-apply-colorscheme ClearSimple

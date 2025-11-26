@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ouex pipefail
+set -oue pipefail
 
 COCKPIT_PACKAGES=(
     cockpit

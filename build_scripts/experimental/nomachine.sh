@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ouex pipefail
+set -oue pipefail
 
 PACKAGE_NAME="nomachine_9.2.18_3_x86_64.tar.gz"
 INSTALL_PATH="/var/opt/nomachine"

@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ouex pipefail
+set -oue pipefail
 
 FEDORA_VERSION=${FEDORA_VERSION:-43}
 

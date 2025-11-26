@@ -1,7 +1,7 @@
 #!/bin/bash
-set -ouex pipefail
+set -oue pipefail
 
-logger -t horizon "HorizonOS installing flatpaks"
+logger "HorizonOS installing flatpaks"
 
 if flatpak remotes | grep -q "^fedora"; then
     flatpak list --app --columns=application | while read -r app; do

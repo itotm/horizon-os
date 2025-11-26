@@ -1,10 +1,10 @@
 #!/bin/bash
-set -ouex pipefail
+set -oue pipefail
 
-logger -t horizon "Starting automatic system update"
+logger "Starting automatic system update"
 
 if ! /usr/libexec/horizon-check-version /etc/horizon-version-actual; then
-    logger -t horizon "System update cancelled: first run post-install procedures"
+    logger "System update cancelled: first run post-install procedures"
     exit 0
 fi
 
