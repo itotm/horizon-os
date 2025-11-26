@@ -99,10 +99,17 @@ jobs:
       - name: Mount BTRFS for podman storage
         id: container-storage-action
         uses: ublue-os/container-storage-action@911baca08baf30c8654933e9e9723cb399892140
-        continue-on-error: true 
+        continue-on-error: true
         with:
-          target-dir: /var/lib/containers
+          target-dir: /mnt
           mount-opts: compress-force=zstd:3
+      - name: Configure Podman storage root to /mnt
+        run: |
+          echo "[storage]" > containers-storage.conf
+          echo "  driver = \"btrfs\"" >> containers-storage.conf
+          echo "  graphroot = \"/mnt\"" >> containers-storage.conf
+          export CONTAINERS_STORAGE_CONF=$(pwd)/containers-storage.conf
+          echo "CONTAINERS_STORAGE_CONF=$CONTAINERS_STORAGE_CONF" >> $GITHUB_ENV
 
       - name: Show free disk space
         run: |
@@ -180,8 +187,8 @@ jobs:
             ENABLE_EXPERIMENTAL=${{ github.event.inputs.enable_experimental || false }}
             ENABLE_TESTING=${{ github.event.inputs.enable_testing || false }}
             DISABLE_REPOS=${{ github.event.inputs.disable_repos || true }}
-          layers: false
-          oci: false
+          layers: true
+          oci: true
 
       - name: Log image size
         run: |
