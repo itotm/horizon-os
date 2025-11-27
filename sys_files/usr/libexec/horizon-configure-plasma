@@ -6,7 +6,7 @@ logger "Configuring Plasma desktop settings for user"
 plasma-apply-lookandfeel -a org.kde.breezetwilight.desktop
 plasma-apply-colorscheme ClearSimple
 plasma-apply-desktoptheme ClearSimple
-plasma-apply-cursortheme Breeze_Light
+plasma-apply-cursortheme breeze-cursors-light-plasma5
 
 # Breeze
 kwriteconfig6 --file breezerc --group "Common" --key "OutlineIntensity" "OutlineOff"
