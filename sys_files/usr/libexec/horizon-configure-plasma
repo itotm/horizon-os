@@ -8,11 +8,47 @@ plasma-apply-colorscheme ClearSimple
 plasma-apply-desktoptheme ClearSimple
 plasma-apply-cursortheme Breeze_Light
 
-# Breeze settings
+# Breeze
 kwriteconfig6 --file breezerc --group "Common" --key "OutlineIntensity" "OutlineOff"
 kwriteconfig6 --file breezerc --group "Windeco" --key "ButtonSize" "ButtonSmall"
 
-# Konsole profile settings
+# Icons
+kwriteconfig6 --file kdeglobals --group "Icons" --key "Theme" "ElevenTwilight"
+
+# Fonts
+kwriteconfig6 --file kdeglobals --group "General" --key "fixed" "Cascadia Mono,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
+kwriteconfig6 --file kdeglobals --group "General" --key "font" "Adwaita Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
+kwriteconfig6 --file kdeglobals --group "General" --key "menuFont" "Adwaita Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
+kwriteconfig6 --file kdeglobals --group "General" --key "smallestReadableFont" "Adwaita Sans,9,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
+kwriteconfig6 --file kdeglobals --group "General" --key "toolBarFont" "Adwaita Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
+
+# Launch feedback
+kwriteconfig6 --file klaunchrc --group "BusyCursorSettings" --key "Bouncing" false
+kwriteconfig6 --file klaunchrc --group "FeedbackStyle" --key "BusyCursor" false
+
+# PlasmaToolTips
+kwriteconfig6 --file plasmarc --group "PlasmaToolTips" --key "Delay" -1
+
+# Plasma shell
+kwriteconfig6 --file plasmashellrc --group "PlasmaViews" --group "Panel 2" --key "floating" 0
+kwriteconfig6 --file plasmashellrc --group "PlasmaViews" --group "Panel 2" --key "floatingApplets" 1
+kwriteconfig6 --file plasmashellrc --group "PlasmaViews" --group "Panel 2" --key "panelOpacity" 1
+kwriteconfig6 --file plasmashellrc --group "PlasmaViews" --group "Panel 2" --group "Defaults" --key "thickness" 32
+
+# Session
+kwriteconfig6 --file ksmserverrc --group "General" --key "confirmLogout" false
+kwriteconfig6 --file ksmserverrc --group "General" --key "loginMode" "emptySession"
+
+# Discover updates
+kwriteconfig6 --file PlasmaDiscoverUpdates --group "Global" --key "RequiredNotificationInterval" -1
+kwriteconfig6 --file PlasmaDiscoverUpdates --group "Global" --key "UseUnattendedUpdates" false
+
+# Dolphin
+kwriteconfig6 --file dolphinrc --group "General" --key "ShowFullPath" true
+kwriteconfig6 --file dolphinrc --group "General" --key "ShowStatusBar" "FullWidth"
+kwriteconfig6 --file dolphinrc --group "DetailsMode" --key "PreviewSize" 22
+
+# Konsole
 kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "Appearance" --key "ColorScheme" "BreezeBlue"
 kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "General" --key "Name" "Default"
 kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "General" --key "Parent" "FALLBACK/"
@@ -28,3 +64,7 @@ kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "Interaction
 kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "Interaction Options" --key "TripleClickMode" 1
 kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "Scrolling" --key "HistoryMode" 2
 kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "Terminal Features" --key "UrlHintsModifiers" 67108864
+kwriteconfig6 --file konsolerc --group "Desktop Entry" --key "DefaultProfile" "Default.profile"
+kwriteconfig6 --file konsolerc --group "KonsoleWindow" --key "ShowWindowTitleOnTitleBar" true
+
+logger "Plasma desktop settings configured for user"

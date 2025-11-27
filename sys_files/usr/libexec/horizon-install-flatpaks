@@ -45,6 +45,7 @@ FLATPAK_PACKAGES=(
     com.usebottles.bottles
     fr.handbrake.ghb
     io.github.flattool.Warehouse
+    io.github.plrigaux.sysd-manager
     io.github.slgobinath.SafeEyes
     io.github.zarestia_dev.rclone-manager
     net.cozic.joplin_desktop

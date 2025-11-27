@@ -20,10 +20,4 @@ for line in "${lines[@]}"; do
     fi
 done
 
-if ! grep -q "atuin init bash" ~/.bashrc; then
-  curl https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh -o ~/.bash-preexec.sh
-  printf '
-[[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
-' >> ~/.bashrc
-  echo 'eval "$(atuin init bash --disable-ctrl-r)"' >> ~/.bashrc
-fi
+logger "Bash configuration complete"

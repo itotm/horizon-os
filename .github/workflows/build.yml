@@ -2,7 +2,7 @@
 name: Build container image
 on:
   schedule:
-    - cron: '0 3 * * *' # Daily at 03:00 UTC
+    - cron: '0 2 * * *' # Daily at 02:00 UTC
   workflow_dispatch:
     inputs:
       fedora_version:
@@ -36,7 +36,7 @@ on:
       enable_devtools:
         description: "Developer Tools"
         required: false
-        default: true
+        default: false
         type: boolean
       enable_experimental:
         description: "Experimental"
@@ -105,13 +105,6 @@ jobs:
           mount-opts: compress-force=zstd:3
           loopback-free: 0.9
 
-      - name: Show free disk space
-        run: |
-          echo "Disk space before build:"
-          df -h
-          echo "Block devices:"
-          lsblk -f
-
       - name: Get current date and version
         id: date
         run: |
@@ -177,11 +170,10 @@ jobs:
             ENABLE_STANDARD=${{ github.event.inputs.enable_standard || true }}
             ENABLE_EXTENDED=${{ github.event.inputs.enable_extended || false }}
             ENABLE_VIRTTOOLS=${{ github.event.inputs.enable_devtools || true }}
-            ENABLE_DEVTOOLS=${{ github.event.inputs.enable_devtools || true }}
+            ENABLE_DEVTOOLS=${{ github.event.inputs.enable_devtools || false }}
             ENABLE_EXPERIMENTAL=${{ github.event.inputs.enable_experimental || false }}
             ENABLE_TESTING=${{ github.event.inputs.enable_testing || false }}
             DISABLE_REPOS=${{ github.event.inputs.disable_repos || true }}
-          layers: true
           oci: true
 
       - name: Log image size
