@@ -27,7 +27,7 @@ kwriteconfig6 --file klaunchrc --group "BusyCursorSettings" --key "Bouncing" fal
 kwriteconfig6 --file klaunchrc --group "FeedbackStyle" --key "BusyCursor" false
 
 # PlasmaToolTips
-kwriteconfig6 --file plasmarc --group "PlasmaToolTips" --key "Delay" -1
+kwriteconfig6 --file plasmarc --group "PlasmaToolTips" --key "Delay" \"-1\"
 
 # Plasma shell
 kwriteconfig6 --file plasmashellrc --group "PlasmaViews" --group "Panel 2" --key "floating" 0
@@ -40,7 +40,7 @@ kwriteconfig6 --file ksmserverrc --group "General" --key "confirmLogout" false
 kwriteconfig6 --file ksmserverrc --group "General" --key "loginMode" "emptySession"
 
 # Discover updates
-kwriteconfig6 --file PlasmaDiscoverUpdates --group "Global" --key "RequiredNotificationInterval" -1
+kwriteconfig6 --file PlasmaDiscoverUpdates --group "Global" --key "RequiredNotificationInterval" \"-1\"
 kwriteconfig6 --file PlasmaDiscoverUpdates --group "Global" --key "UseUnattendedUpdates" false
 
 # Dolphin
@@ -67,4 +67,6 @@ kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "Terminal Fe
 kwriteconfig6 --file konsolerc --group "Desktop Entry" --key "DefaultProfile" "Default.profile"
 kwriteconfig6 --file konsolerc --group "KonsoleWindow" --key "ShowWindowTitleOnTitleBar" true
 
-logger "Plasma desktop settings configured for user"
+logger "Plasma desktop configuration complete"
+
+plasmashell --replace &

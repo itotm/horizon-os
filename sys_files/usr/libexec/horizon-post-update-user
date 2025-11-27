@@ -2,3 +2,5 @@
 set -oue pipefail
 
 logger "HorizonOS user post update"
+
+logger "HorizonOS user post update complete"

@@ -6,3 +6,5 @@ logger "HorizonOS user post install"
 /usr/libexec/horizon-enable-syncthing
 /usr/libexec/horizon-configure-bash
 /usr/libexec/horizon-configure-plasma
+
+logger "HorizonOS user post install complete"
