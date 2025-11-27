@@ -10,7 +10,7 @@ dnf5 -y remove "${REMOVE_PACKAGES[@]}"
 INSTALL_PACKAGES=(
     bat
     btop
-    cascadia-mono-all
+    cascadia-mono-fonts
     du-dust
     duf
     fastfetch
