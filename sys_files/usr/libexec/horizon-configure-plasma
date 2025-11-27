@@ -29,6 +29,9 @@ kwriteconfig6 --file klaunchrc --group "FeedbackStyle" --key "BusyCursor" false
 # PlasmaToolTips
 kwriteconfig6 --file plasmarc --group "PlasmaToolTips" --key "Delay" \"-1\"
 
+# Splash
+kwriteconfig6 --file ksplashrc --group "KSplash" --key "Theme" "colored-plasma-logo"
+
 # Plasma shell
 kwriteconfig6 --file plasmashellrc --group "PlasmaViews" --group "Panel 2" --key "floating" 0
 kwriteconfig6 --file plasmashellrc --group "PlasmaViews" --group "Panel 2" --key "floatingApplets" 1
