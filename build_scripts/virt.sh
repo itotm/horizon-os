@@ -1,13 +1,13 @@
 #!/bin/bash
 set -oue pipefail
 
-EMU_PACKAGES=(
+VIRT_PACKAGES=(
     cockpit-machines
     distrobox
     libvirt
     qemu-kvm
     virt-manager
 )
-dnf5 -y install "${EMU_PACKAGES[@]}"
+dnf5 -y install "${VIRT_PACKAGES[@]}"
 
 ./ctx/cleanup.sh

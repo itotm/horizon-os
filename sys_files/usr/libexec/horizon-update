@@ -8,71 +8,14 @@ if ! /usr/libexec/horizon-check-version /etc/horizon-version-actual; then
     exit 0
 fi
 
-LOG_FILE="/var/log/horizon-update.log"
-BOOTC_UPDATED=false
-FLATPAK_UPDATED=false
-PODMAN_UPDATED=false
+export LOG_FILE="/var/log/horizon-update.log"
 
-logger "System update: bootc"
-if command -v bootc &> /dev/null; then
-    bootc_output=$(bootc upgrade 2>&1) || true
-    
-    if echo "$bootc_output" | grep -qi "staged\|queued\|updated"; then
-        BOOTC_UPDATED=true
-        logger "bootc updated"
-        /usr/libexec/horizon-notify "System Updated" "A new bootc update is available. Reboot to apply it."
-    else
-        logger "bootc not updated"
-    fi
-else
-    logger "bootc not found"
-fi
-
-logger "System update: flatpak"
-if command -v flatpak &> /dev/null; then
-    flatpak_output=$(flatpak update -y --noninteractive 2>&1 | tee -a "$LOG_FILE")
-    logger "flatpak updated"
-    if echo "$flatpak_output" | grep -q "Changes complete"; then
-        FLATPAK_UPDATED=true
-    fi
-else
-    logger "flatpak not found"
-fi
-
-logger "System update: podman"
-if command -v podman &> /dev/null; then
-    images=$(podman images --format "{{.Repository}}:{{.Tag}}" | grep -v "<none>" || true)
-    if [ -n "$images" ]; then
-        for image in $images; do
-            logger "podman updating $image"
-            podman_output=$(podman pull "$image" 2>&1 || logger "podman error $image")
-            if echo "$podman_output" | grep -q "Downloaded"; then
-                PODMAN_UPDATED=true
-            fi
-        done
-        podman image prune -f 2>&1
-        logger "podman images updated"
-    else
-        logger "no podman images"
-    fi
-else
-    logger "podman not found"
-fi
+BOOTC_UPDATED=$(/usr/libexec/horizon-update-bootc)
 
 logger "System update: completed"
 
-if [ "$BOOTC_UPDATED" = true ] || [ "$FLATPAK_UPDATED" = true ] || [ "$PODMAN_UPDATED" = true ]; then
-    msg=""
-    if [ "$BOOTC_UPDATED" = true ]; then
-        msg="bootc updated. "
-    fi
-    if [ "$FLATPAK_UPDATED" = true ]; then
-        msg+="Flatpak packages updated. "
-    fi
-    if [ "$PODMAN_UPDATED" = true ]; then
-        msg+="Podman images updated. "
-    fi
-    /usr/libexec/horizon-notify "Updates Completed" "${msg}Reboot to apply bootc updates if present."
+if [ "$BOOTC_UPDATED" = true ]; then
+    /usr/libexec/horizon-notify "Update Completed" "Reboot to apply bootc updates."
 fi
 
 exit 0

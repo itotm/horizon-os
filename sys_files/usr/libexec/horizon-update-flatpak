@@ -1,0 +1,20 @@
+#!/bin/bash
+set -oue pipefail
+
+LOG_FILE="${LOG_FILE:-/var/log/horizon-update.log}"
+
+if ! command -v flatpak &> /dev/null; then
+    logger "flatpak not found"
+    echo "false"
+    exit 0
+fi
+
+logger "System update: flatpak"
+flatpak_output=$(flatpak update -y --noninteractive 2>&1 | tee -a "$LOG_FILE")
+logger "flatpak updated"
+
+if echo "$flatpak_output" | grep -q "Changes complete"; then
+    echo "true"
+else
+    echo "false"
+fi

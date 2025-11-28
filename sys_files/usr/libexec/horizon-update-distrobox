@@ -1,0 +1,16 @@
+#!/bin/bash
+set -oue pipefail
+
+LOG_FILE="${LOG_FILE:-$HOME/.local/share/horizon/update.log}"
+mkdir -p "$(dirname "$LOG_FILE")"
+
+if ! command -v distrobox &> /dev/null; then
+    logger "Distrobox not found"
+    echo "false"
+    exit 0
+fi
+
+logger "Updating Distrobox containers..."
+distrobox-upgrade --all 2>&1 | tee -a "$LOG_FILE"
+logger "All Distrobox containers updated"
+echo "true"

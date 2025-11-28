@@ -1,0 +1,20 @@
+#!/bin/bash
+set -oue pipefail
+
+if ! command -v bootc &> /dev/null; then
+    logger "bootc not found"
+    echo "false"
+    exit 0
+fi
+
+logger "System update: bootc"
+bootc_output=$(bootc upgrade 2>&1) || true
+
+if echo "$bootc_output" | grep -qi "staged\|queued\|updated"; then
+    logger "bootc updated"
+    /usr/libexec/horizon-notify "System Updated" "A new bootc update is available. Reboot to apply it."
+    echo "true"
+else
+    logger "bootc not updated"
+    echo "false"
+fi

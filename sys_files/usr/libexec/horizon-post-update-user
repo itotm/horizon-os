@@ -3,4 +3,6 @@ set -oue pipefail
 
 logger "HorizonOS user post update"
 
+/usr/libexec/horizon-update-distrobox
+
 logger "HorizonOS user post update complete"

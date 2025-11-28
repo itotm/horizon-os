@@ -3,4 +3,7 @@ set -oue pipefail
 
 logger "HorizonOS system post update"
 
+/usr/libexec/horizon-update-flatpak
+/usr/libexec/horizon-update-podman
+
 logger "HorizonOS system post update complete"

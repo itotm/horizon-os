@@ -68,7 +68,9 @@ FLATPAK_PACKAGES=(
     org.kde.kpat
     org.kde.marble
     org.libreoffice.LibreOffice
+    org.mozilla.Thunderbird
     org.qbittorrent.qBittorrent
+    org.videolan.VLC
 )
 
 for package in "${FLATPAK_PACKAGES[@]}"; do

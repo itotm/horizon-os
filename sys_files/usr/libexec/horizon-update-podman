@@ -1,0 +1,31 @@
+#!/bin/bash
+# Update Podman images
+# Returns: "true" if updated, "false" otherwise
+
+set -oue pipefail
+
+if ! command -v podman &> /dev/null; then
+    logger "podman not found"
+    echo "false"
+    exit 0
+fi
+
+logger "System update: podman"
+PODMAN_UPDATED=false
+
+images=$(podman images --format "{{.Repository}}:{{.Tag}}" | grep -v "<none>" || true)
+if [ -n "$images" ]; then
+    for image in $images; do
+        logger "podman updating $image"
+        podman_output=$(podman pull "$image" 2>&1 || logger "podman error $image")
+        if echo "$podman_output" | grep -q "Downloaded"; then
+            PODMAN_UPDATED=true
+        fi
+    done
+    podman image prune -f 2>&1
+    logger "podman images updated"
+else
+    logger "no podman images"
+fi
+
+echo "$PODMAN_UPDATED"

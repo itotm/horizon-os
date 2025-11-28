@@ -175,7 +175,7 @@ jobs:
             ENABLE_TESTING=${{ github.event.inputs.enable_testing || false }}
             DISABLE_REPOS=${{ github.event.inputs.disable_repos || true }}
           layers: true
-          oci: true
+          oci: false
 
       - name: Log image size
         run: |
