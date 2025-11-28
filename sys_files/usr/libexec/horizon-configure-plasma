@@ -15,12 +15,16 @@ kwriteconfig6 --file breezerc --group "Windeco" --key "ButtonSize" "ButtonSmall"
 # Icons
 kwriteconfig6 --file kdeglobals --group "Icons" --key "Theme" "ElevenTwilight"
 
+# KDE
+kwriteconfig6 --file kdeglobals --group "KDE" --key "AnimationDurationFactor" 0.5
+
 # Fonts
 kwriteconfig6 --file kdeglobals --group "General" --key "fixed" "Cascadia Mono,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
 kwriteconfig6 --file kdeglobals --group "General" --key "font" "Adwaita Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
 kwriteconfig6 --file kdeglobals --group "General" --key "menuFont" "Adwaita Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
 kwriteconfig6 --file kdeglobals --group "General" --key "smallestReadableFont" "Adwaita Sans,9,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
 kwriteconfig6 --file kdeglobals --group "General" --key "toolBarFont" "Adwaita Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
+kwriteconfig6 --file kdeglobals --group "WM" --key "activeFont" "Adwaita Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
 
 # Launch feedback
 kwriteconfig6 --file klaunchrc --group "BusyCursorSettings" --key "Bouncing" false
@@ -52,6 +56,7 @@ kwriteconfig6 --file plasma-localerc --group "Formats" --key "LC_NUMERIC" "it_IT
 kwriteconfig6 --file plasma-localerc --group "Formats" --key "LC_PAPER" "it_IT.UTF-8"
 kwriteconfig6 --file plasma-localerc --group "Formats" --key "LC_TELEPHONE" "it_IT.UTF-8"
 kwriteconfig6 --file plasma-localerc --group "Formats" --key "LC_TIME" "it_IT.UTF-8"
+kwriteconfig6 --file kdeglobals --group "Locale" --key "BinaryUnitDialect" 1
 
 # Discover updates
 kwriteconfig6 --file PlasmaDiscoverUpdates --group "Global" --key "RequiredNotificationInterval" -- -1
@@ -81,6 +86,7 @@ kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "Terminal Fe
 kwriteconfig6 --file konsolerc --group "Desktop Entry" --key "DefaultProfile" "Default.profile"
 kwriteconfig6 --file konsolerc --group "KonsoleWindow" --key "ShowWindowTitleOnTitleBar" true
 
-logger "Plasma desktop configuration complete"
-
+plasmashell --replace &
 kwin_wayland --replace &
+
+logger "Plasma desktop configuration complete"
