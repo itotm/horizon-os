@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ou pipefail
+set -euo pipefail
 
 logger "System update: podman"
 
@@ -9,16 +9,22 @@ if ! command -v podman &> /dev/null; then
 fi
 
 images=$(podman images --format "{{.Repository}}:{{.Tag}}" | grep -v "<none>" || true)
-if [ -n "$images" ]; then
-    for image in $images; do
-        logger "podman updating $image"
-        podman_output=$(podman pull "$image" 2>&1 || logger "podman error $image")
-        if echo "$podman_output" | grep -q "Downloaded"; then
-        fi
-    done
-    podman image prune -f 2>&1
-    logger "podman images updated"
-else
+
+if [ -z "$images" ]; then
     logger "no podman images"
+    exit 0
 fi
+
+for image in $images; do
+    logger "podman updating $image"
+    if podman pull "$image" 2>&1 | tee /tmp/podman_pull.log | grep -q "Downloaded"; then
+        logger "podman $image updated"
+    else
+        logger "podman $image already up to date or error"
+    fi
+done
+
+podman image prune -f 2>&1 | logger
+
+logger "podman images update completed"
 exit 0

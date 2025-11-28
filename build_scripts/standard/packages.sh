@@ -26,7 +26,6 @@ INSTALL_PACKAGES=(
     mc
     ncdu
     procs
-    qt6-qdbusviewer
     rclone
     rclone-browser
     ripgrep

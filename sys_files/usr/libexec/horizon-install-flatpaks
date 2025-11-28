@@ -3,8 +3,6 @@ set -oue pipefail
 
 logger "HorizonOS installing flatpaks"
 
-
-did_something=false
 if flatpak remotes | grep -q "^fedora"; then
     flatpak list --app --columns=application | while read -r app; do
         if [ -n "$app" ]; then
@@ -31,7 +29,6 @@ if flatpak remotes | grep -q "^fedora"; then
     done
 
     flatpak uninstall --unused -y 2>/dev/null || true
-    did_something=true
 fi
 
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
@@ -48,10 +45,10 @@ FLATPAK_PACKAGES=(
     io.github.plrigaux.sysd-manager
     io.github.slgobinath.SafeEyes
     io.github.zarestia_dev.rclone-manager
+    io.qt.qdbusviewer
     net.cozic.joplin_desktop
     net.lutris.Lutris
     net.mediaarea.MediaInfo
-    net.nokyan.Resources
     no.mifi.losslesscut
     org.audacityteam.Audacity
     org.avidemux.Avidemux
@@ -68,24 +65,18 @@ FLATPAK_PACKAGES=(
     org.kde.kpat
     org.kde.marble
     org.libreoffice.LibreOffice
+    org.mozilla.Thunderbird
     org.qbittorrent.qBittorrent
+    org.videolan.VLC
+    page.codeberg.JakobDev.jdSystemMonitor
 )
 
 for package in "${FLATPAK_PACKAGES[@]}"; do
     if ! flatpak list --app --columns=application | grep -Fxq "$package"; then
         flatpak install -y "$package"
-        did_something=true
     fi
 done
 
-flatpak override --user --filesystem=xdg-config/gtk-3.0:ro
-flatpak override --user --filesystem=xdg-config/gtk-4.0:ro
+/usr/libexec/horizon-notify "Flatpak packages" "Installation completed."
 
-flatpak override --user --env=WEBKIT_DISABLE_COMPOSITING_MODE=1 io.github.zarestia_dev.rclone-manager
-flatpak override --user io.github.zarestia_dev.rclone-manager --talk-name=org.freedesktop.Flatpak
-flatpak override --user io.github.zarestia_dev.rclone-manager --filesystem=~/.config/autostart:create
-
-if [ "$did_something" = true ]; then
-    /usr/libexec/horizon-notify "Flatpak packages" "Installation completed."
-fi
-
+logger "HorizonOS flatpak installation completed"

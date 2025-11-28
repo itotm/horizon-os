@@ -1,0 +1,15 @@
+#!/bin/bash
+set -oue pipefail
+
+logger "HorizonOS user flatpak configuration"
+
+# Override GTK config for user
+flatpak override --user --filesystem=xdg-config/gtk-3.0:ro
+flatpak override --user --filesystem=xdg-config/gtk-4.0:ro
+
+# Rclone Manager specific overrides
+flatpak override --user --env=WEBKIT_DISABLE_COMPOSITING_MODE=1 io.github.zarestia_dev.rclone-manager
+flatpak override --user io.github.zarestia_dev.rclone-manager --talk-name=org.freedesktop.Flatpak
+flatpak override --user io.github.zarestia_dev.rclone-manager --filesystem=~/.config/autostart:create
+
+logger "Flatpak user configuration completed"
