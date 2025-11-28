@@ -3,21 +3,20 @@ set -oue pipefail
 
 logger "Configuring Bash aliases and enhancements for user"
 
-lines=(
-    "# HorizonOS aliases and shell enhancements"
-    "bind 'set completion-ignore-case on'"
-    "alias ls='lsd'"
-    "alias du='dust'"
-    "alias ps='procs'"
-    "alias grep='rg'"
-    "alias tldr='tldr --color'"
-    "eval \"$(fzf --bash)\""
-)
-
-for line in "${lines[@]}"; do
-    if ! grep -Fxq "$line" ~/.bashrc; then
-        echo "$line" >> ~/.bashrc
-    fi
-done
+if ! grep -q "# HorizonOS aliases and shell enhancements" ~/.bashrc; then
+    {
+        echo ""
+        echo "# HorizonOS aliases and shell enhancements"
+        echo "bind 'set completion-ignore-case on'"
+        echo "alias ls='lsd'"
+        echo "alias du='dust'"
+        echo "alias ps='procs'"
+        echo "alias grep='rg'"
+        echo "alias tldr='tldr --color'"
+        echo "eval \"\$(fzf --bash)\""
+    } | tee -a ~/.bashrc
+else
+    echo "HorizonOS aliases already present in ~/.bashrc"
+fi
 
 logger "Bash configuration complete"
