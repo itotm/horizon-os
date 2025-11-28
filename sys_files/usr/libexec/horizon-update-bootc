@@ -12,7 +12,6 @@ bootc_output=$(bootc upgrade 2>&1) || true
 
 if echo "$bootc_output" | grep -qi "staged\|queued\|updated"; then
     logger "bootc updated"
-    /usr/libexec/horizon-notify "System Updated" "A new bootc update is available. Reboot to apply it."
     echo "true"
 else
     logger "bootc not updated"

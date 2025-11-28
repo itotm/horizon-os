@@ -12,10 +12,9 @@ export LOG_FILE="/var/log/horizon-update.log"
 
 BOOTC_UPDATED=$(/usr/libexec/horizon-update-bootc)
 
-logger "System update: completed"
-
 if [ "$BOOTC_UPDATED" = true ]; then
     /usr/libexec/horizon-notify "Update Completed" "Reboot to apply bootc updates."
 fi
 
+logger "System update: completed"
 exit 0
