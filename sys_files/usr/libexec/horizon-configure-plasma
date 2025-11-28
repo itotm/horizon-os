@@ -18,6 +18,9 @@ kwriteconfig6 --file kdeglobals --group "Icons" --key "Theme" "ElevenTwilight"
 # KDE
 kwriteconfig6 --file kdeglobals --group "KDE" --key "AnimationDurationFactor" 0.5
 
+# Sound
+kwriteconfig6 --file kdeglobals --group "Sounds" --key "Enable" false
+
 # Fonts
 kwriteconfig6 --file kdeglobals --group "General" --key "fixed" "Cascadia Mono,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
 kwriteconfig6 --file kdeglobals --group "General" --key "font" "Adwaita Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
