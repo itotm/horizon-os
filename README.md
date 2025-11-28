@@ -11,8 +11,8 @@ A custom image based on Fedora Kinoite 43 and built with Universal Blue template
 - a bunch of [cli tools](./build_scripts/standard/packages.sh)
 - media codecs from [RPM Fusion](https://rpmfusion.org/)
 - selected [KDE apps](./build_scripts/standard/kde-apps.sh)
-- Cockpit, Tailscale, Sunshine, Thunderbird, VLC preinstalled
 - Flathub with selected [packages](./sys_files/usr/bin/horizon-install-flatpaks.sh)
+- Cockpit, Tailscale, Sunshine preinstalled
 - Syncthing as Quadlet
 - optional tools: QEmu, dotnet, VSCode
 - [my](https://github.com/itotm/plasma-colors) custom colors and icons
@@ -24,14 +24,7 @@ A custom image based on Fedora Kinoite 43 and built with Universal Blue template
 ## Howto
 
 - install standard [Fedora Kinoite](https://fedoraproject.org/atomic-desktops/kinoite/download)
-- upgrade
-
-```bash
-sudo rpm-ostree upgrade
-```
-
-- reboot
-- pin current version (optional - to go back easily to standard Kinoite)
+- pin current version (optional - to go back easily)
 
 ```bash
 sudo ostree admin pin 0
@@ -44,10 +37,6 @@ sudo bootc switch ghcr.io/itotm/horizon-os:latest
 ```
 
 - reboot (**note**: after the first reboot, wait until Flatpak apps finish installing)
-
-## TODO
-
-Test and refine post install and post update scripts.
 
 ## AI disclaimer
 
