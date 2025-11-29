@@ -36,8 +36,10 @@ flatpak remote-modify --enable flathub
 
 FLATPAK_PACKAGES=(
     com.calibre_ebook.calibre
+    com.github.marhkb.Pods
     com.github.PintaProject.Pinta
     com.github.tchx84.Flatseal
+    com.moonlight_stream.Moonlight
     com.ranfdev.DistroShelf
     com.usebottles.bottles
     fr.handbrake.ghb
@@ -67,7 +69,6 @@ FLATPAK_PACKAGES=(
     org.libreoffice.LibreOffice
     org.mozilla.Thunderbird
     org.qbittorrent.qBittorrent
-    org.videolan.VLC
     page.codeberg.JakobDev.jdSystemMonitor
 )
 
@@ -76,7 +77,5 @@ for package in "${FLATPAK_PACKAGES[@]}"; do
         flatpak install -y "$package"
     fi
 done
-
-/usr/libexec/horizon-notify "Flatpak packages" "Installation completed."
 
 logger "HorizonOS flatpak installation completed"

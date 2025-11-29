@@ -46,7 +46,7 @@ kwriteconfig6 --file ksplashrc --group "KSplash" --key "Theme" "colored-plasma-l
 kwriteconfig6 --file plasmashellrc --group "PlasmaViews" --group "Panel 2" --key "floating" 0
 kwriteconfig6 --file plasmashellrc --group "PlasmaViews" --group "Panel 2" --key "floatingApplets" 1
 kwriteconfig6 --file plasmashellrc --group "PlasmaViews" --group "Panel 2" --key "panelOpacity" 1
-kwriteconfig6 --file plasmashellrc --group "PlasmaViews" --group "Panel 2" --group "Defaults" --key "thickness" 32
+kwriteconfig6 --file plasmashellrc --group "PlasmaViews" --group "Panel 2" --group "Defaults" --key "thickness" 34
 
 # Session
 kwriteconfig6 --file ksmserverrc --group "General" --key "confirmLogout" false
@@ -73,6 +73,11 @@ kwriteconfig6 --file dolphinrc --group "General" --key "ShowFullPath" true
 kwriteconfig6 --file dolphinrc --group "General" --key "ShowStatusBar" "FullWidth"
 kwriteconfig6 --file dolphinrc --group "DetailsMode" --key "PreviewSize" 22
 
+# Wallpaper
+kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "1" --key "wallpaperplugin" "org.kde.potd"
+kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "1" --group "Wallpaper" --group "org.kde.potd" --group "General" --key "FillMode" 2
+kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "1" --group "Wallpaper" --group "org.kde.potd" --group "General" --key "Provider" "bing"
+
 # Konsole
 kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "Appearance" --key "ColorScheme" "BreezeBlue"
 kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "General" --key "Name" "Default"
@@ -98,5 +103,7 @@ sleep 2
 kwin_wayland --replace &
 sleep 2
 plasmashell --replace &
+sleep 1
+/usr/libexec/horizon-notify "System configuration" "Finishing setup and installing apps. The system will reboot automatically"
 
 logger "Plasma desktop configuration complete"
