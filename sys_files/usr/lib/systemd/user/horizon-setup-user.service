@@ -1,8 +1,8 @@
 
 [Unit]
 Description=Setup HorizonOS user aliases, completions and shell enhancements
-After=plasma-workspace.target graphical-session.target
-Wants=plasma-workspace.target graphical-session.target
+After=plasma-workspace.target
+Wants=plasma-workspace.target
 
 [Service]
 Type=oneshot
@@ -10,4 +10,4 @@ ExecStart=/usr/libexec/horizon-setup-user
 RemainAfterExit=true
 
 [Install]
-WantedBy=default.target
+WantedBy=plasma-workspace.target
