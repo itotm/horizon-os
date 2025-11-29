@@ -1,15 +1,47 @@
 #!/bin/bash
 set -oue pipefail
 
-logger "HorizonOS user flatpak configuration"
+logger "Flatpak configuration"
 
-# Override GTK config for user
-flatpak override --user --filesystem=xdg-config/gtk-3.0:ro
-flatpak override --user --filesystem=xdg-config/gtk-4.0:ro
+flatpak list --app --columns=application | while read -r app; do
+    if [ -n "$app" ]; then
+        flatpak uninstall -y "$app" 2>/dev/null || true
+    fi
+done
 
-# Rclone Manager specific overrides
-flatpak override --user --env=WEBKIT_DISABLE_COMPOSITING_MODE=1 io.github.zarestia_dev.rclone-manager
-flatpak override --user io.github.zarestia_dev.rclone-manager --talk-name=org.freedesktop.Flatpak
-flatpak override --user io.github.zarestia_dev.rclone-manager --filesystem=~/.config/autostart:create
+flatpak list --runtime --columns=application | while read -r runtime; do
+    if [ -n "$runtime" ]; then
+        flatpak mask --remove "$runtime" 2>/dev/null || true
+    fi
+done
 
-logger "Flatpak user configuration completed"
+flatpak list --runtime --columns=application | while read -r runtime; do
+    if [ -n "$runtime" ]; then
+        flatpak uninstall -y "$runtime" 2>/dev/null || true
+    fi
+done
+
+for remote in fedora fedora-testing; do
+    if flatpak remotes | grep -q "^$remote"; then
+        flatpak remote-delete "$remote" 2>/dev/null || true
+    fi
+done
+
+flatpak uninstall --unused -y 2>/dev/null || true
+
+find "$HOME/.var/app" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | while read -r appdir; do
+    rm -rf "$appdir" 2>/dev/null || true
+done
+
+find "$HOME/.local/share/flatpak/app" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | while read -r appdir; do
+    rm -rf "$appdir" 2>/dev/null || true
+done
+
+find "$HOME/.local/share/flatpak/runtime" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | while read -r runtimedir; do
+    rm -rf "$runtimedir" 2>/dev/null || true
+done
+
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak remote-modify --enable flathub
+
+logger "Flatpak configuration completed"

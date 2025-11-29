@@ -3,40 +3,11 @@ set -oue pipefail
 
 logger "HorizonOS installing flatpaks"
 
-if flatpak remotes | grep -q "^fedora"; then
-    flatpak list --app --columns=application | while read -r app; do
-        if [ -n "$app" ]; then
-            flatpak uninstall -y "$app" 2>/dev/null || true
-        fi
-    done
-
-    flatpak list --runtime --columns=application | while read -r runtime; do
-        if [ -n "$runtime" ]; then
-            flatpak mask --remove "$runtime" 2>/dev/null || true
-        fi
-    done
-
-    flatpak list --runtime --columns=application | while read -r runtime; do
-        if [ -n "$runtime" ]; then
-            flatpak uninstall -y "$runtime" 2>/dev/null || true
-        fi
-    done
-
-    for remote in fedora fedora-testing; do
-        if flatpak remotes | grep -q "^$remote"; then
-            flatpak remote-delete "$remote" 2>/dev/null || true
-        fi
-    done
-
-    flatpak uninstall --unused -y 2>/dev/null || true
-fi
-
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-flatpak remote-modify --enable flathub
+flatpak override --user --filesystem=xdg-config/gtk-3.0:ro
+flatpak override --user --filesystem=xdg-config/gtk-4.0:ro
 
 FLATPAK_PACKAGES=(
     com.calibre_ebook.calibre
-    com.github.marhkb.Pods
     com.github.PintaProject.Pinta
     com.github.tchx84.Flatseal
     com.moonlight_stream.Moonlight
@@ -46,6 +17,7 @@ FLATPAK_PACKAGES=(
     io.github.flattool.Warehouse
     io.github.plrigaux.sysd-manager
     io.github.slgobinath.SafeEyes
+    io.github.ungoogled_software.ungoogled_chromium
     io.github.zarestia_dev.rclone-manager
     io.qt.qdbusviewer
     net.cozic.joplin_desktop
@@ -77,5 +49,9 @@ for package in "${FLATPAK_PACKAGES[@]}"; do
         flatpak install -y "$package"
     fi
 done
+
+flatpak override --user --env=WEBKIT_DISABLE_COMPOSITING_MODE=1 io.github.zarestia_dev.rclone-manager
+flatpak override --user io.github.zarestia_dev.rclone-manager --talk-name=org.freedesktop.Flatpak
+flatpak override --user io.github.zarestia_dev.rclone-manager --filesystem=~/.config/autostart:create
 
 logger "HorizonOS flatpak installation completed"

@@ -33,8 +33,6 @@ fi
 case $EXIT_CODE in
     1)
         /usr/libexec/horizon-post-install-system
-        /usr/libexec/horizon-post-update-system
-        reboot
         ;;
     2)
         /usr/libexec/horizon-post-update-system
