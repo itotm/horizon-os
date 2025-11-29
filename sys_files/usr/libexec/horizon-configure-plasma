@@ -101,5 +101,7 @@ kwriteconfig6 --file konsolerc --group "Desktop Entry" --key "DefaultProfile" "D
 kwriteconfig6 --file konsolerc --group "KonsoleWindow" --key "ShowWindowTitleOnTitleBar" true
 
 qdbus-qt6 org.kde.GtkConfig /GtkConfig setGtkTheme Breeze
+sleep 2
+plasmashell --replace &
 
 logger "Plasma desktop configuration complete"

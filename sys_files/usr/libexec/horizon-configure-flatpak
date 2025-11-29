@@ -29,18 +29,6 @@ done
 
 flatpak uninstall --unused -y 2>/dev/null || true
 
-find "$HOME/.var/app" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | while read -r appdir; do
-    rm -rf "$appdir" 2>/dev/null || true
-done
-
-find "$HOME/.local/share/flatpak/app" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | while read -r appdir; do
-    rm -rf "$appdir" 2>/dev/null || true
-done
-
-find "$HOME/.local/share/flatpak/runtime" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | while read -r runtimedir; do
-    rm -rf "$runtimedir" 2>/dev/null || true
-done
-
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 flatpak remote-modify --enable flathub
 
