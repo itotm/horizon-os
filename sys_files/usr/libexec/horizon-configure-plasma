@@ -98,11 +98,7 @@ kwriteconfig6 --file konsolerc --group "Desktop Entry" --key "DefaultProfile" "D
 kwriteconfig6 --file konsolerc --group "KonsoleWindow" --key "ShowWindowTitleOnTitleBar" true
 
 qdbus-qt6 org.kde.GtkConfig /GtkConfig setGtkTheme Breeze
-#sleep 2
-# kwin_wayland --replace &
-# sleep 2
-# plasmashell --replace &
-# sleep 1
-/usr/libexec/horizon-notify "System configuration" "Finishing setup and installing apps. The system will reboot automatically"
+
+/usr/libexec/horizon-notify "System configuration" "Please wait, finishing setup and installing apps. The system will reboot automatically"
 
 logger "Plasma desktop configuration complete"
