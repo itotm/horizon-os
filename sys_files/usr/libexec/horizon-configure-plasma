@@ -70,7 +70,7 @@ kwriteconfig6 --file kdeglobals --group "Locale" --key "BinaryUnitDialect" 1
 # Discover
 kwriteconfig6 --file PlasmaDiscoverUpdates --group "Global" --key "RequiredNotificationInterval" -- -1
 kwriteconfig6 --file PlasmaDiscoverUpdates --group "Global" --key "UseUnattendedUpdates" false
-kwriteconfig6 --file discoverrc --group "FlatpakSources" --key "sources" "flathub"
+kwriteconfig6 --file discoverrc --group "FlatpakSources" --key "Sources" "flathub"
 
 # Dolphin
 kwriteconfig6 --file dolphinrc --group "General" --key "ShowFullPath" true
