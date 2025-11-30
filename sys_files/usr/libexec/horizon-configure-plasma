@@ -37,10 +37,10 @@ kwriteconfig6 --file klaunchrc --group "BusyCursorSettings" --key "Bouncing" fal
 kwriteconfig6 --file klaunchrc --group "FeedbackStyle" --key "BusyCursor" false
 
 # PlasmaToolTips
-kwriteconfig6 --file plasmarc --group "PlasmaToolTips" --key "NumLock" 0
+kwriteconfig6 --file plasmarc --group "PlasmaToolTips" --key "Delay" -- -1
 
 # Numpad
-kwriteconfig6 --file kcminputrc --group "Keyboard" --key "Delay" -- -1
+kwriteconfig6 --file kcminputrc --group "Keyboard" --key "NumLock" 0
 
 # Splash
 kwriteconfig6 --file ksplashrc --group "KSplash" --key "Theme" "colored-plasma-logo"
