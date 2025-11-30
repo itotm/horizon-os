@@ -63,6 +63,6 @@ Comment=Open Syncthing Web Interface
 Exec=xdg-open http://localhost:8384
 Icon=applications-internet
 Icon=folder-sync
-Categories=Network;Utility;
+Categories=Network;
 Terminal=false
 EOF

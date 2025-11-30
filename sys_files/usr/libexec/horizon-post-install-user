@@ -3,11 +3,11 @@ set -oue pipefail
 
 logger "HorizonOS user post install"
 
-/usr/libexec/horizon-notify "System configuration" "Please wait, finishing setup and installing apps. The system will reboot automatically"
 /usr/libexec/horizon-enable-syncthing
 /usr/libexec/horizon-configure-bash
-/usr/libexec/horizon-install-flatpaks
 /usr/libexec/horizon-configure-plasma
+/usr/libexec/horizon-notify "System configuration" "Please wait, finishing setup and installing apps. The system will reboot automatically"
+/usr/libexec/horizon-install-flatpaks
 
 logger "HorizonOS user post install complete"
 reboot

@@ -17,7 +17,6 @@ FLATPAK_PACKAGES=(
     io.github.flattool.Warehouse
     io.github.plrigaux.sysd-manager
     io.github.slgobinath.SafeEyes
-    io.github.ungoogled_software.ungoogled_chromium
     io.github.zarestia_dev.rclone-manager
     io.qt.qdbusviewer
     net.cozic.joplin_desktop
@@ -27,6 +26,7 @@ FLATPAK_PACKAGES=(
     org.audacityteam.Audacity
     org.avidemux.Avidemux
     org.bunkus.mkvtoolnix-gui
+    org.chromium.Chromium
     org.deskflow.deskflow
     org.fkoehler.KTailctl
     org.gnome.meld
@@ -46,7 +46,8 @@ FLATPAK_PACKAGES=(
 
 for package in "${FLATPAK_PACKAGES[@]}"; do
     if ! flatpak list --app --columns=application | grep -Fxq "$package"; then
-        flatpak install -y "$package"
+        logger "Installing $package"
+        flatpak install -y "$package" || true
     fi
 done
 
