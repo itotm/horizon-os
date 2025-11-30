@@ -67,9 +67,10 @@ kwriteconfig6 --file plasma-localerc --group "Formats" --key "LC_TELEPHONE" "it_
 kwriteconfig6 --file plasma-localerc --group "Formats" --key "LC_TIME" "it_IT.UTF-8"
 kwriteconfig6 --file kdeglobals --group "Locale" --key "BinaryUnitDialect" 1
 
-# Discover updates
+# Discover
 kwriteconfig6 --file PlasmaDiscoverUpdates --group "Global" --key "RequiredNotificationInterval" -- -1
 kwriteconfig6 --file PlasmaDiscoverUpdates --group "Global" --key "UseUnattendedUpdates" false
+kwriteconfig6 --file discoverrc --group "FlatpakSources" --key "sources" "flathub"
 
 # Dolphin
 kwriteconfig6 --file dolphinrc --group "General" --key "ShowFullPath" true
@@ -101,8 +102,8 @@ kwriteconfig6 --file konsolerc --group "Desktop Entry" --key "DefaultProfile" "D
 kwriteconfig6 --file konsolerc --group "KonsoleWindow" --key "ShowWindowTitleOnTitleBar" true
 
 qdbus-qt6 org.kde.GtkConfig /GtkConfig setGtkTheme Breeze
-sleep 2
+sleep 5
 plasmashell --replace &
-sleep 2
+sleep 5
 
 logger "Plasma desktop configuration complete"

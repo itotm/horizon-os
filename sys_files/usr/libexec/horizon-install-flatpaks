@@ -3,45 +3,48 @@ set -oue pipefail
 
 logger "HorizonOS installing flatpaks"
 
+rm -rf "$HOME/.var/app"/*
+
 flatpak override --user --filesystem=xdg-config/gtk-3.0:ro
 flatpak override --user --filesystem=xdg-config/gtk-4.0:ro
 
 FLATPAK_PACKAGES=(
     org.gtk.Gtk3theme.Breeze
-    # com.calibre_ebook.calibre
-    # com.github.PintaProject.Pinta
-    # com.github.tchx84.Flatseal
-    # com.moonlight_stream.Moonlight
-    # com.ranfdev.DistroShelf
-    # com.usebottles.bottles
-    # fr.handbrake.ghb
-    # io.github.flattool.Warehouse
-    # io.github.plrigaux.sysd-manager
-    # io.github.slgobinath.SafeEyes
-    # io.github.zarestia_dev.rclone-manager
-    # io.qt.qdbusviewer
-    # net.cozic.joplin_desktop
-    # net.lutris.Lutris
-    # net.mediaarea.MediaInfo
-    # no.mifi.losslesscut
-    # org.audacityteam.Audacity
-    # org.avidemux.Avidemux
-    # org.bunkus.mkvtoolnix-gui
+    com.calibre_ebook.calibre
+    com.github.PintaProject.Pinta
+    com.github.tchx84.Flatseal
+    com.moonlight_stream.Moonlight
+    com.ranfdev.DistroShelf
+    com.usebottles.bottles
+    fr.handbrake.ghb
+    io.github.flattool.Warehouse
+    io.github.plrigaux.sysd-manager
+    io.github.slgobinath.SafeEyes
+    io.github.zarestia_dev.rclone-manager
+    io.qt.qdbusviewer
+    net.cozic.joplin_desktop
+    net.lutris.Lutris
+    net.mediaarea.MediaInfo
+    no.mifi.losslesscut
+    org.audacityteam.Audacity
+    org.avidemux.Avidemux
+    org.bunkus.mkvtoolnix-gui
     org.chromium.Chromium
-    # org.deskflow.deskflow
-    # org.fkoehler.KTailctl
-    # org.gnome.meld
-    # org.gimp.GIMP
-    # org.inkscape.Inkscape
-    # org.kde.kalzium
-    # org.kde.kgeography
-    # org.kde.kmahjongg
-    # org.kde.kmines
-    # org.kde.kpat
-    # org.kde.marble
-    # org.libreoffice.LibreOffice
+    org.deskflow.deskflow
+    org.fkoehler.KTailctl
+    org.gnome.meld
+    org.gimp.GIMP
+    org.inkscape.Inkscape
+    org.kde.kalzium
+    org.kde.kgeography
+    org.kde.kmahjongg
+    org.kde.kmines
+    org.kde.kommit
+    org.kde.kpat
+    org.kde.marble
+    org.libreoffice.LibreOffice
     org.mozilla.Thunderbird
-    # org.qbittorrent.qBittorrent
+    org.qbittorrent.qBittorrent
     page.codeberg.JakobDev.jdSystemMonitor
 )
 

@@ -12,17 +12,19 @@ if [ -f "$QUADLET_FILE" ]; then
 fi
 
 mkdir -p "$HOME/Sync"
+mkdir -p "$HOME/.config/syncthing"
 mkdir -p "$QUADLET_DIR"
 
-cat > "$QUADLET_FILE" <<'EOF'
+PUID=$(id -u)
+PGID=$(id -g)
+
+cat > "$QUADLET_FILE" <<EOF
 [Unit]
 Description=Syncthing
 After=network-online.target
 Wants=network-online.target
 
 [Service]
-ExecStartPre=-mkdir -p %h/.config/syncthing
-ExecStartPre=-mkdir -p %h/Sync
 Restart=on-failure
 TimeoutStartSec=900
 
@@ -31,8 +33,8 @@ ContainerName=syncthing
 Image=lscr.io/linuxserver/syncthing:latest
 AutoUpdate=registry
 
-Environment=PUID=1000
-Environment=PGID=1000
+Environment=PUID=$PUID
+Environment=PGID=$PGID
 Environment=UMASK=022
 Environment=TZ=Europe/Rome
 
@@ -52,17 +54,3 @@ WantedBy=default.target
 EOF
 
 systemctl --user daemon-reload
-
-DESKTOP_FILE="$HOME/.local/share/applications/syncthing-webui.desktop"
-mkdir -p "$HOME/.local/share/applications"
-cat > "$DESKTOP_FILE" <<EOF
-[Desktop Entry]
-Type=Application
-Name=Syncthing Web UI
-Comment=Open Syncthing Web Interface
-Exec=xdg-open http://localhost:8384
-Icon=applications-internet
-Icon=folder-sync
-Categories=Network;
-Terminal=false
-EOF

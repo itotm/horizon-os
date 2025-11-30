@@ -16,6 +16,7 @@ A custom image based on Fedora Kinoite 43 and built with Universal Blue template
 - Syncthing as Quadlet
 - optional tools: QEmu, dotnet, VSCode
 - [my](https://github.com/itotm/plasma-colors) custom colors and icons
+- Italian locales and dictionary
 - image built daily, system scheduled to update weekly
 - designed to be modular (fork the repo to try!)
 
