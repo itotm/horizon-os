@@ -3,8 +3,6 @@ set -oue pipefail
 
 logger "HorizonOS installing flatpaks"
 
-rm -rf "$HOME/.var/app"/*
-
 flatpak override --user --filesystem=xdg-config/gtk-3.0:ro
 flatpak override --user --filesystem=xdg-config/gtk-4.0:ro
 

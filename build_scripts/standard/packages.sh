@@ -15,7 +15,6 @@ INSTALL_PACKAGES=(
     duf
     fastfetch
     fd
-    fontawesome-fonts-all
     fzf
     htop
     hunspell-it

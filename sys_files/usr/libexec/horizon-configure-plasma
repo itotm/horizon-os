@@ -25,7 +25,7 @@ kwriteconfig6 --file kwinrc --group "Plugins" --key "diminactiveEnabled" true
 kwriteconfig6 --file kdeglobals --group "Sounds" --key "Enable" false
 
 # Fonts
-kwriteconfig6 --file kdeglobals --group "General" --key "fixed" "Cascadia Mono,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
+kwriteconfig6 --file kdeglobals --group "General" --key "fixed" "Cascadia Code NF,11,-1,5,316,0,0,0,0,0,0,0,0,0,0,1,SemiLight"
 kwriteconfig6 --file kdeglobals --group "General" --key "font" "Adwaita Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
 kwriteconfig6 --file kdeglobals --group "General" --key "menuFont" "Adwaita Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
 kwriteconfig6 --file kdeglobals --group "General" --key "smallestReadableFont" "Adwaita Sans,9,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
@@ -84,6 +84,7 @@ kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containmen
 
 # Konsole
 kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "Appearance" --key "ColorScheme" "BreezeBlue"
+kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "Appearance" --key "BoldIntense" false
 kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "General" --key "Name" "Default"
 kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "General" --key "Parent" "FALLBACK/"
 kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "General" --key "SemanticInputClick" true
