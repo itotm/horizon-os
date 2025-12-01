@@ -9,9 +9,8 @@ if ! grep -q "# HorizonOS aliases and shell enhancements" ~/.bashrc; then
         echo "# HorizonOS aliases and shell enhancements"
         echo "bind 'set completion-ignore-case on'"
         echo "alias ls='lsd'"
+        echo "alias lt='lsd --tree'"
         echo "alias du='dust'"
-        echo "alias ps='procs'"
-        echo "alias grep='rg'"
         echo "alias tldr='tldr --color'"
         echo "eval \"\$(fzf --bash)\""
     } | tee -a ~/.bashrc

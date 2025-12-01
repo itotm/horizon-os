@@ -10,11 +10,12 @@ dnf5 -y remove "${REMOVE_PACKAGES[@]}"
 INSTALL_PACKAGES=(
     bat
     btop
-    cascadia-mono-fonts
+    cascadia-fonts-all
     du-dust
     duf
     fastfetch
     fd
+    fontawesome-fonts-all
     fzf
     htop
     hunspell-it
