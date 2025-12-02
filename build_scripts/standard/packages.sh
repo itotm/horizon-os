@@ -29,6 +29,7 @@ INSTALL_PACKAGES=(
     rclone
     rclone-browser
     ripgrep
+    sddm-conf
     tldr
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
