@@ -169,7 +169,7 @@ jobs:
             ENABLE_COMMON=${{ github.event.inputs.enable_common || true }}
             ENABLE_STANDARD=${{ github.event.inputs.enable_standard || true }}
             ENABLE_EXTENDED=${{ github.event.inputs.enable_extended || false }}
-            ENABLE_VIRTTOOLS=${{ github.event.inputs.enable_devtools || true }}
+            ENABLE_VIRTTOOLS=${{ github.event.inputs.enable_virttools || true }}
             ENABLE_DEVTOOLS=${{ github.event.inputs.enable_devtools || false }}
             ENABLE_EXPERIMENTAL=${{ github.event.inputs.enable_experimental || false }}
             ENABLE_TESTING=${{ github.event.inputs.enable_testing || false }}
