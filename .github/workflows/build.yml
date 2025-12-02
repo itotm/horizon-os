@@ -102,7 +102,7 @@ jobs:
         continue-on-error: true
         with:
           target-dir: /var/lib/containers
-          mount-opts: compress-force=zstd:3
+          mount-opts: compress-force=zstd:1
           loopback-free: 0.9
 
       - name: Get current date and version
@@ -114,10 +114,10 @@ jobs:
           # https://linux.die.net/man/1/date
           echo "date=$(date -u +%Y\-%m\-%d\T%H\:%M\:%S\Z)" >> $GITHUB_OUTPUT
           
-          # Generate version in format vAAAAMMGG.build
+          # Generate version in format AAAAMMGG.build
           BUILD_DATE=$(date -u +%Y%m%d)
           BUILD_NUMBER=${{ github.run_number }}
-          VERSION="v${BUILD_DATE}.${BUILD_NUMBER}"
+          VERSION="${BUILD_DATE}.${BUILD_NUMBER}"
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
       # Image metadata for https://artifacthub.io/ - This is optional but is highly recommended so we all can get a index of all the custom images
