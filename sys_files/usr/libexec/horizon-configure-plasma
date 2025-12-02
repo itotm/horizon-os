@@ -17,6 +17,7 @@ kwriteconfig6 --file kdeglobals --group "Icons" --key "Theme" "ElevenTwilight"
 
 # KDE
 kwriteconfig6 --file kdeglobals --group "KDE" --key "AnimationDurationFactor" 0.5
+kwriteconfig6 --file kdeglobals --group "KDE" --key "ShowIconsOnPushButtons" false
 
 # KWin
 kwriteconfig6 --file kwinrc --group "Plugins" --key "diminactiveEnabled" true
