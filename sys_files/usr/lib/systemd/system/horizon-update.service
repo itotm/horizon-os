@@ -10,6 +10,3 @@ StandardOutput=journal
 StandardError=journal
 Nice=19
 IOSchedulingClass=idle
-
-[Install]
-WantedBy=multi-user.target
