@@ -7,6 +7,7 @@ VIRT_PACKAGES=(
     libvirt
     qemu-kvm
     virt-manager
+    virt-viewer
 )
 dnf5 -y install "${VIRT_PACKAGES[@]}"
 
