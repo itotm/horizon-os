@@ -25,7 +25,7 @@ INSTALL_PACKAGES=(
     lsd
     mc
     ncdu
-    policycoreutils
+    policycoreutils-gui
     procs
     rclone
     rclone-browser
