@@ -21,6 +21,10 @@ sleep 1
 systemctl enable sshd
 systemctl enable podman.socket
 
+cp -r /usr/share/sddm/themes/breeze /usr/share/sddm/themes/horizon
+sed -i 's/fontSize=10/fontSize=11/' /usr/share/sddm/themes/horizon/theme.conf
+sed -i 's|^background=.*|background=/usr/share/wallpapers/DarkestHour/contents/images/1920x1080.jpg|' /usr/share/sddm/themes/horizon/theme.conf
+
 cp -r /ctx/sys_files/* /
 systemctl enable horizon-setup-system.service
 systemctl enable horizon-update.timer

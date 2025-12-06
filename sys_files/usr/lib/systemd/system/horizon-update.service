@@ -1,5 +1,5 @@
 [Unit]
-Description=Automatic system update (bootc, flatpak, podman)
+Description=Automatic system update
 After=network-online.target
 Wants=network-online.target
 
@@ -10,3 +10,4 @@ StandardOutput=journal
 StandardError=journal
 Nice=19
 IOSchedulingClass=idle
+TimeoutSec=1200
