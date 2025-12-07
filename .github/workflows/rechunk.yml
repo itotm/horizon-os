@@ -1,4 +1,4 @@
-name: Rechunk Latest Image
+name: Rechunk latest image
 
 on:
   workflow_dispatch:
@@ -16,107 +16,91 @@ on:
       target_tag:
         description: 'Target tag for rechunked image'
         required: false
-        default: 'latest-rechunk'
+        default: 'latest-rechunked'
         type: string
 
 env:
-  IMAGE_NAME: "${{ github.event.repository.name }}"
-  IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
+  IMAGE_NAME: ${{ github.event.repository.name }}
+  IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
+  SIGNING_SECRET_NAME: SIGNING_SECRET
+  COSIGN_PASSWORD_NAME: COSIGN_PASSWORD
 
 jobs:
   rechunk:
-    name: Rechunk image
     runs-on: ubuntu-24.04
-    
     permissions:
       contents: read
       packages: write
       id-token: write
-    
+
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
-      
-      - name: Setup container storage
-        uses: ublue-os/container-storage-action@911baca08baf30c8654933e9e9723cb399892140
-        with:
-          target-dir: /var/lib/containers
-          mount-opts: compress-force=zstd:1
-          loopback-free: 0.9
-      
-      - name: Login to GHCR
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.IMAGE_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Pull source image
+
+      - name: Pull Source Image
+        id: pull_source
         run: |
-          SOURCE_IMAGE="${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.source_tag || 'latest' }}"
-          echo "Pulling $SOURCE_IMAGE"
-          podman pull $SOURCE_IMAGE
-          podman tag $SOURCE_IMAGE ${{ env.IMAGE_NAME }}:source
-      
-      - name: Prepare metadata
-        id: metadata
-        run: |
-          DATE=$(date -u +%Y%m%d)
-          TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-          TARGET_TAG="${{ github.event.inputs.target_tag || 'latest-rechunk' }}"
+          podman pull ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.source_tag }}
           
-          echo "date=$DATE" >> $GITHUB_OUTPUT
-          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
-          echo "target_tag=$TARGET_TAG" >> $GITHUB_OUTPUT
-          echo "date_tag=rechunk-${DATE}" >> $GITHUB_OUTPUT
-      
+          echo "LOCAL_REF=docker-daemon:${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.source_tag }}" >> $GITHUB_ENV
+          
+          echo "PREV_REF=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.target_tag }}" >> $GITHUB_ENV
+
       - name: Run Rechunker
-        id: rechunk
         uses: hhd-dev/rechunk@v1.2.4
+        id: rechunk
         with:
-          rechunk: 'ghcr.io/hhd-dev/rechunk:v1.2.4'
-          ref: "${{ env.IMAGE_NAME }}:source"
-          prev-ref: "${{ github.event.inputs.fresh_rechunk == 'true' && '' || format('docker://{0}/{1}:{2}', env.IMAGE_REGISTRY, env.IMAGE_NAME, github.event.inputs.target_tag || 'latest-rechunk') }}"
-          skip_compression: true
-          labels: |
-            org.opencontainers.image.title=HorizonOS (Rechunked)
-            org.opencontainers.image.description=Rechunked version of ${{ env.IMAGE_NAME }}
-            org.opencontainers.image.source=https://github.com/${{ github.repository }}
-            org.opencontainers.image.version=rechunk-${{ steps.metadata.outputs.timestamp }}
-            org.opencontainers.image.revision=${{ github.sha }}
-            containers.bootc=1
-            io.artifacthub.package.keywords=bootc,fedora,kinoite,atomic,rechunked
-      
-      - name: Load and retag rechunked image
+          ref: ${{ env.LOCAL_REF }}
+          prev-ref: ${{ env.PREV_REF }}
+          version: ${{ github.event.inputs.target_tag }}
+          clear-plan: ${{ github.event.inputs.fresh_rechunk }}
+          max-layers: 25 
+
+      - name: Tag Rechunked Image
+        id: tag_image
         run: |
-          IMAGE=$(podman pull ${{ steps.rechunk.outputs.ref }})
-          sudo rm -rf ${{ steps.rechunk.outputs.output }}
-          
-          TARGET_TAG="${{ steps.metadata.outputs.target_tag }}"
-          DATE_TAG="${{ steps.metadata.outputs.date_tag }}"
-          
-          podman tag $IMAGE ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:$TARGET_TAG
-          podman tag $IMAGE ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:$DATE_TAG
-      
-      - name: Push rechunked image
-        run: |
-          TARGET_TAG="${{ steps.metadata.outputs.target_tag }}"
-          DATE_TAG="${{ steps.metadata.outputs.date_tag }}"
-          
-          podman push ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:$TARGET_TAG
-          podman push ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:$DATE_TAG
-      
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
-      
-      - name: Sign rechunked image
-        run: |
-          TARGET_TAG="${{ steps.metadata.outputs.target_tag }}"
-          DATE_TAG="${{ steps.metadata.outputs.date_tag }}"
-          IMAGE_BASE="${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}"
-          
-          # Firma entrambi i tag
-          cosign sign -y --key env://COSIGN_PRIVATE_KEY $IMAGE_BASE:$TARGET_TAG
-          cosign sign -y --key env://COSIGN_PRIVATE_KEY $IMAGE_BASE:$DATE_TAG
+          # The rechunked image is available in the local storage of the runner.
+          # We need to tag it with the full registry path before pushing.
+          RECHUNKED_IMAGE_ID=$(podman images --format "{{.ID}}" ${{ steps.rechunk.outputs.ref }} | head -n 1)
+          FULL_TAG_IMAGE=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.target_tag }}
+          podman tag $RECHUNKED_IMAGE_ID $FULL_TAG_IMAGE
+          echo "FULL_TAG_IMAGE=$FULL_TAG_IMAGE" >> $GITHUB_ENV
+
+      - name: Push Rechunked Image to GHCR
+        uses: redhat-actions/push-to-registry@v2
+        id: push
         env:
-          COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
+          REGISTRY_USER: ${{ github.actor }}
+          REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          registry: ${{ env.IMAGE_REGISTRY }}
+          image: ${{ env.IMAGE_NAME }}
+          tags: ${{ github.event.inputs.target_tag }}
+          username: ${{ env.REGISTRY_USER }}
+          password: ${{ env.REGISTRY_PASSWORD }}
+          
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v4.0.0
+
+      - name: Sign container image
+        run: |
+          # Sign the image using the digest from the push step
+          IMAGE_TO_SIGN="${{ env.FULL_TAG_IMAGE }}@${{ steps.push.outputs.digest }}"
+          cosign sign -y --key env://COSIGN_PRIVATE_KEY $IMAGE_TO_SIGN
+        env:
+          COSIGN_EXPERIMENTAL: false
+          COSIGN_PRIVATE_KEY: ${{ secrets[env.SIGNING_SECRET_NAME] }}
+          COSIGN_PASSWORD: ${{ secrets[env.COSIGN_PASSWORD_NAME] }}
