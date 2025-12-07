@@ -4,6 +4,7 @@ set -oue pipefail
 REMOVE_PACKAGES=(
     kjournald
     plasma-discover-rpm-ostree
+    sddm-kcm
 )
 dnf5 -y remove "${REMOVE_PACKAGES[@]}"
 
