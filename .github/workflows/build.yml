@@ -218,6 +218,12 @@ jobs:
           version: ${{ env.DEFAULT_TAG }}-rechunked
           labels: ${{ steps.metadata.outputs.labels }}
 
+      - name: Load and tag rechunked image
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        run: |
+          IMAGE=$(podman pull ${{ steps.rechunk.outputs.ref }})
+          podman tag $IMAGE ${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}-rechunked
+
       - name: Push Rechunked Image To GHCR
         uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
