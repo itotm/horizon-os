@@ -58,7 +58,6 @@ jobs:
           prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.target_tag }}
           version: ${{ github.event.inputs.target_tag }}
           clear-plan: ${{ github.event.inputs.fresh_rechunk }}
-          max-layers: 25 
 
       - name: Tag Rechunked Image
         id: tag_image
