@@ -49,7 +49,12 @@ on:
         default: false
         type: boolean
       disable_repos:
-        description: "Disable repos"
+        description: "Disable Repos"
+        required: false
+        default: true
+        type: boolean
+      enable_rechunker:
+        description: "Enable Rechunker"
         required: false
         default: true
         type: boolean
@@ -175,13 +180,19 @@ jobs:
       # They also check if the runner is on the default branch so that things like the merge queue (if you enable it), are going to work
       - name: Run Rechunker
         id: rechunk
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && (github.event.inputs.enable_rechunker == null || github.event.inputs.enable_rechunker == true)
         uses: hhd-dev/rechunk@v1.2.4
         with:
           ref: 'raw-img'
           prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}
           version: ${{ steps.date.outputs.version }}
           labels: ${{ steps.metadata.outputs.labels }}
+
+      - name: Tag raw-img as current if Rechunker skipped
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && (github.event.inputs.enable_rechunker != null && github.event.inputs.enable_rechunker == false)
+        run: |
+          sudo buildah tag raw-img ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}
+        
 
       - name: Push To GHCR
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
