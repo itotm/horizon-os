@@ -3,7 +3,6 @@ set -oue pipefail
 
 logger "HorizonOS user post install"
 
-/usr/libexec/horizon-configure-autologin
 /usr/libexec/horizon-enable-syncthing
 /usr/libexec/horizon-configure-bash
 /usr/libexec/horizon-configure-plasma

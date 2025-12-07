@@ -3,7 +3,7 @@ set -oue pipefail
 
 logger "Configuring SDDM autologin"
 
-USER_NAME=$(logname)
+USER_NAME="$1"
 SDDM_CONF_DIR="/etc/sddm.conf.d"
 SDDM_CONF_FILE="$SDDM_CONF_DIR/autologin.conf"
 
