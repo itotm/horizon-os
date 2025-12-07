@@ -1,0 +1,19 @@
+#!/bin/bash
+set -oue pipefail
+
+logger "Configuring SDDM autologin"
+
+USER_NAME=$(logname)
+SDDM_CONF_DIR="/etc/sddm.conf.d"
+SDDM_CONF_FILE="$SDDM_CONF_DIR/autologin.conf"
+
+if [ ! -d "$SDDM_CONF_DIR" ]; then
+    mkdir -p "$SDDM_CONF_DIR"
+fi
+
+cat <<EOF > "$SDDM_CONF_FILE"
+[Autologin]
+User=$USER_NAME
+EOF
+
+logger "SDDM autologin configured for user $USER_NAME"
