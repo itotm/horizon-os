@@ -61,7 +61,6 @@ env:
   IMAGE_NAME: "${{ github.event.repository.name }}"
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
   DEFAULT_TAG: "latest"
-  RECHUNKED_TAG: "latest-rechunked"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
@@ -88,15 +87,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
 
-      # You only use this action if the container-storage-action proves to be unreliable, you don't need to enable both
-      # This is optional, but if you see that your builds are way too big for the runners, you can enable this by uncommenting the following lines:
-      # - name: Maximize build space
-      #   uses: ublue-os/remove-unwanted-software@695eb75bc387dbcd9685a8e72d23439d8686cba6
-      #   with:
-      #     remove-codeql: true
-
-      # Fallback to the remove-unwanted-software-action if github doesn't allocate enough space
-      # See: https://github.com/ublue-os/container-storage-action/pull/11
       - name: Mount BTRFS for podman storage
         id: container-storage-action
         uses: ublue-os/container-storage-action@911baca08baf30c8654933e9e9723cb399892140
@@ -156,32 +146,28 @@ jobs:
 
       - name: Build Image
         id: build_image
-        uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2
-        with:
-          containerfiles: |
-            ./Containerfile
-          image: ${{ env.IMAGE_NAME }}
-          tags: ${{ steps.metadata.outputs.tags }}
-          labels: ${{ steps.metadata.outputs.labels }}
-          build-args: |
-            FEDORA_VERSION=${{ github.event.inputs.fedora_version || '43' }}
-            BUILD_NUMBER=${{ github.run_number }}
-            IMAGE_VERSION=${{ steps.date.outputs.version }}
-            ENABLE_COMMON=${{ github.event.inputs.enable_common || true }}
-            ENABLE_STANDARD=${{ github.event.inputs.enable_standard || true }}
-            ENABLE_EXTENDED=${{ github.event.inputs.enable_extended || false }}
-            ENABLE_VIRTTOOLS=${{ github.event.inputs.enable_virttools || true }}
-            ENABLE_DEVTOOLS=${{ github.event.inputs.enable_devtools || false }}
-            ENABLE_EXPERIMENTAL=${{ github.event.inputs.enable_experimental || false }}
-            ENABLE_TESTING=${{ github.event.inputs.enable_testing || false }}
-            DISABLE_REPOS=${{ github.event.inputs.disable_repos || true }}
-          layers: false
-          oci: false
+        run: |
+          sudo buildah build \
+            --file ./Containerfile \
+            --tag raw-img \
+            --build-arg FEDORA_VERSION=${{ github.event.inputs.fedora_version || '43' }} \
+            --build-arg BUILD_NUMBER=${{ github.run_number }} \
+            --build-arg IMAGE_VERSION=${{ steps.date.outputs.version }} \
+            --build-arg ENABLE_COMMON=${{ github.event.inputs.enable_common || true }} \
+            --build-arg ENABLE_STANDARD=${{ github.event.inputs.enable_standard || true }} \
+            --build-arg ENABLE_EXTENDED=${{ github.event.inputs.enable_extended || false }} \
+            --build-arg ENABLE_VIRTTOOLS=${{ github.event.inputs.enable_virttools || true }} \
+            --build-arg ENABLE_DEVTOOLS=${{ github.event.inputs.enable_devtools || false }} \
+            --build-arg ENABLE_EXPERIMENTAL=${{ github.event.inputs.enable_experimental || false }} \
+            --build-arg ENABLE_TESTING=${{ github.event.inputs.enable_testing || false }} \
+            --build-arg DISABLE_REPOS=${{ github.event.inputs.disable_repos || true }} \
+            --label "${{ steps.metadata.outputs.labels }}" \
+            .
 
       - name: Log image size
         run: |
-          IMAGE_ID=$(buildah images --format "{{.ID}}" ${{ env.IMAGE_NAME }} | head -n 1)
-          IMAGE_SIZE=$(buildah images --format "{{.Size}}" ${{ env.IMAGE_NAME }} | head -n 1)
+          IMAGE_ID=$(sudo buildah images --format "{{.ID}}" raw-img | head -n 1)
+          IMAGE_SIZE=$(sudo buildah images --format "{{.Size}}" raw-img | head -n 1)
           echo "Built image ID: $IMAGE_ID"
           echo "Image size: $IMAGE_SIZE"
 
@@ -195,49 +181,24 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Push To GHCR
-        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-        id: push
-        env:
-          REGISTRY_USER: ${{ github.actor }}
-          REGISTRY_PASSWORD: ${{ github.token }}
-        with:
-          registry: ${{ env.IMAGE_REGISTRY }}
-          image: ${{ env.IMAGE_NAME }}
-          tags: ${{ steps.metadata.outputs.tags }}
-          username: ${{ env.REGISTRY_USER }}
-          password: ${{ env.REGISTRY_PASSWORD }}
-
       - name: Run Rechunker
         id: rechunk
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         uses: hhd-dev/rechunk@v1.2.4
         with:
-          ref: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}
-          prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.RECHUNKED_TAG }}
-          version: ${{ env.RECHUNKED_TAG }}
+          ref: 'raw-img'
+          prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}
+          version: ${{ steps.date.outputs.version }}
           labels: ${{ steps.metadata.outputs.labels }}
 
-      - name: Load and tag rechunked image
+      - name: Push To GHCR
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
-          IMAGE=$(podman pull ${{ steps.rechunk.outputs.ref }})
-          podman tag $IMAGE ${{ env.IMAGE_NAME }}:${{ env.RECHUNKED_TAG }}
-
-      - name: Push Rechunked Image To GHCR
-        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-        id: push_rechunked
-        env:
-          REGISTRY_USER: ${{ github.actor }}
-          REGISTRY_PASSWORD: ${{ github.token }}
-        with:
-          registry: ${{ env.IMAGE_REGISTRY }}
-          image: ${{ env.IMAGE_NAME }}
-          tags: ${{ env.RECHUNKED_TAG }}
-          username: ${{ env.REGISTRY_USER }}
-          password: ${{ env.REGISTRY_PASSWORD }}
+          echo "${{ secrets.GITHUB_TOKEN }}" | sudo podman login ghcr.io -u ${{ github.actor }} --password-stdin
+          
+          for tag in ${{ steps.metadata.outputs.tags }}; do
+            sudo skopeo copy ${{ steps.rechunk.outputs.ref }} docker://${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:$tag
+          done
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
@@ -247,10 +208,8 @@ jobs:
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
           IMAGE_FULL="${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}"
-          for tag in ${{ steps.metadata.outputs.tags }}; do
-            cosign sign -y --key env://COSIGN_PRIVATE_KEY $IMAGE_FULL:$tag
-          done
+          DIGEST=$(sudo skopeo inspect --format '{{.Digest}}' ${{ steps.rechunk.outputs.ref }})
+          cosign sign -y --key env://COSIGN_PRIVATE_KEY "${IMAGE_FULL}@${DIGEST}"
         env:
-          TAGS: ${{ steps.push.outputs.digest }}
           COSIGN_EXPERIMENTAL: false
           COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
