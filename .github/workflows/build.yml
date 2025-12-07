@@ -180,7 +180,7 @@ jobs:
       # They also check if the runner is on the default branch so that things like the merge queue (if you enable it), are going to work
       - name: Run Rechunker
         id: rechunk
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && (github.event.inputs.enable_rechunker == null || github.event.inputs.enable_rechunker == true)
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.enable_rechunker != 'false'
         uses: hhd-dev/rechunk@v1.2.4
         with:
           ref: 'raw-img'
@@ -189,18 +189,25 @@ jobs:
           labels: ${{ steps.metadata.outputs.labels }}
 
       - name: Tag raw-img as current if Rechunker skipped
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && (github.event.inputs.enable_rechunker != null && github.event.inputs.enable_rechunker == false)
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.enable_rechunker == 'false'
         run: |
           sudo buildah tag raw-img ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}
-        
+
+      - name: Set IMAGE_REF variable
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        run: |
+          if [ "${{ github.event.inputs.enable_rechunker }}" = "false" ]; then
+            echo "IMAGE_REF=containers-storage:${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}" >> $GITHUB_ENV
+          else
+            echo "IMAGE_REF=${{ steps.rechunk.outputs.ref }}" >> $GITHUB_ENV
+          fi
 
       - name: Push To GHCR
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | sudo podman login ghcr.io -u ${{ github.actor }} --password-stdin
-          
           for tag in ${{ steps.metadata.outputs.tags }}; do
-            sudo skopeo copy ${{ steps.rechunk.outputs.ref }} docker://${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:$tag
+            sudo skopeo copy ${{ env.IMAGE_REF }} docker://${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:$tag
           done
 
       - name: Install Cosign
@@ -211,7 +218,7 @@ jobs:
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
           IMAGE_FULL="${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}"
-          DIGEST=$(sudo skopeo inspect --format '{{.Digest}}' ${{ steps.rechunk.outputs.ref }})
+          DIGEST=$(sudo skopeo inspect --format '{{.Digest}}' ${{ env.IMAGE_REF }})
           cosign sign -y --key env://COSIGN_PRIVATE_KEY "${IMAGE_FULL}@${DIGEST}"
         env:
           COSIGN_EXPERIMENTAL: false
