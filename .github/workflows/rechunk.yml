@@ -55,7 +55,7 @@ jobs:
         run: |
           podman pull ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.source_tag }}
           
-          echo "LOCAL_REF=docker-daemon:${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.source_tag }}" >> $GITHUB_ENV
+          echo "LOCAL_REF=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.source_tag }}" >> $GITHUB_ENV
           
           echo "PREV_REF=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.target_tag }}" >> $GITHUB_ENV
 
