@@ -3,7 +3,9 @@ set -oue pipefail
 
 logger "HorizonOS system post install"
 
-/usr/libexec/horizon-configure-sddm
+systemctl enable horizon-update.timer
+
 /usr/libexec/horizon-configure-flatpak
+/usr/libexec/horizon-configure-sddm
 
 logger "HorizonOS system post install complete"

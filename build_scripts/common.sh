@@ -27,7 +27,6 @@ sed -i 's|^background=.*|background=/usr/share/wallpapers/DarkestHour/contents/i
 
 cp -r /ctx/sys_files/* /
 systemctl enable horizon-setup-system.service
-systemctl enable horizon-update.timer
 
 cat > /etc/xdg/kcm-about-distrorc <<EOF
 [General]

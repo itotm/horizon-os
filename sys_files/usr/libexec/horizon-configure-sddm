@@ -15,13 +15,12 @@ CursorTheme=breeze-cursors-light-plasma5
 EOF
 
 USER_NAME=$(awk -F: '$3 >= 1000 && $1 !~ /^systemd-/ {print $1; exit}' /etc/passwd)
-SDDM_AUTOLOGIN_FILE="$SDDM_CONF_DIR/autologin.conf"
 
 if [ ! -d "$SDDM_CONF_DIR" ]; then
     mkdir -p "$SDDM_CONF_DIR"
 fi
 
-cat <<EOF > "$SDDM_AUTOLOGIN_FILE"
+cat <<EOF > "$SDDM_CONF_DIR/autologin.conf"
 [Autologin]
 User=$USER_NAME
 EOF
