@@ -3,9 +3,7 @@ set -oue pipefail
 
 logger "HorizonOS system post install"
 
-USER_NAME=$(awk -F: '$3 >= 1000 && $1 !~ /^systemd-/ {print $1; exit}' /etc/passwd)
-/usr/libexec/horizon-configure-autologin "$USER_NAME"
-
+/usr/libexec/horizon-configure-sddm
 /usr/libexec/horizon-configure-flatpak
 
 logger "HorizonOS system post install complete"
