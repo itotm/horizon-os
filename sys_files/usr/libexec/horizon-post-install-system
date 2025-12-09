@@ -3,8 +3,6 @@ set -oue pipefail
 
 logger "HorizonOS system post install"
 
-systemctl enable horizon-update.timer
-
 /usr/libexec/horizon-configure-services
 /usr/libexec/horizon-configure-flatpak
 /usr/libexec/horizon-configure-sddm
