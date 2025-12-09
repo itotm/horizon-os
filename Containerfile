@@ -5,7 +5,6 @@ ARG ENABLE_EXTENDED=false
 ARG ENABLE_VIRTTOOLS=true
 ARG ENABLE_DEVTOOLS=false
 ARG ENABLE_EXPERIMENTAL=false
-ARG ENABLE_TESTING=false
 ARG DISABLE_REPOS=true
 
 FROM alpine AS ctx
@@ -29,7 +28,6 @@ ARG ENABLE_EXTENDED
 ARG ENABLE_VIRTTOOLS
 ARG ENABLE_DEVTOOLS
 ARG ENABLE_EXPERIMENTAL
-ARG ENABLE_TESTING
 ARG DISABLE_REPOS
 
 LABEL org.opencontainers.image.title="HorizonOS"
@@ -43,14 +41,14 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_STANDARD /ctx/standard/kde-apps.sh
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh ENABLE_STANDARD /ctx/standard/sunshine.sh
-RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_STANDARD /ctx/standard/cockpit.sh
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_STANDARD /ctx/standard/tailscale.sh
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_STANDARD /ctx/standard/vlc.sh
 
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
+    /ctx/runner.sh ENABLE_EXTENDED /ctx/extended/sunshine.sh
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_EXTENDED /ctx/extended/thunderbird.sh
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
@@ -59,7 +57,7 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/
     /ctx/runner.sh ENABLE_EXTENDED /ctx/extended/libreoffice.sh
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh ENABLE_VIRTTOOLS /ctx/virt.sh
+    /ctx/runner.sh ENABLE_VIRTTOOLS /ctx/virttools/virt.sh
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_DEVTOOLS /ctx/devtools/dotnet.sh
@@ -69,7 +67,7 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_EXPERIMENTAL /ctx/experimental/nomachine.sh
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh ENABLE_TESTING /ctx/experimental/wine.sh
+    /ctx/runner.sh ENABLE_EXPERIMENTAL /ctx/experimental/wine.sh
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_COMMON /ctx/common.sh

@@ -43,11 +43,6 @@ on:
         required: false
         default: false
         type: boolean
-      enable_testing:
-        description: "Testing"
-        required: false
-        default: false
-        type: boolean
       disable_repos:
         description: "Disable Repos"
         required: false
@@ -164,7 +159,6 @@ jobs:
             --build-arg ENABLE_VIRTTOOLS=${{ github.event.inputs.enable_virttools || true }} \
             --build-arg ENABLE_DEVTOOLS=${{ github.event.inputs.enable_devtools || false }} \
             --build-arg ENABLE_EXPERIMENTAL=${{ github.event.inputs.enable_experimental || false }} \
-            --build-arg ENABLE_TESTING=${{ github.event.inputs.enable_testing || false }} \
             --build-arg DISABLE_REPOS=${{ github.event.inputs.disable_repos || true }} \
             --label "${{ steps.metadata.outputs.labels }}" \
             .
