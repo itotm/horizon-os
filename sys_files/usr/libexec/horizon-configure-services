@@ -1,0 +1,17 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+logger "Services configuration"
+
+SERVICES=(
+    "cockpit.socket"
+    "podman.socket"
+    "sshd"
+    "tailscaled"
+)
+
+for service in "${SERVICES[@]}"; do
+    systemctl enable "${service}" 2>/dev/null || true
+done
+
+logger "Services configuration completed"

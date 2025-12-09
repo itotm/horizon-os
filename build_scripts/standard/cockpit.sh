@@ -8,6 +8,4 @@ COCKPIT_PACKAGES=(
 )
 dnf5 -y install "${COCKPIT_PACKAGES[@]}"
 
-systemctl enable cockpit.socket
-
 ./ctx/cleanup.sh

@@ -5,6 +5,10 @@ logger "Configuring SDDM"
 
 SDDM_CONF_DIR="/etc/sddm.conf.d"
 
+if [ ! -d "$SDDM_CONF_DIR" ]; then
+    mkdir -p "$SDDM_CONF_DIR"
+fi
+
 cat <<EOF > "$SDDM_CONF_DIR/horizon.conf"
 [General]
 Numlock=on
@@ -16,14 +20,9 @@ EOF
 
 USER_NAME=$(awk -F: '$3 >= 1000 && $1 !~ /^systemd-/ {print $1; exit}' /etc/passwd)
 
-if [ ! -d "$SDDM_CONF_DIR" ]; then
-    mkdir -p "$SDDM_CONF_DIR"
-fi
-
 cat <<EOF > "$SDDM_CONF_DIR/autologin.conf"
 [Autologin]
 User=$USER_NAME
 EOF
-
 
 logger "SDDM configured"
