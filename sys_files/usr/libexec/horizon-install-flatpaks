@@ -15,6 +15,7 @@ FLATPAK_PACKAGES=(
     com.ranfdev.DistroShelf
     com.usebottles.bottles
     fr.handbrake.ghb
+    hu.irl.cameractrls
     io.github.flattool.Warehouse
     io.github.plrigaux.sysd-manager
     io.github.slgobinath.SafeEyes
