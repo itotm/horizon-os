@@ -9,7 +9,7 @@ curl -LO "$URL"
 tar xzf "$ARCHIVE"
 cd "$DIR"
 
-./install.sh
+sudo rpm --nosignature --nodigest -i ./*.rpm
 cd ..
 
 rm -rf "$ARCHIVE" "$DIR"
