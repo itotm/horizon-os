@@ -2,6 +2,7 @@
 set -oue pipefail
 
 KDE_PACKAGES=(
+    kamoso
     kate
     kdiff3
     kid3
