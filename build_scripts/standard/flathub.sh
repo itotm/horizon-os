@@ -1,8 +1,6 @@
 #!/bin/bash
 set -oue pipefail
 
-logger "Flatpak configuration"
-
 flatpak list --app --columns=application | while read -r app; do
     if [ -n "$app" ]; then
         flatpak uninstall -y --delete-data "$app" 2>/dev/null || true
@@ -31,5 +29,3 @@ flatpak uninstall -y --unused 2>/dev/null || true
 
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 flatpak remote-modify --enable flathub
-
-logger "Flatpak configuration completed"
