@@ -8,6 +8,8 @@ REMOVE_PACKAGES=(
 )
 dnf5 -y remove "${REMOVE_PACKAGES[@]}"
 
+dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=1
+
 INSTALL_PACKAGES=(
     bat
     btop
@@ -21,21 +23,21 @@ INSTALL_PACKAGES=(
     hunspell-it
     hwinfo
     hyperfine
-    iscan-firmware
     lm_sensors
     lsd
     mc
+    mozilla-openh264
     ncdu
+    openh264
     policycoreutils-gui
     procs
     rclone
     rclone-browser
     ripgrep
+    sane-backends
     tldr
+    xsane
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
-
-dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=1
-dnf5 -y install openh264 mozilla-openh264
 
 ./ctx/cleanup.sh
