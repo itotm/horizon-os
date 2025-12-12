@@ -10,8 +10,7 @@ tar xzf "$ARCHIVE"
 
 find "$DIR" -type f -name '*.rpm' > /tmp/epson-v200-rpms.txt
 
-sudo dnf install -y --nogpgcheck --nosignature --nodigest $(cat /tmp/epson-v200-rpms.txt)
+dnf5 -y install --nogpgcheck $(cat /tmp/epson-v200-rpms.txt)
 
 rm -f /tmp/epson-v200-rpms.txt
-
 rm -rf "$ARCHIVE" "$DIR"
