@@ -1,13 +1,10 @@
 [Unit]
 Description=Timer for automatic system update
-Requires=horizon-update.service
 
 [Timer]
 OnCalendar=Fri 06:00
 Persistent=true
 RandomizedDelaySec=15min
-AccuracySec=5min
-WakeSystem=false
 
 [Install]
 WantedBy=timers.target
