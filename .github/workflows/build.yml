@@ -58,6 +58,11 @@ on:
         required: false
         default: false
         type: boolean
+      tag_as_dev:
+        description: "Tag as 'dev'"
+        required: false
+        default: false
+        type: boolean
 
 env:
   IMAGE_DESC: "HorizonOS - Customized Fedora Kinoite Image"
@@ -124,12 +129,14 @@ jobs:
         with:
           # This generates all the tags for your image, you can add custom tags here too!
           # Default tags are "$DEFAULT_TAG" and version tag in format vAAAAMMGG.build.
+          # When tag_as_dev is true, only 'dev' tag is used.
           tags: |
-            type=raw,value=${{ env.DEFAULT_TAG }}
-            type=raw,value=${{ steps.date.outputs.version }}
-            type=raw,value=f${{ inputs.fedora_version || '43' }}
-            type=sha,enable=${{ github.event_name == 'pull_request' }}
-            type=ref,event=pr
+            type=raw,value=dev,enable=${{ github.event.inputs.tag_as_dev == 'true' }}
+            type=raw,value=${{ env.DEFAULT_TAG }},enable=${{ github.event.inputs.tag_as_dev != 'true' }}
+            type=raw,value=${{ steps.date.outputs.version }},enable=${{ github.event.inputs.tag_as_dev != 'true' }}
+            type=raw,value=f${{ inputs.fedora_version || '43' }},enable=${{ github.event.inputs.tag_as_dev != 'true' }}
+            type=sha,enable=${{ github.event_name == 'pull_request' && github.event.inputs.tag_as_dev != 'true' }}
+            type=ref,event=pr,enable=${{ github.event.inputs.tag_as_dev != 'true' }}
           labels: |
             io.artifacthub.package.readme-url=https://raw.githubusercontent.com/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}/${{ github.sha }}/README.md
             org.opencontainers.image.created=${{ steps.date.outputs.date }}
@@ -183,7 +190,7 @@ jobs:
         uses: hhd-dev/rechunk@v1.2.4
         with:
           ref: 'raw-img'
-          prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}
+          prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.tag_as_dev == 'true' && 'dev' || env.DEFAULT_TAG }}
           version: ${{ steps.date.outputs.version }}
           labels: ${{ steps.metadata.outputs.labels }}
           clear-plan: ${{ github.event.inputs.clear_plan || false }}
@@ -191,13 +198,15 @@ jobs:
       - name: Tag raw-img as current if Rechunker skipped
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.enable_rechunker == 'false'
         run: |
-          sudo buildah tag raw-img ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}
+          TAG=${{ github.event.inputs.tag_as_dev == 'true' && 'dev' || env.DEFAULT_TAG }}
+          sudo buildah tag raw-img ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG}
 
       - name: Set IMAGE_REF variable
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
+          TAG=${{ github.event.inputs.tag_as_dev == 'true' && 'dev' || env.DEFAULT_TAG }}
           if [ "${{ github.event.inputs.enable_rechunker }}" = "false" ]; then
-            echo "IMAGE_REF=containers-storage:${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}" >> $GITHUB_ENV
+            echo "IMAGE_REF=containers-storage:${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG}" >> $GITHUB_ENV
           else
             echo "IMAGE_REF=${{ steps.rechunk.outputs.ref }}" >> $GITHUB_ENV
           fi
