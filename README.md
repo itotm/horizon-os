@@ -2,17 +2,15 @@
 
 ![HorizonOS](./logo.png)
 
-A custom image based on Fedora Kinoite 43 and built with Universal Blue template.
-
-**WARNING:** not (yet) ready, builds are unstable and experimental. Use at your own risk.
+A custom bootc image based on Fedora Kinoite 43 and built with Universal Blue template.
 
 ## Features
 
 - a bunch of [cli tools](./build_scripts/standard/packages.sh)
 - media codecs from [RPM Fusion](https://rpmfusion.org/)
 - selected [KDE apps](./build_scripts/standard/kde-apps.sh)
-- Flathub with selected [packages](./sys_files/usr/bin/horizon-install-flatpaks.sh)
-- Cockpit, Tailscale, Sunshine preinstalled
+- Flathub with selected [packages](./sys_files/usr/libexec/horizon-install-flatpaks)
+- Cockpit and Tailscale preinstalled
 - Syncthing as Quadlet
 - optional tools: QEmu, dotnet, VSCode
 - [my](https://github.com/itotm/plasma-colors) custom colors and icons
@@ -45,4 +43,4 @@ Some scripts written and/or modified by Claude and Copilot.
 
 ---
 
-[![Build container image](https://github.com/itotm/horizon-os/actions/workflows/build.yml/badge.svg)](https://github.com/itotm/horizon-os/actions/workflows/build.yml)
+[![Latest build](https://github.com/itotm/horizon-os/actions/workflows/build.yml/badge.svg)](https://github.com/itotm/horizon-os/actions/workflows/build.yml)
