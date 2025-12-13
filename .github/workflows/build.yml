@@ -3,7 +3,7 @@ name: Build container image
 on:
   schedule:
     # - cron: '0 2 * * *' # Daily at 02:00 UTC
-    - cron: '40 18 * * *' # Daily at 02:00 UTC
+    - cron: '45 18 * * *'
   workflow_dispatch:
     inputs:
       fedora_version:
