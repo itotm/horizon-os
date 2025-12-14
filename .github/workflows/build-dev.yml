@@ -1,0 +1,152 @@
+---
+name: Build DEV container image
+on:
+  workflow_dispatch:
+    inputs:
+      fedora_version:
+        description: "Fedora base image"
+        required: false
+        default: '43'
+        type: choice
+        options:
+          - '42'
+          - '43'
+      enable_common:
+        description: "Common"
+        required: false
+        default: true
+        type: boolean
+      enable_standard:
+        description: "Standard"
+        required: false
+        default: true
+        type: boolean
+      enable_extended:
+        description: "Extended"
+        required: false
+        default: false
+        type: boolean
+      enable_virttools:
+        description: "Virtualization Tools"
+        required: false
+        default: true
+        type: boolean
+      enable_devtools:
+        description: "Developer Tools"
+        required: false
+        default: false
+        type: boolean
+      enable_experimental:
+        description: "Experimental"
+        required: false
+        default: false
+        type: boolean
+      disable_repos:
+        description: "Disable Repos"
+        required: false
+        default: true
+        type: boolean
+
+env:
+  IMAGE_DESC: "HorizonOS - Customized Fedora Kinoite Image"
+  IMAGE_KEYWORDS: "bootc,fedora,kinoite,atomic"
+  IMAGE_LOGO_URL: "https://horizon-os.itotm.org/logo.png"
+  IMAGE_NAME: "${{ github.event.repository.name }}"
+  IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
+  DEFAULT_TAG: "dev"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  build_push:
+    name: Build and push image
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Prepare environment
+        run: |
+          # Lowercase the image uri
+          echo "IMAGE_REGISTRY=${IMAGE_REGISTRY,,}" >> ${GITHUB_ENV}
+          echo "IMAGE_NAME=${IMAGE_NAME,,}" >> ${GITHUB_ENV}
+
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      - name: Mount BTRFS for podman storage
+        id: container-storage-action
+        uses: ublue-os/container-storage-action@911baca08baf30c8654933e9e9723cb399892140
+        continue-on-error: true
+        with:
+          target-dir: /var/lib/containers
+          mount-opts: compress-force=zstd:1
+          loopback-free: 0.9
+
+      - name: Get current date and version
+        id: date
+        run: |
+          echo "date=$(date -u +%Y\-%m\-%d\T%H\:%M\:%S\Z)" >> $GITHUB_OUTPUT
+          BUILD_DATE=$(date -u +%Y%m%d)
+          BUILD_NUMBER=${{ github.run_number }}
+          VERSION="dev.${BUILD_DATE}.${BUILD_NUMBER}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Image Metadata
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
+        id: metadata
+        with:
+          tags: |
+            type=raw,value=dev
+          labels: |
+            org.opencontainers.image.created=${{ steps.date.outputs.date }}
+            org.opencontainers.image.description=${{ env.IMAGE_DESC }}
+            org.opencontainers.image.documentation=https://raw.githubusercontent.com/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}/${{ github.sha }}/README.md
+            org.opencontainers.image.source=https://github.com/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}/blob/${{ github.sha }}/Containerfile
+            org.opencontainers.image.title=${{ env.IMAGE_NAME }}
+            org.opencontainers.image.url=https://github.com/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}/tree/${{ github.sha }}
+            org.opencontainers.image.vendor=${{ github.repository_owner }}
+            org.opencontainers.image.version=${{ steps.date.outputs.version }}
+            containers.bootc=1
+          sep-tags: " "
+          sep-annotations: " "
+
+      - name: Build Image
+        id: build_image
+        run: |
+          sudo buildah build \
+            --file ./Containerfile \
+            --tag raw-img \
+            --build-arg FEDORA_VERSION=${{ github.event.inputs.fedora_version || '43' }} \
+            --build-arg BUILD_NUMBER=${{ github.run_number }} \
+            --build-arg IMAGE_VERSION=${{ steps.date.outputs.version }} \
+            --build-arg ENABLE_COMMON=${{ github.event.inputs.enable_common || true }} \
+            --build-arg ENABLE_STANDARD=${{ github.event.inputs.enable_standard || true }} \
+            --build-arg ENABLE_EXTENDED=${{ github.event.inputs.enable_extended || false }} \
+            --build-arg ENABLE_VIRTTOOLS=${{ github.event.inputs.enable_virttools || true }} \
+            --build-arg ENABLE_DEVTOOLS=${{ github.event.inputs.enable_devtools || false }} \
+            --build-arg ENABLE_EXPERIMENTAL=${{ github.event.inputs.enable_experimental || false }} \
+            --build-arg DISABLE_REPOS=${{ github.event.inputs.disable_repos || true }} \
+            --label "${{ steps.metadata.outputs.labels }}" \
+            .
+
+      - name: Log image size
+        run: |
+          IMAGE_ID=$(sudo buildah images --format "{{.ID}}" raw-img | head -n 1)
+          IMAGE_SIZE=$(sudo buildah images --format "{{.Size}}" raw-img | head -n 1)
+          echo "Built image ID: $IMAGE_ID"
+          echo "Image size: $IMAGE_SIZE"
+
+      - name: Tag raw-img as dev
+        run: |
+          sudo buildah tag raw-img ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:dev
+
+      - name: Push To GHCR
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | sudo podman login ghcr.io -u ${{ github.actor }} --password-stdin
+          sudo skopeo copy containers-storage:${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:dev docker://${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:dev
