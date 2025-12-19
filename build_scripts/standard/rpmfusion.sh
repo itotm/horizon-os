@@ -11,6 +11,11 @@ dnf5 -y install \
 
 dnf5 -y swap ffmpeg-free ffmpeg --allowerasing
 
+dnf5 -y update @multimedia --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin
+
+dnf5 -y swap mesa-va-drivers mesa-va-drivers-freeworld
+dnf5 -y swap mesa-vdpau-drivers mesa-vdpau-drivers-freeworld
+
 RPMFUSION_PACKAGES=(
     intel-media-driver
     libdvdcss
