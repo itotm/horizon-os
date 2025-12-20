@@ -22,6 +22,10 @@ RPMFUSION_PACKAGES=(
     gstreamer1-plugins-bad-freeworld
     gstreamer1-plugins-ugly
     gstreamer1-vaapi
+    nvtop
+    vulkan-tools
+    mesa-vulkan-drivers
+    libavcodec-freeworld
 )
 dnf5 -y install "${RPMFUSION_PACKAGES[@]}"
 
