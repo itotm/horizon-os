@@ -45,7 +45,6 @@ FLATPAK_PACKAGES=(
     org.kde.kpat
     org.kde.marble
     org.libreoffice.LibreOffice
-    org.mozilla.Thunderbird
     org.qbittorrent.qBittorrent
     page.codeberg.JakobDev.jdSystemMonitor
 )
