@@ -2,7 +2,6 @@
 set -oue pipefail
 
 VIRT_PACKAGES=(
-    cockpit-machines
     distrobox
     libvirt
     qemu-kvm

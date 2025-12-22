@@ -15,7 +15,6 @@ dnf5 -y swap mesa-va-drivers mesa-va-drivers-freeworld
 dnf5 -y swap mesa-vdpau-drivers mesa-vdpau-drivers-freeworld
 
 RPMFUSION_PACKAGES=(
-    gstreamer1-plugin-libav
     gstreamer1-plugins-bad-free-extras
     gstreamer1-plugins-bad-freeworld
     gstreamer1-plugins-ugly
@@ -23,9 +22,7 @@ RPMFUSION_PACKAGES=(
     intel-media-driver
     libavcodec-freeworld
     libdvdcss
-    mesa-vulkan-drivers
     nvtop
-    vulkan-tools
 )
 dnf5 -y install "${RPMFUSION_PACKAGES[@]}"
 
