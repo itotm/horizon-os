@@ -38,7 +38,10 @@ FLATPAK_PACKAGES=(
     org.kde.kgeography
     org.kde.kmahjongg
     org.kde.kmines
+    org.kde.kmplot
+    org.kde.kolourpaint
     org.kde.kommit
+    org.kde.kompare
     org.kde.kpat
     org.kde.marble
     org.libreoffice.LibreOffice

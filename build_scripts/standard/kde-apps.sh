@@ -8,7 +8,9 @@ KDE_PACKAGES=(
     kid3
     elisa-player
     gwenview
+    isoimagewriter
     kcalc
+    kcolorchooser
     kolourpaint
     krdc
     ksystemlog
