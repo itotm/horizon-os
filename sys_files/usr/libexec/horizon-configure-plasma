@@ -82,7 +82,7 @@ kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containmen
 kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "1" --group "Wallpaper" --group "org.kde.potd" --group "General" --key "Provider" "bing"
 
 # Konsole
-kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "Appearance" --key "ColorScheme" "BreezeBlue"
+kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "Appearance" --key "ColorScheme" "LinuxBlue"
 kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "Appearance" --key "BoldIntense" false
 kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "General" --key "Name" "Default"
 kwriteconfig6 --file ~/.local/share/konsole/Default.profile --group "General" --key "Parent" "FALLBACK/"
