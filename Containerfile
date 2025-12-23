@@ -3,7 +3,7 @@ ARG ENABLE_COMMON=true
 ARG ENABLE_STANDARD=true
 ARG ENABLE_EXTENDED=false
 ARG ENABLE_VIRTTOOLS=true
-ARG ENABLE_DEVTOOLS=true
+ARG ENABLE_DEVTOOLS=false
 ARG ENABLE_EXPERIMENTAL=false
 ARG DISABLE_REPOS=true
 
@@ -50,9 +50,9 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/
     /ctx/runner.sh ENABLE_STANDARD /ctx/standard/vlc.sh
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh ENABLE_EXTENDED /ctx/extended/sunshine.sh
+    /ctx/runner.sh ENABLE_STANDARD /ctx/extended/sunshine.sh
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh ENABLE_STANDARD /ctx/extended/thunderbird.sh
+    /ctx/runner.sh ENABLE_EXTENDED /ctx/extended/thunderbird.sh
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_EXTENDED /ctx/extended/gimp.sh
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
@@ -64,7 +64,7 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_DEVTOOLS /ctx/devtools/dotnet.sh
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh ENABLE_DEVTOOLS /ctx/devtools/vscode.sh
+    /ctx/runner.sh ENABLE_STANDARD /ctx/devtools/vscode.sh
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_EXPERIMENTAL /ctx/standard/ventoy.sh

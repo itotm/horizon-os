@@ -15,6 +15,8 @@ KDE_PACKAGES=(
     krdc
     ksystemlog
     okular
+    skanlite
+    skanpage   
 )
 dnf5 -y install "${KDE_PACKAGES[@]}"
 
