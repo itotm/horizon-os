@@ -9,7 +9,7 @@ ARG DISABLE_REPOS=true
 
 FROM alpine AS ctx
 COPY build_scripts /
-RUN chmod +x ./*.sh
+RUN find . -name "*.sh" -exec chmod +x {} \;
 COPY sys_files sys_files
 RUN chmod +x ./sys_files/usr/libexec/horizon-*
 
