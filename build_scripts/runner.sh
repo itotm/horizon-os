@@ -9,7 +9,9 @@ FLAG_VALUE=$(eval echo "\$$FLAG_NAME")
 if [ "$FLAG_VALUE" = "true" ]; then
     if [ -d "$SCRIPT_TO_RUN" ]; then
         for script in "$SCRIPT_TO_RUN"/*; do
-            [ -f "$script" ] && [ -x "$script" ] && sh "$script"
+            if [ -f "$script" ] && [ -x "$script" ]; then
+                sh "$script"
+            fi
         done
     else
         sh "$SCRIPT_TO_RUN"
