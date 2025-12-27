@@ -35,19 +35,19 @@ LABEL org.opencontainers.image.description="Custom Fedora Kinoite image"
 LABEL org.opencontainers.image.source="https://github.com/itotm/horizon-os"
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh ENABLE_STANDARD /ctx/standard/
+    /ctx/runner.sh ENABLE_STANDARD /ctx/standard
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh ENABLE_EXTENDED /ctx/extended/
+    /ctx/runner.sh ENABLE_EXTENDED /ctx/extended
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh ENABLE_VIRTTOOLS /ctx/virttools/
+    /ctx/runner.sh ENABLE_VIRTTOOLS /ctx/virttools
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh ENABLE_DEVTOOLS /ctx/devtools/
+    /ctx/runner.sh ENABLE_DEVTOOLS /ctx/devtools
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
-    /ctx/runner.sh ENABLE_EXPERIMENTAL /ctx/experimental/
+    /ctx/runner.sh ENABLE_EXPERIMENTAL /ctx/experimental
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_COMMON /ctx/common.sh
