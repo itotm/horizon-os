@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Markdown File...
+Comment=Enter Markdown filename:
+Type=Link
+URL=.source/markdown.md
+Icon=text-markdown
+
