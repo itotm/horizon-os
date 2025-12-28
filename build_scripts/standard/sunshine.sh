@@ -11,5 +11,3 @@ else
 	dnf5 -y install Sunshine
 	dnf5 -y copr disable lizardbyte/beta
 fi
-
-./ctx/cleanup.sh

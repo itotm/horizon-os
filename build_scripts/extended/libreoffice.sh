@@ -2,5 +2,3 @@
 set -oue pipefail
 
 dnf5 -y install libreoffice
-
-./ctx/cleanup.sh

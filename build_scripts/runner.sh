@@ -1,5 +1,5 @@
 #!/bin/sh
-set -ouex pipefail
+set -oue pipefail
 
 FLAG_NAME="$1"
 SCRIPT_TO_RUN="$2"

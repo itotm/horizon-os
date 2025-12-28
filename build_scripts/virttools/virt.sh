@@ -10,5 +10,3 @@ VIRT_PACKAGES=(
     virt-viewer
 )
 dnf5 -y install "${VIRT_PACKAGES[@]}"
-
-./ctx/cleanup.sh

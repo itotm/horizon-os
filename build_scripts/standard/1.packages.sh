@@ -37,5 +37,3 @@ INSTALL_PACKAGES=(
     tldr
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
-
-./ctx/cleanup.sh

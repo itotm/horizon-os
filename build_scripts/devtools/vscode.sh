@@ -6,5 +6,3 @@ echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com
 
 dnf5 check-update
 dnf5 -y install code
-
-./ctx/cleanup.sh

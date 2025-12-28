@@ -19,5 +19,3 @@ KDE_PACKAGES=(
     skanpage   
 )
 dnf5 -y install "${KDE_PACKAGES[@]}"
-
-./ctx/cleanup.sh

@@ -7,5 +7,3 @@ COCKPIT_PACKAGES=(
     cockpit-selinux
 )
 dnf5 -y install "${COCKPIT_PACKAGES[@]}"
-
-./ctx/cleanup.sh
