@@ -12,6 +12,8 @@ KDE_PACKAGES=(
     kcalc
     kcolorchooser
     kolourpaint
+    kompare
+    kommit
     krdc
     ksystemlog
     okular
