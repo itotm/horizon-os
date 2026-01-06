@@ -11,9 +11,12 @@ KDE_PACKAGES=(
     isoimagewriter
     kcalc
     kcolorchooser
+    kmahjongg
+    kmines
     kolourpaint
     kompare
     kommit
+    kpat
     krdc
     ksystemlog
     okular
