@@ -36,5 +36,6 @@ INSTALL_PACKAGES=(
     rclone-browser
     ripgrep
     tldr
+    tlp
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
