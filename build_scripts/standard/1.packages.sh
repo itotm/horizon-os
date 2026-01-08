@@ -30,6 +30,7 @@ INSTALL_PACKAGES=(
     ncdu
     openh264
     policycoreutils-gui
+    powertop
     procs
     rclone
     rclone-browser
