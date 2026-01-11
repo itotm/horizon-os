@@ -5,11 +5,10 @@ dnf5 -y copr enable sunnyyang/corefreq
 dnf5 -y install corefreq kernel-devel
 dnf5 -y copr disable sunnyyang/corefreq
 
-for KVER in /usr/lib/modules/*; do
-    if [ -d "$KVER" ]; then
-        KERNEL_VERSION=$(basename "$KVER")
-        akmods --force --kernels "${KERNEL_VERSION}"
-    fi
-done
+KERNEL_VERSION=$(ls -1 /usr/lib/modules/ | head -n1)
 
-depmod -a
+akmods --force --kernels "${KERNEL_VERSION}" 2>&1 | grep -v "could not open directory" || true
+
+depmod -a "${KERNEL_VERSION}" 2>&1 | grep -v "azure" || true
+
+dnf5 -y remove kernel-devel
