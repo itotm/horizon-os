@@ -4,6 +4,8 @@ set -oue pipefail
 if [ "${DISABLE_REPOS:-true}" = "true" ]; then
 	sed -i 's/^enabled=.*/enabled=0/' /etc/yum.repos.d/*.repo
 fi
+
+dnf5 -y autoremove
 dnf5 -y clean all
 
 ./ctx/download-github.sh https://github.com/itotm/eleven-twilight/releases/download/1.0.1/ElevenTwilight.tar.gz /usr/share/icons > /dev/null
