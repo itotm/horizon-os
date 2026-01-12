@@ -2,7 +2,6 @@
 set -oue pipefail
 
 REMOVE_PACKAGES=(
-    kjournald
     plasma-discover-rpm-ostree
     sddm-kcm
 )
