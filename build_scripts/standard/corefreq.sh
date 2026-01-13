@@ -2,13 +2,13 @@
 set -oue pipefail
 
 dnf5 -y copr enable sunnyyang/corefreq
-dnf5 -y install corefreq
+dnf5 -y install corefreq kernel-devel
 dnf5 -y copr disable sunnyyang/corefreq
 
 KERNEL_VERSION=$(ls -1 /usr/lib/modules/ | head -n1)
 
-akmods --force --kernels "${KERNEL_VERSION}" 2>&1 | grep -v "could not open directory" || true
+akmods --force --kernels "${KERNEL_VERSION}" 2>&1 || true
 
-depmod -a "${KERNEL_VERSION}" 2>&1 | grep -v "azure" || true
+depmod -a "${KERNEL_VERSION}" 2>&1 || true
 
-dnf5 -y remove corefreq
+dnf5 -y remove kernel-devel
