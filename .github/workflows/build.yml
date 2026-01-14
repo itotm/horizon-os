@@ -126,7 +126,7 @@ jobs:
           # This generates all the tags for your image, you can add custom tags here too!
           # Default tags are "$DEFAULT_TAG" and version tag in format vAAAAMMGG.build.
           tags: |
-            type=raw,value=${{ env.DEFAULT_TAG }}
+            type=raw,value=${{ env.DEFAULT_TAG }},enable=${{ inputs.fedora_version == '' || inputs.fedora_version == '43' }}
             type=raw,value=${{ steps.date.outputs.version }}
             type=raw,value=f${{ inputs.fedora_version || '43' }}
             type=sha,enable=${{ github.event_name == 'pull_request' }}
