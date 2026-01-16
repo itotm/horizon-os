@@ -11,6 +11,7 @@ KDE_PACKAGES=(
     isoimagewriter
     kcalc
     kcolorchooser
+    kdiskmark
     kmahjongg
     kmines
     kolourpaint
