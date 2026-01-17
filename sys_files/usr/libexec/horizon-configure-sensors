@@ -1,0 +1,36 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+logger "Sensors configuration"
+
+cat > /etc/sensors.d/nct6686-isa-0a20.conf <<EOF
+chip "nct6686-isa-0a20"
+
+# hide voltages
+    ignore in0
+    ignore in1
+    ignore in2
+    ignore in3
+    ignore in4
+    ignore in5
+    ignore in6
+    ignore in7
+    ignore in8
+    ignore in9
+    ignore in10
+    ignore in11
+    ignore in12
+    ignore in13
+
+# hide fans
+    ignore fan1
+    ignore fan2
+    ignore fan3
+    ignore fan4
+    ignore fan5
+    ignore fan6
+    ignore fan7
+    ignore fan8
+EOF
+
+logger "Sensors configuration completed"
