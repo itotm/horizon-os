@@ -12,6 +12,9 @@ cd "${BUILD_DIR}"
 git clone https://github.com/Fred78290/nct6687d.git
 cd nct6687d
 
+KERNEL_VERSION=$(ls -1 /usr/lib/modules/ | head -n1)
+sed -i "s|kver.*?=.*\$(shell uname -r)|kver        ?= ${KERNEL_VERSION}|g" Makefile
+
 make install
 
 mkdir -p /etc/modules-load.d
@@ -24,8 +27,6 @@ rm -rf "${BUILD_DIR}"
 dnf5 -y copr enable sunnyyang/corefreq
 dnf5 -y install corefreq
 dnf5 -y copr disable sunnyyang/corefreq
-
-KERNEL_VERSION=$(ls -1 /usr/lib/modules/ | head -n1)
 
 akmods --force --kernels "${KERNEL_VERSION}" 2>&1 || true
 
