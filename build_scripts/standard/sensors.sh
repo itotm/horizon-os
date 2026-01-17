@@ -17,7 +17,7 @@ sed -i "s|kver.*?=.*\$(shell uname -r)|kver        ?= ${KERNEL_VERSION}|g" Makef
 
 make build
 
-sudo cp ${BUILD_DIR}/nct6687d/${KERNEL_VERSION}/nct6687.ko /lib/modules/${KERNEL_VERSION}/kernel/drivers/hwmon/
+cp ${BUILD_DIR}/nct6687d/${KERNEL_VERSION}/nct6687.ko /lib/modules/${KERNEL_VERSION}/kernel/drivers/hwmon/
 
 mkdir -p /etc/modules-load.d
 echo "nct6687" >> /etc/modules-load.d/nct6687.conf

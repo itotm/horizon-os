@@ -3,10 +3,11 @@ set -oue pipefail
 
 logger "Bash configuring for user"
 
-if ! grep -q "# HorizonOS aliases and shell enhancements" ~/.bashrc; then
+if ! grep -q "# HorizonOS customizations" ~/.bashrc; then
     {
         echo ""
-        echo "# HorizonOS aliases and shell enhancements"
+        echo "# HorizonOS customizations"
+        echo "PROMPT_DIR_COLOR=\"1;96\""
         echo "bind 'set completion-ignore-case on'"
         echo "alias ls='lsd'"
         echo "alias lt='lsd --tree'"
@@ -14,8 +15,6 @@ if ! grep -q "# HorizonOS aliases and shell enhancements" ~/.bashrc; then
         echo "alias tldr='tldr --color'"
         echo "eval \"\$(fzf --bash)\""
     } | tee -a ~/.bashrc
-else
-    echo "HorizonOS aliases already present in ~/.bashrc"
 fi
 
 logger "Bash configuration complete"
