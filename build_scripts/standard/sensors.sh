@@ -2,7 +2,7 @@
 set -oue pipefail
 
 # nct6687d
-dnf5 -y install kernel-devel git '@Development Tools' diffstat doxygen gettext patch patchutils subversion systemtap rpmdevtools kmodtool
+dnf5 -y install kernel-devel git gcc make diffstat doxygen gettext patch patchutils subversion systemtap rpmdevtools kmodtool
 
 BUILD_DIR="/tmp/nct6687d-build"
 RPMBUILD_DIR="/tmp/rpmbuild"
@@ -39,4 +39,4 @@ akmods --force --kernels "${KERNEL_VERSION}" 2>&1 || true
 
 depmod -a "${KERNEL_VERSION}" 2>&1 || true
 
-dnf5 -y remove kernel-devel git '@Development Tools' diffstat doxygen gettext patch patchutils subversion systemtap rpmdevtools kmodtool
+dnf5 -y remove kernel-devel git gcc make diffstat doxygen gettext patch patchutils subversion systemtap rpmdevtools kmodtool
