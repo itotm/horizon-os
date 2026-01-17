@@ -11,6 +11,7 @@ cd "${BUILD_DIR}"
 git clone https://github.com/Fred78290/nct6687d.git
 cd nct6687d
 
+mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 make akmod
 
 mkdir -p /etc/modules-load.d
