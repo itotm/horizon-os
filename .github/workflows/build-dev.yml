@@ -29,7 +29,7 @@ on:
       enable_virttools:
         description: "Virtualization Tools"
         required: false
-        default: true
+        default: false
         type: boolean
       enable_devtools:
         description: "Developer Tools"
@@ -128,7 +128,7 @@ jobs:
             --build-arg ENABLE_COMMON=${{ github.event.inputs.enable_common || true }} \
             --build-arg ENABLE_STANDARD=${{ github.event.inputs.enable_standard || true }} \
             --build-arg ENABLE_EXTENDED=${{ github.event.inputs.enable_extended || false }} \
-            --build-arg ENABLE_VIRTTOOLS=${{ github.event.inputs.enable_virttools || true }} \
+            --build-arg ENABLE_VIRTTOOLS=${{ github.event.inputs.enable_virttools || false }} \
             --build-arg ENABLE_DEVTOOLS=${{ github.event.inputs.enable_devtools || false }} \
             --build-arg ENABLE_EXPERIMENTAL=${{ github.event.inputs.enable_experimental || false }} \
             --build-arg DISABLE_REPOS=${{ github.event.inputs.disable_repos || true }} \
