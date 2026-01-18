@@ -11,7 +11,6 @@ dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=1
 
 INSTALL_PACKAGES=(
     bat
-    btop
     cascadia-fonts-all
     du-dust
     duf
@@ -28,6 +27,7 @@ INSTALL_PACKAGES=(
     mozilla-openh264
     ncdu
     openh264
+    plymouth-plugin-two-step
     policycoreutils-gui
     powertop
     procs
