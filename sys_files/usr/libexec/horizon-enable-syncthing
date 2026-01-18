@@ -12,7 +12,6 @@ if [ -f "$QUADLET_FILE" ]; then
 fi
 
 mkdir -p "$HOME/Sync"
-mkdir -p "$HOME/.config/syncthing"
 mkdir -p "$QUADLET_DIR"
 
 PUID=$(id -u)
@@ -30,16 +29,15 @@ TimeoutStartSec=900
 
 [Container]
 ContainerName=syncthing
-Image=lscr.io/linuxserver/syncthing:latest
+Image=docker.io/syncthing/syncthing:latest
 AutoUpdate=registry
 
-Environment=PUID=$PUID
-Environment=PGID=$PGID
+Environment=PUID=1000
+Environment=PGID=1000
 Environment=UMASK=022
 Environment=TZ=Europe/Rome
 
-Volume=%h/.config/syncthing:/config:Z
-Volume=%h/Sync:/data/Sync:Z
+Volume=%h/Sync:/var/syncthing:Z
 
 PublishPort=8384:8384
 PublishPort=22000:22000/tcp
@@ -47,7 +45,6 @@ PublishPort=22000:22000/udp
 PublishPort=21027:21027/udp
 
 Network=slirp4netns:allow_host_loopback=true
-SecurityLabelDisable=true
 
 [Install]
 WantedBy=default.target
