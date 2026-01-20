@@ -9,11 +9,8 @@ mkdir -p "${BUILD_DIR}"
 
 cd "${BUILD_DIR}"
 
-git clone https://github.com/Fred78290/nct6687d.git
+git clone https://github.com/itotm/nct6687d.git
 cd nct6687d
-
-KERNEL_VERSION=$(ls -1 /usr/lib/modules/ | head -n1)
-sed -i "s|kver.*?=.*\$(shell uname -r)|kver        ?= ${KERNEL_VERSION}|g" Makefile
 
 make build
 
