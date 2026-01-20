@@ -2,7 +2,6 @@
 set -oue pipefail
 
 REMOVE_PACKAGES=(
-    kf6-baloo
     plasma-discover-rpm-ostree
     sddm-kcm
 )

@@ -22,7 +22,8 @@ sleep 1
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plymouth-themes/releases/download/v1.0/fedora-logo.tar.gz /usr/share/plymouth/themes > /dev/null
 
-plymouth-set-default-theme fedora-logo -R
+plymouth-set-default-theme fedora-logo
+dracut --force /boot/initramfs-${KERNEL_VERSION}.img ${KERNEL_VERSION}
 
 cp -r /usr/share/sddm/themes/breeze /usr/share/sddm/themes/horizon
 sed -i 's/fontSize=10/fontSize=11/' /usr/share/sddm/themes/horizon/theme.conf
