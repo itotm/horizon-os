@@ -11,8 +11,6 @@ A custom bootc image based on Fedora Kinoite 43 and built with Universal Blue te
 - selected [KDE apps](./build_scripts/standard/kde-apps.sh)
 - Flathub with selected [packages](./sys_files/usr/libexec/horizon-install-flatpaks)
 - Cockpit and Tailscale preinstalled
-- Syncthing as Quadlet
-- optional tools: QEmu, dotnet, VSCode
 - [my](https://github.com/itotm/plasma-colors) custom colors and icons
 - Italian locales and dictionary
 - image built daily, system scheduled to update weekly

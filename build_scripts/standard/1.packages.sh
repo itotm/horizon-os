@@ -27,13 +27,13 @@ INSTALL_PACKAGES=(
     mozilla-openh264
     ncdu
     openh264
-    plymouth-plugin-two-step
     policycoreutils-gui
     powertop
     procs
     rclone
     rclone-browser
     ripgrep
+    syncthing
     tldr
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
