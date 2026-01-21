@@ -19,12 +19,12 @@ sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plasma-colors/releases/download/v1.0/breeze-cursors-light-plasma5.tar.gz /usr/share/icons > /dev/null
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plasma-colors/tree/main/Konsole /usr/share/konsole > /dev/null
-sleep 1
-./ctx/download-github.sh https://github.com/itotm/plymouth-themes/releases/download/v1.0/fedora-logo.tar.gz /usr/share/plymouth/themes > /dev/null
+#sleep 1
+#./ctx/download-github.sh https://github.com/itotm/plymouth-themes/releases/download/v1.0/fedora-logo.tar.gz /usr/share/plymouth/themes > /dev/null
 
-plymouth-set-default-theme fedora-logo
-KERNEL_VERSION=$(ls -1 /usr/lib/modules/ | head -n1)
-dracut --force --no-hostonly --reproducible -v --kver "${KERNEL_VERSION}" "/usr/lib/modules/${KERNEL_VERSION}/initramfs.img"
+#plymouth-set-default-theme fedora-logo
+#KERNEL_VERSION=$(ls -1 /usr/lib/modules/ | head -n1)
+#dracut --force --no-hostonly --reproducible -v --kver "${KERNEL_VERSION}" "/usr/lib/modules/${KERNEL_VERSION}/initramfs.img"
 
 cp -r /usr/share/sddm/themes/breeze /usr/share/sddm/themes/horizon
 sed -i 's/fontSize=10/fontSize=11/' /usr/share/sddm/themes/horizon/theme.conf
