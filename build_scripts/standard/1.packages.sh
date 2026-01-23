@@ -17,6 +17,7 @@ INSTALL_PACKAGES=(
     fastfetch
     fd
     fzf
+    grsync
     htop
     hunspell-it
     hwinfo
