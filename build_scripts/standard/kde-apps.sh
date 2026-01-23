@@ -18,7 +18,6 @@ KDE_PACKAGES=(
     kompare
     kommit
     kpat
-    krdc
     ksystemlog
     okular
     skanlite

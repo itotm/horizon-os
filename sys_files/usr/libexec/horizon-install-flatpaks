@@ -34,6 +34,7 @@ FLATPAK_PACKAGES=(
     org.gnome.meld
     org.gimp.GIMP
     org.inkscape.Inkscape
+    org.kde.krdc
     org.libreoffice.LibreOffice
     org.mozilla.Thunderbird
     org.qbittorrent.qBittorrent
