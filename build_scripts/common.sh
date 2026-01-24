@@ -8,23 +8,17 @@ fi
 dnf5 -y autoremove
 dnf5 -y clean all
 
-./ctx/download-github.sh https://github.com/itotm/eleven-twilight/releases/download/1.0.1/ElevenTwilight.tar.gz /usr/share/icons > /dev/null
+./ctx/download-github.sh https://github.com/itotm/eleven-twilight/releases/download/1.0.1/ElevenTwilight.tar.gz /usr/share/icons
 sleep 1
-./ctx/download-github.sh https://github.com/itotm/plasma-colors/releases/download/v1.0/ClearSimple.colors.tar.gz /usr/share/color-schemes > /dev/null
+./ctx/download-github.sh https://github.com/itotm/plasma-colors/releases/download/v1.0/ClearSimple.colors.tar.gz /usr/share/color-schemes
 sleep 1
-./ctx/download-github.sh https://github.com/itotm/plasma-colors/releases/download/v1.0/ClearSimple.tar.gz /usr/share/plasma/desktoptheme > /dev/null
+./ctx/download-github.sh https://github.com/itotm/plasma-colors/releases/download/v1.0/ClearSimple.tar.gz /usr/share/plasma/desktoptheme
 sleep 1
-./ctx/download-github.sh https://github.com/itotm/plasma-colors/releases/download/v1.0/colored-plasma-logo.tar.gz /usr/share/plasma/look-and-feel > /dev/null
+./ctx/download-github.sh https://github.com/itotm/plasma-colors/releases/download/v1.0/colored-plasma-logo.tar.gz /usr/share/plasma/look-and-feel
 sleep 1
-./ctx/download-github.sh https://github.com/itotm/plasma-colors/releases/download/v1.0/breeze-cursors-light-plasma5.tar.gz /usr/share/icons > /dev/null
+./ctx/download-github.sh https://github.com/itotm/plasma-colors/releases/download/v1.0/breeze-cursors-light-plasma5.tar.gz /usr/share/icons
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plasma-colors/tree/main/Konsole /usr/share/konsole > /dev/null
-#sleep 1
-#./ctx/download-github.sh https://github.com/itotm/plymouth-themes/releases/download/v1.0/fedora-logo.tar.gz /usr/share/plymouth/themes > /dev/null
-
-#plymouth-set-default-theme fedora-logo
-#KERNEL_VERSION=$(ls -1 /usr/lib/modules/ | head -n1)
-#dracut --force --no-hostonly --reproducible -v --kver "${KERNEL_VERSION}" "/usr/lib/modules/${KERNEL_VERSION}/initramfs.img"
 
 cp -r /usr/share/sddm/themes/breeze /usr/share/sddm/themes/horizon
 sed -i 's/fontSize=10/fontSize=11/' /usr/share/sddm/themes/horizon/theme.conf

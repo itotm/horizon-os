@@ -61,13 +61,13 @@ extract_archive() {
             unzip -q "$archive_file" -d "$dest_path"
             ;;
         tar.gz|tgz)
-            tar -xzf "$archive_file" -C "$dest_path"
+            tar -xzf "$archive_file" -C "$dest_path" 2>/dev/null
             ;;
         tar.bz2)
-            tar -xjf "$archive_file" -C "$dest_path"
+            tar -xjf "$archive_file" -C "$dest_path" 2>/dev/null
             ;;
         tar.xz)
-            tar -xJf "$archive_file" -C "$dest_path"
+            tar -xJf "$archive_file" -C "$dest_path" 2>/dev/null
             ;;
         *)
             echo "Error: Unsupported archive format"
@@ -126,7 +126,7 @@ if is_archive_url "$URL"; then
         ARCHIVE_NAME=$(basename "$URL")
         TEMP_ARCHIVE="$TEMP_DIR/$ARCHIVE_NAME"
         echo "Downloading archive..."
-        curl -L -o "$TEMP_ARCHIVE" "$URL"
+        curl -s -L -o "$TEMP_ARCHIVE" "$URL"
         extract_archive "$TEMP_ARCHIVE" "$DESTINATION" "$EXTENSION"
         echo "Archive extracted successfully."
     else
@@ -136,7 +136,7 @@ if is_archive_url "$URL"; then
         FILE_NAME=$(basename "$URL")
         DEST_FILE="$DESTINATION/$FILE_NAME"
         echo "Downloading file..."
-        curl -L -o "$DEST_FILE" "$URL"
+        curl -s -L -o "$DEST_FILE" "$URL"
         chmod +r "$DEST_FILE"
         echo "File downloaded successfully."
     fi
