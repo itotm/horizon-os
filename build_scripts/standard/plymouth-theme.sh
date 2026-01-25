@@ -12,6 +12,7 @@ echo "Starting initramfs regeneration for kernel version: ${KERNEL_VERSION}"
     --kver "${KERNEL_VERSION}" \
     --force \
     --add 'ostree' \
+    --omit "rootfs-block" \
     --no-hostonly \
     --reproducible \
     "${INITRAMFS_IMAGE}"
