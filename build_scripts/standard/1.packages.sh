@@ -23,7 +23,6 @@ INSTALL_PACKAGES=(
     hwinfo
     hyperfine
     lm_sensors
-    lsd
     mc
     mozilla-openh264
     ncdu

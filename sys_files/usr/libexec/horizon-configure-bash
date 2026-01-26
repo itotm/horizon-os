@@ -9,10 +9,6 @@ if ! grep -q "# HorizonOS customizations" ~/.bashrc; then
         echo "# HorizonOS customizations"
         echo "PROMPT_DIR_COLOR=\"1;96\""
         echo "bind 'set completion-ignore-case on'"
-        echo "if command -v lsd >/dev/null 2>&1; then alias ls='lsd'; fi"
-        echo "if command -v lsd >/dev/null 2>&1; then alias lt='lsd --tree'; fi"
-        echo "if command -v dust >/dev/null 2>&1; then alias du='dust'; fi"
-        echo "if command -v tldr >/dev/null 2>&1; then alias tldr='tldr --color'; fi"
         echo "if command -v fzf >/dev/null 2>&1; then eval \"\$(fzf --bash)\"; fi"
     } | tee -a ~/.bashrc
 fi
