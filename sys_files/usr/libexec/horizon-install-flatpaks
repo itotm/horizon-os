@@ -29,7 +29,6 @@ FLATPAK_PACKAGES=(
     org.avidemux.Avidemux
     org.bunkus.mkvtoolnix-gui
     org.chromium.Chromium
-    org.deskflow.deskflow
     org.fkoehler.KTailctl
     org.gnome.meld
     org.gimp.GIMP
