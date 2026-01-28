@@ -34,6 +34,7 @@ INSTALL_PACKAGES=(
     rclone-browser
     ripgrep
     syncthing
+    tigervnc
     tldr
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
