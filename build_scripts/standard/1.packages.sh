@@ -33,8 +33,10 @@ INSTALL_PACKAGES=(
     rclone
     rclone-browser
     ripgrep
+    sane-backends
     syncthing
     tigervnc
     tldr
+    xsane
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
