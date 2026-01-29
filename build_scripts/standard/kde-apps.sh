@@ -22,5 +22,6 @@ KDE_PACKAGES=(
     okular
     skanlite
     skanpage
+    smb4k
 )
 dnf5 -y install "${KDE_PACKAGES[@]}"
