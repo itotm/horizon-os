@@ -33,6 +33,6 @@ Variant=HorizonOS ${IMAGE_VERSION}
 Website=https://github.com/itotm/horizon-os
 EOF
 
-sed -i "s/^PRETTY_NAME=\"/PRETTY_NAME=\"HorizonOS ${IMAGE_VERSION} - /" /etc/os-release
+sed -i "s/^PRETTY_NAME=.*/PRETTY_NAME=\"HorizonOS ${IMAGE_VERSION}\"/" /etc/os-release
 
 echo "${IMAGE_VERSION}" > /etc/horizon-version
