@@ -36,7 +36,6 @@ INSTALL_PACKAGES=(
     rclone
     rclone-browser
     ripgrep
-    sane-backends
     syncthing
     tigervnc
     tldr
