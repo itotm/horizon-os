@@ -11,6 +11,7 @@ dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=1
 
 INSTALL_PACKAGES=(
     bat
+    cargo
     cascadia-fonts-all
     du-dust
     duf
@@ -22,6 +23,7 @@ INSTALL_PACKAGES=(
     hunspell-it
     hwinfo
     hyperfine
+    input-remapper
     lm_sensors
     lshw
     mc
