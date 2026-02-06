@@ -22,7 +22,6 @@ INSTALL_PACKAGES=(
     hunspell-it
     hwinfo
     hyperfine
-    input-remapper
     lm_sensors
     lshw
     mc
