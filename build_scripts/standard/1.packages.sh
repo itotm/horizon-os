@@ -2,6 +2,7 @@
 set -oue pipefail
 
 REMOVE_PACKAGES=(
+    kde-connect
     plasma-discover-rpm-ostree
     sddm-kcm
 )
