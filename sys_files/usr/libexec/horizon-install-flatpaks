@@ -21,6 +21,7 @@ FLATPAK_PACKAGES=(
     io.github.slgobinath.SafeEyes
     io.github.zarestia_dev.rclone-manager
     io.qt.qdbusviewer
+    it.mijorus.gearlever
     net.cozic.joplin_desktop
     net.lutris.Lutris
     net.mediaarea.MediaInfo
