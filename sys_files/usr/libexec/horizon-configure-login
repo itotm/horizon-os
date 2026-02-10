@@ -1,0 +1,31 @@
+#!/bin/bash
+set -oue pipefail
+
+# this is a dirty workaround for timing issues with plasma services starting before wayland display is available
+
+logger "Configuring Plasma login service overrides"
+
+SYSTEMD_USER_DIR="$HOME/.config/systemd/user"
+
+SERVICES=(
+    "plasma-kcminit.service.d"
+    "plasma-kded6.service.d"
+    "plasma-kglobalaccel.service.d"
+    "plasma-ksmserver.service.d"
+)
+
+OVERRIDE_CONTENT="[Unit]
+After=plasma-kwin_wayland.service
+
+[Service]
+ExecStartPre=/bin/sleep 3
+Restart=on-failure
+RestartSec=4
+"
+
+for service in "${SERVICES[@]}"; do
+    mkdir -p "$SYSTEMD_USER_DIR/$service"
+    echo "$OVERRIDE_CONTENT" > "$SYSTEMD_USER_DIR/$service/override.conf"
+done
+
+logger "Plasma login service overrides configured"
