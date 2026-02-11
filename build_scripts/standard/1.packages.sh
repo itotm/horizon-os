@@ -13,6 +13,7 @@ dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=1
 INSTALL_PACKAGES=(
     bat
     cascadia-fonts-all
+    chezmoi
     du-dust
     duf
     fastfetch
