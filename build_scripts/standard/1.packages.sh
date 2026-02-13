@@ -19,7 +19,6 @@ INSTALL_PACKAGES=(
     fastfetch
     fd
     fzf
-    genisoimage
     grsync
     htop
     hunspell-it

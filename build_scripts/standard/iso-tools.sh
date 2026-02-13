@@ -1,0 +1,4 @@
+#!/bin/bash
+set -oue pipefail
+
+dnf5 -y install genisoimage mtools syslinux squashfs-tools
