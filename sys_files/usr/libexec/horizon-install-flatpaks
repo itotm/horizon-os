@@ -36,7 +36,6 @@ FLATPAK_PACKAGES=(
     org.inkscape.Inkscape
     org.kde.krdc
     org.libreoffice.LibreOffice
-    org.mozilla.Thunderbird
     org.qbittorrent.qBittorrent
     page.codeberg.JakobDev.jdSystemMonitor
 )
