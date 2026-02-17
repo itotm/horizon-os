@@ -35,14 +35,6 @@ sudo bootc switch ghcr.io/itotm/horizon-os:latest
 
 - reboot and login (**note**: the system will finish installing apps and reboot automatically)
 
-- switch to signed image
-  1. copy `cosign.pub` to `/etc/pki/containers/horizon-os.pub`
-  2. copy `policy.json` to `/etc/containers/policy.json`
-
-```bash
-sudo bootc switch --enforce-container-sigpolicy ghcr.io/itotm/horizon-os:latest
-```
-
 ## AI disclaimer
 
 Some scripts written and/or modified by Claude and Copilot.
