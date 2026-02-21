@@ -23,5 +23,6 @@ RPMFUSION_PACKAGES=(
     libavcodec-freeworld
     libdvdcss
     nvtop
+    amule
 )
 dnf5 -y install "${RPMFUSION_PACKAGES[@]}"
