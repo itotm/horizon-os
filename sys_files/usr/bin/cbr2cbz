@@ -1,0 +1,138 @@
+#!/usr/bin/env bash
+# cbr2cbz.sh - Converts CBR (RAR) comic files to CBZ (ZIP)
+# Uses unar for extraction (full RAR v4/v5 support) and 7zip for ZIP creation.
+# Dependencies: unar, 7zip (Fedora: sudo dnf install unar 7zip)
+#
+# Usage:
+#   cbr2cbz.sh file.cbr
+#   cbr2cbz.sh file1.cbr file2.cbr ...
+#   cbr2cbz.sh /path/to/folder
+
+set -euo pipefail
+
+# ── colors ───────────────────────────────────────────────────────────────────
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
+
+# ── check dependencies ────────────────────────────────────────────────────────
+check_deps() {
+    local missing=()
+
+    if command -v unar &>/dev/null; then
+        CMD_UNAR="unar"
+    else
+        missing+=("unar")
+    fi
+
+    if command -v 7z &>/dev/null; then
+        CMD_7Z="7z"
+    elif command -v 7za &>/dev/null; then
+        CMD_7Z="7za"
+    else
+        missing+=("7zip")
+    fi
+
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        echo -e "${RED}Error: missing tools: ${missing[*]}${NC}"
+        echo "Install with: sudo dnf install unar 7zip"
+        exit 1
+    fi
+}
+
+# ── convert a single file ─────────────────────────────────────────────────────
+convert_file() {
+    local cbr_file="$1"
+
+    if [[ ! -f "$cbr_file" ]]; then
+        echo -e "${YELLOW}Warning: '$cbr_file' not found, skipping.${NC}"
+        return 1
+    fi
+
+    local ext="${cbr_file##*.}"
+    if [[ "${ext,,}" != "cbr" ]]; then
+        echo -e "${YELLOW}Warning: '$cbr_file' is not a .cbr file, skipping.${NC}"
+        return 1
+    fi
+
+    local base_dir
+    base_dir="$(dirname "$(realpath "$cbr_file")")"
+    local base_name
+    base_name="$(basename "$cbr_file")"
+    base_name="${base_name%.*}"
+    local cbz_file="${base_dir}/${base_name}.cbz"
+
+    if [[ -f "$cbz_file" ]]; then
+        echo -e "${YELLOW}Skipped (already exists): ${base_name}.cbz${NC}"
+        return 0
+    fi
+
+    echo -e "Converting: ${base_name}.cbr  →  ${base_name}.cbz"
+
+    # Run extraction and zip in a subshell so that:
+    # - 'cd' does not affect the parent shell
+    # - trap/cleanup is fully isolated per file
+    local ok
+    ok=0
+    (
+        local tmp_dir
+        tmp_dir="$(mktemp -d)"
+        trap 'rm -rf "$tmp_dir"' EXIT
+
+        # Extract the CBR using unar (supports RAR v4, v5, and more)
+        "$CMD_UNAR" -quiet -output-directory "$tmp_dir" "$cbr_file" > /dev/null
+
+        # If unar created a subfolder, step into it
+        local items=( "$tmp_dir"/* )
+        if [[ ${#items[@]} -eq 1 && -d "${items[0]}" ]]; then
+            cd "${items[0]}"
+        else
+            cd "$tmp_dir"
+        fi
+
+        # Create the CBZ (-mx=0 = store, no compression:
+        # images are already compressed, recompressing wastes time with no gain)
+        "$CMD_7Z" a -tzip -mx=0 "$cbz_file" . > /dev/null
+    ) && ok=1
+
+    if [[ $ok -eq 1 ]]; then
+        echo -e "${GREEN}OK: ${base_name}.cbz${NC}"
+    else
+        echo -e "${RED}Error while converting '$cbr_file'${NC}"
+        rm -f "$cbz_file"
+        return 1
+    fi
+}
+
+# ── handle input ──────────────────────────────────────────────────────────────
+process_input() {
+    local input="$1"
+
+    if [[ -d "$input" ]]; then
+        local count=0
+        while IFS= read -r -d '' cbr; do
+            convert_file "$cbr" && (( count++ )) || true
+        done < <(find "$input" -iname "*.cbr" -print0)
+        echo ""
+        echo -e "${GREEN}Done. Files converted: $count${NC}"
+    elif [[ -f "$input" ]]; then
+        convert_file "$input"
+    else
+        echo -e "${RED}Error: '$input' is neither a valid file nor a folder.${NC}"
+        exit 1
+    fi
+}
+
+# ── main ──────────────────────────────────────────────────────────────────────
+main() {
+    if [[ $# -eq 0 ]]; then
+        echo "Usage: $(basename "$0") <file.cbr | folder | file1.cbr file2.cbr ...>"
+        exit 1
+    fi
+
+    check_deps
+
+    for arg in "$@"; do
+        process_input "$arg"
+    done
+}
+
+main "$@"

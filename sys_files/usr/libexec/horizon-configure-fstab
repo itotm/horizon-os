@@ -1,0 +1,8 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+logger "Fstab configuration"
+
+sed -i 's|^\([^#].*\s\+/\s\+\)|#\1|' /etc/fstab
+
+logger "Fstab configuration completed"

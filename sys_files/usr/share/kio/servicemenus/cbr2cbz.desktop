@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Service
+Name=Convert CBR to CBZ
+Comment=Convert selected CBR files to CBZ format (ZIP)
+Icon=application-zip
+MimeType=application/x-cbr;application/vnd.comicbook-rar;inode/directory;
+Actions=ConvertCBR;
+
+[Desktop Action ConvertCBR]
+Name=Convert CBR → CBZ
+Icon=application-zip
+Exec=bash -c 'cbr2cbz "$@"' -- %F

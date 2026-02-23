@@ -1,0 +1,407 @@
+#!/usr/bin/env bash
+#
+# rpm-analyzer - Analyzes RPM packages using system tools
+# Requires: rpm2cpio, cpio, readelf, rpm
+#
+
+set -eo pipefail
+
+# Prevent issues with locale
+export LC_ALL=C
+
+#=============================================================================
+# Helper Functions
+#=============================================================================
+
+print_help() {
+    cat << 'EOF'
+Usage:
+  rpm-analyzer <file.rpm>
+
+Description:
+  Analyzes an RPM package using system tools (rpm2cpio, readelf) and produces a complete report.
+
+Examples:
+  rpm-analyzer ./mypackage-1.2.3-1.x86_64.rpm
+EOF
+}
+
+# Check if a command is available
+is_tool_available() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Compute SHA256 hash of a file
+compute_sha256() {
+    local file="$1"
+    sha256sum "$file" 2>/dev/null | awk '{print $1}'
+}
+
+# Check if a file is an ELF binary
+is_elf_binary() {
+    local file="$1"
+    [[ -f "$file" ]] && [[ -r "$file" ]] && \
+        head -c 4 "$file" 2>/dev/null | grep -q $'\x7fELF'
+}
+
+#=============================================================================
+# File Tree Builder
+#=============================================================================
+
+build_file_tree() {
+    local base_dir="$1"
+    local -a files=()
+
+    # Collect all files
+    while IFS= read -r -d '' file; do
+        local rel_path
+        rel_path=$(realpath --relative-to="$base_dir" "$file" 2>/dev/null || echo "$file")
+        files+=("$rel_path")
+    done < <(find "$base_dir" -type f -print0 2>/dev/null | sort -z)
+
+    if [[ ${#files[@]} -eq 0 ]]; then
+        echo "(none)"
+        return
+    fi
+
+    # Build tree structure using associative arrays
+    declare -A tree_dirs
+    declare -A tree_files
+
+    for file in "${files[@]}"; do
+        # Store file
+        tree_files["$file"]=1
+
+        # Store all parent directories
+        local dir
+        dir=$(dirname "$file")
+        while [[ "$dir" != "." ]]; do
+            tree_dirs["$dir"]=1
+            dir=$(dirname "$dir")
+        done
+    done
+
+    # Render tree
+    render_tree_recursive "." "" true
+}
+
+render_tree_recursive() {
+    local current_path="$1"
+    local prefix="$2"
+    local is_root="$3"
+
+    # Get entries in current directory
+    local -a entries=()
+    local -a dirs=()
+    local -a files=()
+
+    # Separate files and directories
+    for file in "${!tree_files[@]}"; do
+        local parent
+        parent=$(dirname "$file")
+        if [[ "$parent" == "$current_path" ]]; then
+            files+=("$(basename "$file")")
+        fi
+    done
+
+    for dir in "${!tree_dirs[@]}"; do
+        local parent
+        parent=$(dirname "$dir")
+        if [[ "$parent" == "$current_path" ]]; then
+            dirs+=("$(basename "$dir")")
+        fi
+    done
+
+    # Sort: directories first, then files
+    IFS=$'\n' dirs=($(sort <<<"${dirs[*]}"))
+    IFS=$'\n' files=($(sort <<<"${files[*]}"))
+    unset IFS
+
+    entries=("${dirs[@]}" "${files[@]}")
+
+    local total=${#entries[@]}
+    local i=0
+
+    for entry in "${entries[@]}"; do
+        ((i++))
+        local is_last=$([[ $i -eq $total ]] && echo true || echo false)
+        local connector
+        [[ "$is_last" == true ]] && connector="└── " || connector="├── "
+
+        # Check if it's a directory
+        local full_path
+        [[ "$current_path" == "." ]] && full_path="$entry" || full_path="$current_path/$entry"
+
+        if [[ -n "${tree_dirs[$full_path]:-}" ]]; then
+            # Directory
+            echo "${prefix}${connector}📁 ${entry}"
+            local new_prefix
+            [[ "$is_last" == true ]] && new_prefix="${prefix}    " || new_prefix="${prefix}│   "
+            render_tree_recursive "$full_path" "$new_prefix" false
+        else
+            # File
+            echo "${prefix}${connector}📄 ${entry}"
+        fi
+    done
+}
+
+#=============================================================================
+# Binary Analysis
+#=============================================================================
+
+analyze_with_readelf() {
+    local extract_path="$1"
+
+    if ! is_tool_available readelf; then
+        echo "✗ Tool not found: readelf"
+        echo "  Install binutils (e.g., on Debian/Ubuntu: apt install binutils)"
+        return
+    fi
+
+    # Find all ELF binaries
+    local -a binaries=()
+    while IFS= read -r -d '' file; do
+        if is_elf_binary "$file"; then
+            binaries+=("$file")
+        fi
+    done < <(find "$extract_path" -type f -print0 2>/dev/null)
+
+    if [[ ${#binaries[@]} -eq 0 ]]; then
+        echo "No ELF binaries found"
+        return
+    fi
+
+    echo "Found ${#binaries[@]} ELF binary/binaries:"
+    echo
+
+    # Analyze up to 10 binaries
+    local count=0
+    local max_show=10
+
+    for binary in "${binaries[@]}"; do
+        if [[ $count -ge $max_show ]]; then
+            break
+        fi
+
+        local relative_path
+        relative_path=$(realpath --relative-to="$extract_path" "$binary" 2>/dev/null)
+        echo "📦 ${relative_path}"
+
+        # Extract ELF header info
+        local header_output
+        header_output=$(readelf -h "$binary" 2>/dev/null || true)
+
+        while IFS= read -r line; do
+            if [[ "$line" =~ (Class:|Machine:|Type:) ]]; then
+                echo "  ${line}"
+            fi
+        done <<< "$header_output"
+
+        # Extract dependencies
+        local deps_output
+        deps_output=$(readelf -d "$binary" 2>/dev/null || true)
+
+        if [[ "$deps_output" == *"NEEDED"* ]]; then
+            local -a libs=()
+            while IFS= read -r line; do
+                if [[ "$line" == *"NEEDED"* ]]; then
+                    # Extract library name between brackets
+                    local lib
+                    lib=$(echo "$line" | sed -n 's/.*\[\(.*\)\].*/\1/p')
+                    [[ -n "$lib" ]] && libs+=("$lib")
+                fi
+            done <<< "$deps_output"
+
+            if [[ ${#libs[@]} -gt 0 ]]; then
+                echo "  Dependencies:"
+                for lib in "${libs[@]}"; do
+                    echo "    → ${lib}"
+                done
+            fi
+        fi
+
+        echo
+        ((count++))
+    done
+
+    if [[ ${#binaries[@]} -gt $max_show ]]; then
+        echo "... ($((${#binaries[@]} - max_show)) more binaries not shown)"
+    fi
+}
+
+#=============================================================================
+# RPM Scripts Extraction
+#=============================================================================
+
+extract_rpm_scripts() {
+    local rpm_path="$1"
+
+    if ! is_tool_available rpm; then
+        echo "✗ Tool not found: rpm"
+        echo "  Install rpm (e.g., on Debian/Ubuntu: apt install rpm)"
+        return
+    fi
+
+    # Script types to extract (matching C# order and format)
+    local -a script_types=(
+        "PREIN:Pre-install script:prein"
+        "POSTIN:Post-install script:postin"
+        "PREUN:Pre-uninstall script:preun"
+        "POSTUN:Post-uninstall script:postun"
+        "PRETRANS:Pre-transaction script:pretrans"
+        "POSTTRANS:Post-transaction script:posttrans"
+        "VERIFYSCRIPT:Verify script:verify"
+    )
+
+    local found_any=false
+
+    for script_info in "${script_types[@]}"; do
+        IFS=':' read -r tag description short_tag <<< "$script_info"
+
+        local script
+        script=$(rpm -qp --queryformat "%{${tag}}" "$rpm_path" 2>/dev/null || true)
+
+        # Check if script exists and is not empty or "(none)"
+        if [[ -n "$script" ]] && [[ "$script" != "(none)" ]]; then
+            found_any=true
+            echo "--- ${description} (${short_tag}) ---"
+            echo "$script"
+            echo
+        fi
+    done
+
+    if [[ "$found_any" == false ]]; then
+        echo "No scripts found"
+    fi
+}
+
+#=============================================================================
+# Main Report Builder
+#=============================================================================
+
+build_rpm_report() {
+    local rpm_path="$1"
+    local output=""
+
+    # Header section
+    local file_size
+    file_size=$(stat -c%s "$rpm_path" 2>/dev/null)
+
+    output+="== RPM Analyzer =="$'\n'
+    output+="File: ${rpm_path}"$'\n'
+    output+="File size: ${file_size} bytes"$'\n'
+    output+="SHA256: $(compute_sha256 "$rpm_path")"$'\n'
+    output+=$'\n'
+
+    # Create temporary directory
+    local temp_dir
+    temp_dir=$(mktemp -d -t "rpm_extract_XXXXXXXXXX")
+
+    # Ensure cleanup on exit
+    trap 'rm -rf "$temp_dir"' EXIT
+
+    # Extraction section
+    output+="== Extracting RPM contents (rpm2cpio) =="$'\n'
+
+    # Check for required tools
+    local -a missing_tools=()
+    is_tool_available rpm2cpio || missing_tools+=("rpm2cpio")
+    is_tool_available cpio || missing_tools+=("cpio")
+
+    if [[ ${#missing_tools[@]} -gt 0 ]]; then
+        output+="✗ Tool(s) not found: ${missing_tools[*]}"$'\n'
+        output+="  Install required packages (e.g., on Debian/Ubuntu: apt install rpm cpio)"$'\n'
+    else
+        # Extract RPM contents
+        local abs_rpm_path
+        abs_rpm_path=$(realpath "$rpm_path")
+
+        local extract_output
+        local extract_status=0
+
+        extract_output=$(cd "$temp_dir" && rpm2cpio "$abs_rpm_path" | cpio -idm 2>&1) || extract_status=$?
+
+        # Check if extraction succeeded (exit code 0 OR files were extracted)
+        local file_count
+        file_count=$(find "$temp_dir" -mindepth 1 2>/dev/null | wc -l)
+
+        if [[ $extract_status -eq 0 ]] || [[ $file_count -gt 0 ]]; then
+            output+="✓ Extraction successful"$'\n'
+            output+=$'\n'
+
+            # File tree
+            local files_count
+            files_count=$(find "$temp_dir" -type f 2>/dev/null | wc -l)
+
+            output+="== File Tree (${files_count} files) =="$'\n'
+
+            # Store tree_dirs and tree_files for use in render function
+            declare -gA tree_dirs
+            declare -gA tree_files
+
+            while IFS= read -r -d '' file; do
+                local rel_path
+                rel_path=$(realpath --relative-to="$temp_dir" "$file" 2>/dev/null)
+                tree_files["$rel_path"]=1
+
+                local dir
+                dir=$(dirname "$rel_path")
+                while [[ "$dir" != "." ]]; do
+                    tree_dirs["$dir"]=1
+                    dir=$(dirname "$dir")
+                done
+            done < <(find "$temp_dir" -type f -print0 2>/dev/null | sort -z)
+
+            if [[ ${#tree_files[@]} -eq 0 ]]; then
+                output+="(none)"$'\n'
+            else
+                output+=$(render_tree_recursive "." "" true)$'\n'
+            fi
+
+            output+=$'\n'
+
+            # Binary analysis
+            output+="== Binary Analysis (readelf) =="$'\n'
+            output+=$(analyze_with_readelf "$temp_dir")
+            output+=$'\n'
+
+            # RPM scripts
+            output+="== RPM Scripts =="$'\n'
+            output+=$(extract_rpm_scripts "$rpm_path")
+        else
+            # Extraction failed
+            local stderr_msg
+            stderr_msg=$(echo "$extract_output" | grep -v '^[[:space:]]*$' | tail -1)
+            output+="✗ Extraction failed: ${stderr_msg}"$'\n'
+        fi
+    fi
+
+    # Remove trailing newlines and output
+    echo "$output" | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}'
+}
+
+#=============================================================================
+# Main Entry Point
+#=============================================================================
+
+main() {
+    # Check arguments
+    if [[ $# -ne 1 ]] || [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
+        print_help
+        exit 2
+    fi
+
+    local rpm_path="$1"
+
+    # Check if file exists
+    if [[ ! -f "$rpm_path" ]]; then
+        echo "Error: file not found: ${rpm_path}" >&2
+        exit 2
+    fi
+
+    # Build and display report
+    build_rpm_report "$rpm_path"
+}
+
+# Run main function
+main "$@"

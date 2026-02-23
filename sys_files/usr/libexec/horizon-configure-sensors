@@ -6,6 +6,11 @@ logger "Sensors configuration"
 cat > /etc/sensors.d/nct6686-isa-0a20.conf <<EOF
 chip "nct6686-isa-0a20"
 
+    label temp1 "Chipset"
+    label temp2 "Motherboard"
+    label temp3 "Case"
+    label temp4 "Cpu"
+
 # hide voltages
     ignore in0
     ignore in1
