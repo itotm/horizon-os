@@ -3,7 +3,7 @@ Type=Service
 Name=Convert CBR to CBZ
 Comment=Convert selected CBR files to CBZ format (ZIP)
 Icon=application-zip
-MimeType=application/x-cbr;application/vnd.comicbook-rar;inode/directory;
+MimeType=application/x-cbr;application/vnd.comicbook-rar;
 Actions=ConvertCBR;
 
 [Desktop Action ConvertCBR]
