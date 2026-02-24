@@ -13,7 +13,7 @@ A custom bootc image based on Fedora Kinoite 43 and built with Universal Blue te
 - Cockpit and Tailscale preinstalled
 - [my](https://github.com/itotm/plasma-colors) custom colors and icons
 - Italian locales and dictionary
-- image built daily, system scheduled to update weekly
+- scheduled to update weekly
 - designed to be modular (fork the repo to try!)
 
 ![build action](./build-action.png)
