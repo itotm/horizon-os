@@ -225,18 +225,18 @@ jobs:
             sudo skopeo copy ${{ env.IMAGE_REF }} docker://docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:$tag
           done
 
-      - name: Login to Quay.io
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-        run: |
-          echo "${{ secrets.QUAY_TOKEN }}" | sudo skopeo login quay.io \
-            -u ${{ secrets.QUAY_USERNAME }} --password-stdin
+      # - name: Login to Quay.io
+      #   if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+      #   run: |
+      #     echo "${{ secrets.QUAY_TOKEN }}" | sudo skopeo login quay.io \
+      #       -u ${{ secrets.QUAY_USERNAME }} --password-stdin
 
-      - name: Push To Quay.io
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-        run: |
-          for tag in ${{ steps.metadata.outputs.tags }}; do
-            sudo skopeo copy ${{ env.IMAGE_REF }} docker://quay.io/${{ secrets.QUAY_USERNAME }}/${{ env.IMAGE_NAME }}:$tag
-          done
+      # - name: Push To Quay.io
+      #   if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+      #   run: |
+      #     for tag in ${{ steps.metadata.outputs.tags }}; do
+      #       sudo skopeo copy ${{ env.IMAGE_REF }} docker://quay.io/${{ secrets.QUAY_USERNAME }}/${{ env.IMAGE_NAME }}:$tag
+      #     done
 
       # - name: Install Cosign
       #   uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
