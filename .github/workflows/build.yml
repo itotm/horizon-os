@@ -2,7 +2,7 @@
 name: Build container image
 on:
   schedule:
-    - cron: "38 23 * * *" # Every day at 23:38 UTC
+    - cron: "1 0 * * *" # Every day at 00:01 UTC
   workflow_dispatch:
     inputs:
       fedora_version:
@@ -117,6 +117,14 @@ jobs:
           VERSION="${BUILD_DATE}.${BUILD_NUMBER}"
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
+          # Check if today is Friday (5 = Friday)
+          DAY_OF_WEEK=$(date -u +%u)
+          if [ "$DAY_OF_WEEK" = "5" ]; then
+            echo "is_friday=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_friday=false" >> $GITHUB_OUTPUT
+          fi
+
       # Image metadata for https://artifacthub.io/ - This is optional but is highly recommended so we all can get a index of all the custom images
       # The metadata by itself is not going to do anything, you choose if you want your image to be on ArtifactHub or not.
       - name: Image Metadata
@@ -205,7 +213,7 @@ jobs:
           fi
 
       - name: Push To GHCR
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.is_friday == 'true'
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | sudo podman login ghcr.io -u ${{ github.actor }} --password-stdin
           for tag in ${{ steps.metadata.outputs.tags }}; do
@@ -213,13 +221,13 @@ jobs:
           done
 
       - name: Login to Docker Hub
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.is_friday == 'true'
         run: |
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo skopeo login docker.io \
             -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
       - name: Push To Docker Hub
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.is_friday == 'true'
         run: |
           for tag in ${{ steps.metadata.outputs.tags }}; do
             sudo skopeo copy ${{ env.IMAGE_REF }} docker://docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:$tag
@@ -232,11 +240,48 @@ jobs:
             -u ${{ secrets.QUAY_USERNAME }} --password-stdin
 
       - name: Push To Quay.io
+        id: push_quay
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
           for tag in ${{ steps.metadata.outputs.tags }}; do
             sudo skopeo copy ${{ env.IMAGE_REF }} docker://quay.io/${{ secrets.QUAY_NAMESPACE }}/${{ env.IMAGE_NAME }}:$tag
           done
+
+      - name: Delete old images from Quay.io
+        if: steps.push_quay.outcome == 'success'
+        run: |
+          QUAY_REPO="${{ secrets.QUAY_NAMESPACE }}/${{ env.IMAGE_NAME }}"
+          CUTOFF_DATE=$(date -u -d '10 days ago' +%s)
+
+          echo "Fetching tags for ${QUAY_REPO}..."
+          PAGE=1
+          while true; do
+            RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.QUAY_TOKEN }}" \
+              "https://quay.io/api/v1/repository/${QUAY_REPO}/tag/?page=${PAGE}&limit=100&onlyActiveTags=true")
+
+            TAGS=$(echo "$RESPONSE" | jq -r '.tags[]? | select(.name != "${{ env.DEFAULT_TAG }}") | "\(.name) \(.start_ts)"')
+
+            if [ -z "$TAGS" ]; then
+              break
+            fi
+
+            echo "$TAGS" | while read -r TAG_NAME TAG_TS; do
+              if [ "$TAG_TS" -lt "$CUTOFF_DATE" ] 2>/dev/null; then
+                echo "Deleting tag: ${TAG_NAME} (created: $(date -u -d @${TAG_TS} +%Y-%m-%d))"
+                curl -s -X DELETE \
+                  -H "Authorization: Bearer ${{ secrets.QUAY_TOKEN }}" \
+                  "https://quay.io/api/v1/repository/${QUAY_REPO}/tag/${TAG_NAME}"
+              fi
+            done
+
+            HAS_MORE=$(echo "$RESPONSE" | jq -r '.has_additional // false')
+            if [ "$HAS_MORE" != "true" ]; then
+              break
+            fi
+            PAGE=$((PAGE + 1))
+          done
+
+          echo "Cleanup complete."
 
       # - name: Install Cosign
       #   uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
