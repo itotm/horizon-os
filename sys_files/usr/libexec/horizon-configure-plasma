@@ -9,7 +9,7 @@ plasma-apply-desktoptheme ClearSimple
 plasma-apply-cursortheme breeze-cursors-light-plasma5
 
 # Breeze
-kwriteconfig6 --file breezerc --group "Common" --key "OutlineIntensity" "OutlineOff"
+kwriteconfig6 --file breezerc --group "Common" --key "OutlineEnabled" false
 kwriteconfig6 --file breezerc --group "Windeco" --key "ButtonSize" "ButtonSmall"
 
 # Icons
@@ -27,7 +27,7 @@ kwriteconfig6 --file kwinrc --group "org.kde.kdecoration2" --key "ShowToolTips" 
 kwriteconfig6 --file kdeglobals --group "Sounds" --key "Enable" false
 
 # Fonts
-kwriteconfig6 --file kdeglobals --group "General" --key "fixed" "Cascadia Code NF,11,-1,5,316,0,0,0,0,0,0,0,0,0,0,1,SemiLight"
+kwriteconfig6 --file kdeglobals --group "General" --key "fixed" "Cascadia Mono,11,-1,5,316,0,0,0,0,0,0,0,0,0,0,1,SemiLight"
 kwriteconfig6 --file kdeglobals --group "General" --key "font" "Adwaita Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
 kwriteconfig6 --file kdeglobals --group "General" --key "menuFont" "Adwaita Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
 kwriteconfig6 --file kdeglobals --group "General" --key "smallestReadableFont" "Adwaita Sans,9,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
