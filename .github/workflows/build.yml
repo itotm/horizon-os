@@ -213,7 +213,7 @@ jobs:
           fi
 
       - name: Push To GHCR
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.is_friday == 'true'
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | sudo podman login ghcr.io -u ${{ github.actor }} --password-stdin
           for tag in ${{ steps.metadata.outputs.tags }}; do
@@ -234,14 +234,14 @@ jobs:
           done
 
       - name: Login to Quay.io
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.is_friday == 'true'
         run: |
           echo "${{ secrets.QUAY_TOKEN }}" | sudo skopeo login quay.io \
             -u ${{ secrets.QUAY_USERNAME }} --password-stdin
 
       - name: Push To Quay.io
         id: push_quay
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.is_friday == 'true'
         run: |
           for tag in ${{ steps.metadata.outputs.tags }}; do
             sudo skopeo copy ${{ env.IMAGE_REF }} docker://quay.io/${{ secrets.QUAY_NAMESPACE }}/${{ env.IMAGE_NAME }}:$tag

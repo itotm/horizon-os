@@ -31,6 +31,10 @@ sudo ostree admin pin 0
 
 ```bash
 sudo bootc switch ghcr.io/itotm/horizon-os:latest
+
+# or one of these (updated weekly)
+sudo bootc switch docker.io/itotm/horizon-os:latest
+sudo bootc switch quay.io/itotm/horizon-os:latest
 ```
 
 - reboot and login (**note**: the system will finish installing apps and reboot automatically)
