@@ -221,13 +221,13 @@ jobs:
           done
 
       - name: Login to Docker Hub
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.is_friday == 'true'
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo skopeo login docker.io \
             -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
       - name: Push To Docker Hub
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.is_friday == 'true'
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
           for tag in ${{ steps.metadata.outputs.tags }}; do
             sudo skopeo copy ${{ env.IMAGE_REF }} docker://docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:$tag
