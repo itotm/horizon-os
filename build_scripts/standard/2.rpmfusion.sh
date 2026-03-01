@@ -15,6 +15,7 @@ dnf5 -y swap mesa-va-drivers mesa-va-drivers-freeworld
 dnf5 -y swap mesa-vdpau-drivers mesa-vdpau-drivers-freeworld
 
 RPMFUSION_PACKAGES=(
+    mesa-vdpau-drivers-freeworld
     gstreamer1-plugins-bad-free-extras
     gstreamer1-plugins-bad-freeworld
     gstreamer1-plugins-ugly
