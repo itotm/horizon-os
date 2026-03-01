@@ -32,7 +32,7 @@ sudo ostree admin pin 0
 ```bash
 sudo bootc switch ghcr.io/itotm/horizon-os:latest
 
-# or one of these (updated weekly)
+# or one of these
 sudo bootc switch docker.io/itotm/horizon-os:latest
 sudo bootc switch quay.io/itotm/horizon-os:latest
 ```

@@ -213,12 +213,60 @@ jobs:
           fi
 
       - name: Push To GHCR
+        id: push_ghcr
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | sudo podman login ghcr.io -u ${{ github.actor }} --password-stdin
           for tag in ${{ steps.metadata.outputs.tags }}; do
             sudo skopeo copy ${{ env.IMAGE_REF }} docker://${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:$tag
           done
+
+      - name: Delete old images from GHCR
+        if: steps.push_ghcr.outcome == 'success'
+        run: |
+          PACKAGE_NAME="${{ env.IMAGE_NAME }}"
+          CUTOFF_DATE=$(date -u -d '8 days ago' +%s)
+
+          echo "Fetching versions for ${PACKAGE_NAME}..."
+          PAGE=1
+          while true; do
+            RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/user/packages/container/${PACKAGE_NAME}/versions?per_page=100&page=${PAGE}")
+
+            # Check if response is empty array
+            COUNT=$(echo "$RESPONSE" | jq 'length')
+            if [ "$COUNT" = "0" ] || [ -z "$COUNT" ]; then
+              break
+            fi
+
+            echo "$RESPONSE" | jq -c '.[]' | while read -r VERSION; do
+              VERSION_ID=$(echo "$VERSION" | jq -r '.id')
+              TAGS=$(echo "$VERSION" | jq -r '.metadata.container.tags // [] | join(",")')
+              UPDATED_AT=$(echo "$VERSION" | jq -r '.updated_at')
+              VERSION_TS=$(date -u -d "$UPDATED_AT" +%s 2>/dev/null || echo 0)
+
+              # Skip if it has the default tag
+              if echo "$TAGS" | grep -q "${{ env.DEFAULT_TAG }}"; then
+                continue
+              fi
+
+              if [ "$VERSION_TS" -lt "$CUTOFF_DATE" ] 2>/dev/null; then
+                echo "Deleting version ID: ${VERSION_ID} (tags: ${TAGS}, updated: ${UPDATED_AT})"
+                curl -s -X DELETE \
+                  -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                  -H "Accept: application/vnd.github+json" \
+                  "https://api.github.com/user/packages/container/${PACKAGE_NAME}/versions/${VERSION_ID}"
+              fi
+            done
+
+            if [ "$COUNT" -lt 100 ]; then
+              break
+            fi
+            PAGE=$((PAGE + 1))
+          done
+
+          echo "GHCR cleanup complete."
 
       - name: Login to Docker Hub
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
@@ -227,21 +275,61 @@ jobs:
             -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
       - name: Push To Docker Hub
+        id: push_dockerhub
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
           for tag in ${{ steps.metadata.outputs.tags }}; do
             sudo skopeo copy ${{ env.IMAGE_REF }} docker://docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:$tag
           done
 
+      - name: Delete old images from Docker Hub
+        if: steps.push_dockerhub.outcome == 'success'
+        run: |
+          DOCKERHUB_REPO="${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}"
+          CUTOFF_DATE=$(date -u -d '8 days ago' +%s)
+
+          # Get auth token
+          TOKEN=$(curl -s -H "Content-Type: application/json" \
+            -X POST -d '{"username": "${{ secrets.DOCKERHUB_USERNAME }}", "password": "${{ secrets.DOCKERHUB_TOKEN }}"}' \
+            "https://hub.docker.com/v2/users/login/" | jq -r '.token')
+
+          echo "Fetching tags for ${DOCKERHUB_REPO}..."
+          PAGE_URL="https://hub.docker.com/v2/repositories/${DOCKERHUB_REPO}/tags/?page_size=100"
+          while [ "$PAGE_URL" != "null" ] && [ -n "$PAGE_URL" ]; do
+            RESPONSE=$(curl -s -H "Authorization: Bearer ${TOKEN}" "$PAGE_URL")
+
+            echo "$RESPONSE" | jq -c '.results[]?' | while read -r TAG; do
+              TAG_NAME=$(echo "$TAG" | jq -r '.name')
+              LAST_UPDATED=$(echo "$TAG" | jq -r '.last_updated')
+              TAG_TS=$(date -u -d "$LAST_UPDATED" +%s 2>/dev/null || echo 0)
+
+              # Skip the default tag
+              if [ "$TAG_NAME" = "${{ env.DEFAULT_TAG }}" ]; then
+                continue
+              fi
+
+              if [ "$TAG_TS" -lt "$CUTOFF_DATE" ] 2>/dev/null; then
+                echo "Deleting tag: ${TAG_NAME} (updated: ${LAST_UPDATED})"
+                curl -s -X DELETE \
+                  -H "Authorization: Bearer ${TOKEN}" \
+                  "https://hub.docker.com/v2/repositories/${DOCKERHUB_REPO}/tags/${TAG_NAME}/"
+              fi
+            done
+
+            PAGE_URL=$(echo "$RESPONSE" | jq -r '.next // "null"')
+          done
+
+          echo "Docker Hub cleanup complete."
+
       - name: Login to Quay.io
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.is_friday == 'true'
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
           echo "${{ secrets.QUAY_TOKEN }}" | sudo skopeo login quay.io \
             -u ${{ secrets.QUAY_USERNAME }} --password-stdin
 
       - name: Push To Quay.io
         id: push_quay
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.is_friday == 'true'
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
           for tag in ${{ steps.metadata.outputs.tags }}; do
             sudo skopeo copy ${{ env.IMAGE_REF }} docker://quay.io/${{ secrets.QUAY_NAMESPACE }}/${{ env.IMAGE_NAME }}:$tag
@@ -251,7 +339,7 @@ jobs:
         if: steps.push_quay.outcome == 'success'
         run: |
           QUAY_REPO="${{ secrets.QUAY_NAMESPACE }}/${{ env.IMAGE_NAME }}"
-          CUTOFF_DATE=$(date -u -d '10 days ago' +%s)
+          CUTOFF_DATE=$(date -u -d '8 days ago' +%s)
 
           echo "Fetching tags for ${QUAY_REPO}..."
           PAGE=1
