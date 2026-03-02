@@ -2,22 +2,23 @@
 set -oue pipefail
 
 KDE_PACKAGES=(
-    kamoso
-    kate
-    kdiff3
-    kid3
     elisa-player
     gwenview
     isoimagewriter
+    kamoso
+    kate
     kcalc
     kcolorchooser
+    kdiff3
     kdiskmark
     kmahjongg
     kmines
+    kid3
     kolourpaint
     kompare
     kommit
     kpat
+    krusader
     ksystemlog
     okular
     skanlite
