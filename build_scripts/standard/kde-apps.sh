@@ -18,6 +18,7 @@ KDE_PACKAGES=(
     kompare
     kommit
     kpat
+    krename
     krusader
     ksystemlog
     okular
