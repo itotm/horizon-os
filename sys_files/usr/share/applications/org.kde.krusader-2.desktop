@@ -1,0 +1,18 @@
+[Desktop Entry]
+Comment=Twin-Panel File Manager
+Exec=krusader-root -qwindowtitle %c %u
+GenericName=File Manager
+Icon=krusader_user
+MimeType=inode/directory;
+Name=Krusader (root)
+NoDisplay=false
+Path=
+PrefersNonDefaultGPU=false
+StartupNotify=true
+StartupWMClass=krusader
+Terminal=false
+TerminalOptions=
+Type=Application
+X-DocPath=krusader/index.html
+X-KDE-SubstituteUID=false
+X-KDE-Username=
