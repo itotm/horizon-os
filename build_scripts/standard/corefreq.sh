@@ -2,7 +2,7 @@
 set -oue pipefail
 
 dnf5 -y copr enable sunnyyang/corefreq
-dnf5 -y install corefreq kernel-devel
+dnf5 -y install --setopt=allow_downgrade=False corefreq kernel-devel
 dnf5 -y copr disable sunnyyang/corefreq
 
 KERNEL_VERSION=$(ls -1 /usr/lib/modules/ | head -n1)
