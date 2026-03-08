@@ -23,6 +23,7 @@ INSTALL_PACKAGES=(
     hunspell-it
     hwinfo
     hyperfine
+    libimobiledevice-utils
     lm_sensors
     lshw
     mc

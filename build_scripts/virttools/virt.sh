@@ -5,6 +5,7 @@ VIRT_PACKAGES=(
     cockpit-machines
     distrobox
     libvirt
+    podman-compose
     qemu-kvm
     virt-manager
     virt-viewer
