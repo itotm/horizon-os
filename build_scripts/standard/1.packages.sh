@@ -24,6 +24,7 @@ INSTALL_PACKAGES=(
     hwinfo
     hyperfine
     libimobiledevice-utils
+    libgpod
     lm_sensors
     lshw
     mc
