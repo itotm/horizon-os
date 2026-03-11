@@ -1,7 +1,7 @@
 #!/bin/bash
 set -oue pipefail
 
-dnf5 -y install kernel-devel gcc make git
+dnf5 -y install kernel-devel gcc
 
 KERNEL_VERSION=$(ls -1 /usr/lib/modules/ | head -n1)
 BUILD_DIR="/tmp/corefreq-build"
@@ -23,4 +23,4 @@ systemctl enable corefreqd.service
 
 cd /
 rm -rf "${BUILD_DIR}"
-dnf5 -y remove kernel-devel gcc make
+dnf5 -y remove kernel-devel gcc
