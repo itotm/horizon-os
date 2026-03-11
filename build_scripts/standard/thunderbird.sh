@@ -10,10 +10,12 @@ if grep -q '^Exec=' "${DESKTOP_FILE}"; then
     sed -i 's|^Exec=|Exec=env GDK_BACKEND=x11 |' "${DESKTOP_FILE}"
 fi
 
-BRIDGE_VERSION="3.22.0"
-BRIDGE_RPM="protonmail-bridge-${BRIDGE_VERSION}-1.x86_64.rpm"
-BRIDGE_URL="https://proton.me/download/bridge/${BRIDGE_RPM}"
+BRIDGE_RPM=$(curl --http1.1 -fsSL \
+  "https://api.github.com/repos/ProtonMail/proton-bridge/releases/latest" \
+  | grep -o '"browser_download_url": "[^"]*x86_64\.rpm"' \
+  | grep -v '\.sig' \
+  | cut -d'"' -f4)
 
-curl -fsSL -o "/tmp/${BRIDGE_RPM}" "${BRIDGE_URL}"
-dnf5 -y install "/tmp/${BRIDGE_RPM}"
-rm -f "/tmp/${BRIDGE_RPM}"
+curl --http1.1 --retry 3 --retry-delay 10 -fsSL -o "/tmp/protonmail-bridge.rpm" "${BRIDGE_RPM}"
+dnf5 -y install "/tmp/protonmail-bridge.rpm"
+rm -f "/tmp/protonmail-bridge.rpm"
