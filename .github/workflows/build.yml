@@ -311,7 +311,7 @@ jobs:
               if [ "$TAG_TS" -lt "$CUTOFF_DATE" ] 2>/dev/null; then
                 echo "Deleting tag: ${TAG_NAME} (updated: ${LAST_UPDATED})"
                 curl -s -X DELETE \
-                  -H "Authorization: Bearer ${TOKEN}" \
+                  -H "Authorization: JWT ${TOKEN}" \
                   "https://hub.docker.com/v2/repositories/${DOCKERHUB_REPO}/tags/${TAG_NAME}/"
               fi
             done
@@ -358,6 +358,7 @@ jobs:
                 echo "Deleting tag: ${TAG_NAME} (created: $(date -u -d @${TAG_TS} +%Y-%m-%d))"
                 curl -s -X DELETE \
                   -H "Authorization: Bearer ${{ secrets.QUAY_TOKEN }}" \
+                  -H "Content-Type: application/json" \
                   "https://quay.io/api/v1/repository/${QUAY_REPO}/tag/${TAG_NAME}"
               fi
             done
