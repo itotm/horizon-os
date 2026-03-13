@@ -26,6 +26,7 @@ INSTALL_PACKAGES=(
     lm_sensors
     lshw
     mc
+    most
     mozilla-openh264
     ncdu
     openh264
