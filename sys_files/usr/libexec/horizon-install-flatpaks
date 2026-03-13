@@ -19,7 +19,6 @@ FLATPAK_PACKAGES=(
     io.github.flattool.Warehouse
     io.github.plrigaux.sysd-manager
     io.github.slgobinath.SafeEyes
-    io.github.zarestia_dev.rclone-manager
     io.qt.qdbusviewer
     it.mijorus.gearlever
     net.cozic.joplin_desktop

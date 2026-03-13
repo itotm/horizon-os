@@ -288,7 +288,7 @@ jobs:
           DOCKERHUB_REPO="${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}"
           CUTOFF_DATE=$(date -u -d '8 days ago' +%s)
 
-          # Get auth token
+          # Get auth token for listing tags
           TOKEN=$(curl -s -H "Content-Type: application/json" \
             -X POST -d '{"username": "${{ secrets.DOCKERHUB_USERNAME }}", "password": "${{ secrets.DOCKERHUB_TOKEN }}"}' \
             "https://hub.docker.com/v2/users/login/" | jq -r '.token')
@@ -310,9 +310,7 @@ jobs:
 
               if [ "$TAG_TS" -lt "$CUTOFF_DATE" ] 2>/dev/null; then
                 echo "Deleting tag: ${TAG_NAME} (updated: ${LAST_UPDATED})"
-                curl -s -X DELETE \
-                  -H "Authorization: JWT ${TOKEN}" \
-                  "https://hub.docker.com/v2/repositories/${DOCKERHUB_REPO}/tags/${TAG_NAME}/"
+                sudo skopeo delete docker://docker.io/${DOCKERHUB_REPO}:${TAG_NAME}
               fi
             done
 
@@ -356,10 +354,7 @@ jobs:
             echo "$TAGS" | while read -r TAG_NAME TAG_TS; do
               if [ "$TAG_TS" -lt "$CUTOFF_DATE" ] 2>/dev/null; then
                 echo "Deleting tag: ${TAG_NAME} (created: $(date -u -d @${TAG_TS} +%Y-%m-%d))"
-                curl -s -X DELETE \
-                  -H "Authorization: Bearer ${{ secrets.QUAY_TOKEN }}" \
-                  -H "Content-Type: application/json" \
-                  "https://quay.io/api/v1/repository/${QUAY_REPO}/tag/${TAG_NAME}"
+                sudo skopeo delete docker://quay.io/${QUAY_REPO}:${TAG_NAME}
               fi
             done
 
