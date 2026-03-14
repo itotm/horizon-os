@@ -39,6 +39,7 @@ INSTALL_PACKAGES=(
     syncthing
     tigervnc
     tldr
+    traceroute
     xsane
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
