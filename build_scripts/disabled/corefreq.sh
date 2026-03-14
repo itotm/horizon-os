@@ -1,14 +1,26 @@
 #!/bin/bash
 set -oue pipefail
 
-dnf5 -y copr enable sunnyyang/corefreq
-dnf5 -y install --setopt=allow_downgrade=False corefreq kernel-devel
-dnf5 -y copr disable sunnyyang/corefreq
+dnf5 -y install kernel-devel gcc
 
 KERNEL_VERSION=$(ls -1 /usr/lib/modules/ | head -n1)
+BUILD_DIR="/tmp/corefreq-build"
 
-akmods --force --kernels "${KERNEL_VERSION}" 2>&1 || true
+mkdir -p "${BUILD_DIR}"
+cd "${BUILD_DIR}"
+
+git clone --depth 1 https://github.com/cyring/CoreFreq.git
+cd CoreFreq
+
+make -j KERNELREL="/lib/modules/${KERNEL_VERSION}"
+make install KERNELREL="/lib/modules/${KERNEL_VERSION}"
 
 depmod -a "${KERNEL_VERSION}" 2>&1 || true
 
-dnf5 -y remove kernel-devel
+mkdir -p /etc/modules-load.d
+echo "corefreqk" > /etc/modules-load.d/corefreqk.conf
+systemctl enable corefreqd.service
+
+cd /
+rm -rf "${BUILD_DIR}"
+dnf5 -y remove kernel-devel gcc
