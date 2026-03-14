@@ -1,9 +1,10 @@
 #!/bin/bash
 set -oue pipefail
 
-dnf5 -y install kernel-devel gcc
-
 KERNEL_VERSION=$(ls -1 /usr/lib/modules/ | head -n1)
+KERNEL_PKG_VERSION=$(echo "${KERNEL_VERSION}" | sed 's/\.x86_64$//')
+
+dnf5 -y install "kernel-devel-${KERNEL_PKG_VERSION}" gcc
 BUILD_DIR="/tmp/corefreq-build"
 
 mkdir -p "${BUILD_DIR}"
