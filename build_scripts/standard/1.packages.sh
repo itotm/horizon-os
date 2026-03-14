@@ -11,7 +11,6 @@ dnf5 -y remove "${REMOVE_PACKAGES[@]}"
 dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=1
 
 INSTALL_PACKAGES=(
-    bat
     cascadia-fonts-all
     du-dust
     duf
@@ -27,7 +26,6 @@ INSTALL_PACKAGES=(
     lm_sensors
     lshw
     mc
-    most
     mozilla-openh264
     ncdu
     openh264
