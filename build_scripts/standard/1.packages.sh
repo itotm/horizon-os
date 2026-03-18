@@ -40,6 +40,7 @@ INSTALL_PACKAGES=(
     tigervnc
     tldr
     traceroute
+    wsdd
     xsane
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
