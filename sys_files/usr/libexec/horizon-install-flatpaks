@@ -18,10 +18,10 @@ FLATPAK_PACKAGES=(
     hu.irl.cameractrls
     io.github.flattool.Warehouse
     io.github.plrigaux.sysd-manager
-    io.github.slgobinath.SafeEyes
     io.qt.qdbusviewer
     it.mijorus.gearlever
     net.cozic.joplin_desktop
+    net.hovancik.Stretchly
     net.lutris.Lutris
     net.mediaarea.MediaInfo
     no.mifi.losslesscut
