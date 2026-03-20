@@ -21,6 +21,7 @@ KDE_PACKAGES=(
     krename
     krusader
     ksystemlog
+    marknote
     okular
     skanlite
     skanpage
