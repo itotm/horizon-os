@@ -17,7 +17,6 @@ RPMFUSION_PACKAGES=(
     gstreamer1-plugins-bad-free-extras
     gstreamer1-plugins-bad-freeworld
     gstreamer1-plugins-ugly
-    gstreamer1-vaapi
     intel-media-driver
     libavcodec-freeworld
     libdvdcss

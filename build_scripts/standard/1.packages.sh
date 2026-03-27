@@ -32,12 +32,9 @@ INSTALL_PACKAGES=(
     policycoreutils-gui
     powerstat
     powertop
-    procs
     rclone
-    rclone-browser
     ripgrep
     syncthing
-    tigervnc
     tldr
     traceroute
     xsane
