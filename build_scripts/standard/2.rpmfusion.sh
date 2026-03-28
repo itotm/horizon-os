@@ -22,6 +22,5 @@ RPMFUSION_PACKAGES=(
     libdvdcss
     amule
     nvtop
-    steam
 )
 dnf5 -y install "${RPMFUSION_PACKAGES[@]}"
