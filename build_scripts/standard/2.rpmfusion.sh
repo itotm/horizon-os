@@ -20,7 +20,8 @@ RPMFUSION_PACKAGES=(
     intel-media-driver
     libavcodec-freeworld
     libdvdcss
-    nvtop
     amule
+    nvtop
+    steam
 )
 dnf5 -y install "${RPMFUSION_PACKAGES[@]}"
