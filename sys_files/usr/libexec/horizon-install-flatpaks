@@ -20,7 +20,6 @@ FLATPAK_PACKAGES=(
     io.github.plrigaux.sysd-manager
     io.qt.qdbusviewer
     it.mijorus.gearlever
-    net.cozic.joplin_desktop
     net.hovancik.Stretchly
     net.lutris.Lutris
     net.mediaarea.MediaInfo
@@ -36,7 +35,6 @@ FLATPAK_PACKAGES=(
     org.kde.krdc
     org.libreoffice.LibreOffice
     org.qbittorrent.qBittorrent
-    page.codeberg.JakobDev.jdSystemMonitor
 )
 
 for package in "${FLATPAK_PACKAGES[@]}"; do
