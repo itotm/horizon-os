@@ -92,7 +92,7 @@ jobs:
       - name: Rechunk Image
         run: |
           # Export built image to OCI layout
-          mkdir -p /tmp/rechunk/output
+          mkdir -p /tmp/rechunk
           sudo skopeo copy containers-storage:localhost/build oci:/tmp/rechunk/input
 
           # Rechunk using rpm-ostree to optimize update sizes
