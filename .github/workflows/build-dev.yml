@@ -33,7 +33,7 @@ env:
   IMAGE_NAME: "${{ github.event.repository.name }}"
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
   IMAGE_TAG: "dev"
-  FEDORA_VERSION: "44"
+  FEDORA_VERSION: "43"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
