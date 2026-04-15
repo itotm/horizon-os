@@ -12,12 +12,12 @@ FLATPAK_PACKAGES=(
     com.github.PintaProject.Pinta
     com.github.tchx84.Flatseal
     com.moonlight_stream.Moonlight
-    com.ranfdev.DistroShelf
     com.usebottles.bottles
     fr.handbrake.ghb
     hu.irl.cameractrls
     io.github.flattool.Warehouse
     io.github.plrigaux.sysd-manager
+    io.github.DenysMb.Kontainer
     io.qt.qdbusviewer
     it.mijorus.gearlever
     net.hovancik.Stretchly
