@@ -11,7 +11,7 @@ dnf5 -y install \
 
 dnf5 -y swap ffmpeg-free ffmpeg --allowerasing
 
-#dnf5 -y swap mesa-va-drivers mesa-va-drivers-freeworld
+dnf5 -y swap mesa-va-drivers mesa-va-drivers-freeworld
 
 RPMFUSION_PACKAGES=(
     gstreamer1-plugins-bad-free-extras
@@ -20,7 +20,6 @@ RPMFUSION_PACKAGES=(
     intel-media-driver
     libavcodec-freeworld
     libdvdcss
-    mesa-va-drivers-freeworld
     amule
     nvtop
 )
