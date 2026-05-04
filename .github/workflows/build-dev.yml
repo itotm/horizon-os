@@ -84,7 +84,7 @@ jobs:
           sudo buildah build \
             --file ./Containerfile \
             --tag ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }} \
-            --build-arg FEDORA_VERSION=${{ github.event.inputs.fedora_version || '43' }} \
+            --build-arg FEDORA_VERSION=${{ github.event.inputs.fedora_version || '44' }} \
             --build-arg BUILD_NUMBER=${{ github.run_number }} \
             --build-arg IMAGE_VERSION=${{ steps.date.outputs.version }} \
             --build-arg ENABLE_COMMON=true \
