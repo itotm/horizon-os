@@ -19,12 +19,10 @@ sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plasma-colors/releases/download/v1.0/breeze-cursors-light-plasma5.tar.gz /usr/share/icons
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plasma-colors/tree/main/Konsole /usr/share/konsole > /dev/null
-
-[ -d /usr/share/sddm/themes/breeze ] && {
-    cp -r /usr/share/sddm/themes/breeze /usr/share/sddm/themes/horizon
-    sed -i 's/fontSize=10/fontSize=11/' /usr/share/sddm/themes/horizon/theme.conf
-    sed -i 's|^background=.*|background=/usr/share/wallpapers/DarkestHour/contents/images/1920x1080.jpg|' /usr/share/sddm/themes/horizon/theme.conf
-}
+sleep 1
+./ctx/download-github.sh https://github.com/itotm/plasma-wallpaper-potd-enhanced/releases/download/v1.3.2/plasma-wallpaper-potd-enhanced-1.3.2.tar.gz /usr/share/plasma/wallpapers > /dev/null
+sleep 1
+./ctx/download-github.sh https://github.com/itotm/kickoff-simplified/releases/download/v1.2/kickoff-simplified-1.2.tar.gz /usr/share/plasma/plasmoids > /dev/null
 
 cp -r /ctx/sys_files/* /
 systemctl enable horizon-setup-system.service
@@ -35,6 +33,6 @@ Variant=HorizonOS ${IMAGE_VERSION}
 Website=https://github.com/itotm/horizon-os
 EOF
 
-sed -i "s/^PRETTY_NAME=.*/PRETTY_NAME=\"HorizonOS ${IMAGE_VERSION}\"/" /etc/os-release
+sed -i "s/^PRETTY_NAME=.*/PRETTY_NAME=\"HorizonOS ${IMAGE_VERSION}\"/" /usr/lib/os-release
 
 echo "${IMAGE_VERSION}" > /etc/horizon-version
