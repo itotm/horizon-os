@@ -18,11 +18,7 @@ sleep 1
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plasma-colors/releases/download/v1.0/breeze-cursors-light-plasma5.tar.gz /usr/share/icons
 sleep 1
-./ctx/download-github.sh https://github.com/itotm/plasma-colors/tree/main/Konsole /usr/share/konsole > /dev/null
-sleep 1
-./ctx/download-github.sh https://github.com/itotm/plasma-wallpaper-potd-enhanced/releases/download/v1.3.2/plasma-wallpaper-potd-enhanced-1.3.2.tar.gz /usr/share/plasma/wallpapers > /dev/null
-sleep 1
-./ctx/download-github.sh https://github.com/itotm/kickoff-simplified/releases/download/v1.2/kickoff-simplified-1.2.tar.gz /usr/share/plasma/plasmoids > /dev/null
+./ctx/download-github.sh https://github.com/itotm/plasma-colors/tree/main/Konsole /usr/share/konsole
 
 cp -r /ctx/sys_files/* /
 systemctl enable horizon-setup-system.service
