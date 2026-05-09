@@ -21,7 +21,9 @@ INSTALL_PACKAGES=(
     hunspell-it
     hwinfo
     hyperfine
+    imapsync
     libnatpmp
+    libva-utils
     lm_sensors
     lshw
     mc
@@ -35,6 +37,7 @@ INSTALL_PACKAGES=(
     ripgrep
     syncthing
     tldr
+    tmux
     traceroute
     xsane
 )
