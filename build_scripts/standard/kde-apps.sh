@@ -5,6 +5,7 @@ KDE_PACKAGES=(
     elisa-player
     gwenview
     isoimagewriter
+    k3b
     kamoso
     kate
     kcalc
