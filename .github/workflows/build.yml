@@ -8,12 +8,12 @@ on:
       fedora_version:
         description: "Fedora base image"
         required: false
-        default: "43"
+        default: "44"
         type: choice
         options:
-          - "42"
           - "43"
           - "44"
+          - "45"
       enable_common:
         description: "Common"
         required: false
@@ -134,9 +134,9 @@ jobs:
           # This generates all the tags for your image, you can add custom tags here too!
           # Default tags are "$DEFAULT_TAG" and version tag in format vAAAAMMGG.build.
           tags: |
-            type=raw,value=${{ env.DEFAULT_TAG }},enable=${{ inputs.fedora_version == '' || inputs.fedora_version == '43' }}
+            type=raw,value=${{ env.DEFAULT_TAG }},enable=${{ inputs.fedora_version == '' || inputs.fedora_version == '44' }}
             type=raw,value=${{ steps.date.outputs.version }}
-            type=raw,value=f${{ inputs.fedora_version || '43' }}
+            type=raw,value=f${{ inputs.fedora_version || '44' }}
             type=sha,enable=${{ github.event_name == 'pull_request' }}
             type=ref,event=pr
           labels: |
@@ -164,7 +164,7 @@ jobs:
           sudo buildah build \
             --file ./Containerfile \
             --tag raw-img \
-            --build-arg FEDORA_VERSION=${{ github.event.inputs.fedora_version || '43' }} \
+            --build-arg FEDORA_VERSION=${{ github.event.inputs.fedora_version || '44' }} \
             --build-arg BUILD_NUMBER=${{ github.run_number }} \
             --build-arg IMAGE_VERSION=${{ steps.date.outputs.version }} \
             --build-arg ENABLE_COMMON=${{ github.event.inputs.enable_common || true }} \
