@@ -15,6 +15,8 @@ INSTALL_PACKAGES=(
     duf
     fastfetch
     fd
+    fuse
+    fuse-libs
     fzf
     grsync
     htop
