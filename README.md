@@ -2,16 +2,16 @@
 
 ![HorizonOS](./logo.png)
 
-A custom bootc image based on Fedora Kinoite 43 and built with Universal Blue template.
+A custom bootc image built with Universal Blue template and based on Fedora Kinoite.
 
 ## Features
 
-- a bunch of [cli tools](./build_scripts/standard/packages.sh)
+- added [cli tools](./build_scripts/standard/packages.sh)
 - media codecs from [RPM Fusion](https://rpmfusion.org/)
-- selected [KDE apps](./build_scripts/standard/kde-apps.sh)
-- Flathub with selected [packages](./sys_files/usr/libexec/horizon-install-flatpaks)
+- [KDE apps](./build_scripts/standard/kde-apps.sh)
+- Flathub [apps](./sys_files/usr/libexec/horizon-install-flatpaks) (removed Fedora flatpak repository)
 - Cockpit and Tailscale preinstalled
-- [my](https://github.com/itotm/plasma-colors) custom colors and icons
+- [my](https://github.com/itotm) custom colors, icons, Plymouth theme, Plasma widgets
 - Italian locales and dictionary
 - scheduled to update weekly
 - designed to be modular (fork the repo to try!)
@@ -20,7 +20,7 @@ A custom bootc image based on Fedora Kinoite 43 and built with Universal Blue te
 
 ## Howto
 
-- install standard [Fedora Kinoite](https://fedoraproject.org/atomic-desktops/kinoite/download)
+- install [Fedora Kinoite](https://fedoraproject.org/atomic-desktops/kinoite/download)
 - pin current version (optional - to go back easily)
 
 ```bash
