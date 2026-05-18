@@ -21,6 +21,10 @@ INSTALL_PACKAGES=(
     grsync
     htop
     hunspell-it
+    hunspell-la
+    hunspell-cs
+    hunspell-de
+    hunspell-fr
     hwinfo
     hyperfine
     imapsync
