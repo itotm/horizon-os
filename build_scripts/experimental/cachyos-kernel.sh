@@ -3,6 +3,7 @@ set -oue pipefail
 
 dnf5 -y copr enable bieszczaders/kernel-cachyos-lto
 
+# Disable rpmostree kernel install hook to prevent it from running dracut prematurely
 mv /usr/lib/kernel/install.d/05-rpmostree.install \
    /usr/lib/kernel/install.d/05-rpmostree.install.disabled
 
@@ -16,7 +17,18 @@ KVER=$(ls /usr/lib/modules/ | grep cachyos | head -1)
 echo "Kernel: ${KVER}"
 
 depmod -a "${KVER}"
-kernel-install add "${KVER}" /usr/lib/modules/${KVER}/vmlinuz
+
+INITRAMFS_IMAGE="/usr/lib/modules/${KVER}/initramfs.img"
+echo "Generating initramfs for kernel version: ${KVER}"
+dracut \
+    --kver "${KVER}" \
+    --force \
+    --add 'ostree' \
+    --no-hostonly \
+    --reproducible \
+    "${INITRAMFS_IMAGE}"
+
+chmod 0600 "${INITRAMFS_IMAGE}"
 
 setsebool -P domain_kernel_load_modules on
 

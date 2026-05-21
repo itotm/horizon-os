@@ -1,6 +1,8 @@
 #!/bin/bash
 set -oue pipefail
 
+sed -i '/^\[main\]/a max_parallel_downloads=10' /etc/dnf/dnf.conf
+
 REMOVE_PACKAGES=(
     kde-connect
     plasma-discover-rpm-ostree
