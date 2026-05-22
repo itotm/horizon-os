@@ -92,7 +92,7 @@ jobs:
             --build-arg ENABLE_EXTENDED=false \
             --build-arg ENABLE_VIRTTOOLS=true \
             --build-arg ENABLE_DEVTOOLS=true \
-            --build-arg ENABLE_EXPERIMENTAL=true \
+            --build-arg ENABLE_EXPERIMENTAL=false \
             --build-arg DISABLE_REPOS=true \
             --label "${{ steps.metadata.outputs.labels }}" \
             .
