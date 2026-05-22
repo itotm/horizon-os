@@ -6,13 +6,14 @@ A custom bootc image built with Universal Blue template and based on Fedora Kino
 
 ## Features
 
-- added [cli tools](./build_scripts/standard/packages.sh)
+- [my](https://github.com/itotm) custom colors, icons, Plymouth theme, Plasma widgets
+- [cli tools](./build_scripts/standard/packages.sh)
 - media codecs from [RPM Fusion](https://rpmfusion.org/)
 - [KDE apps](./build_scripts/standard/kde-apps.sh)
-- Flathub [apps](./sys_files/usr/libexec/horizon-install-flatpaks) (removed Fedora flatpak repository)
-- Cockpit and Tailscale preinstalled
-- [my](https://github.com/itotm) custom colors, icons, Plymouth theme, Plasma widgets
-- Italian locales and dictionary
+- [Apps](./sys_files/usr/libexec/horizon-install-flatpaks) from Flathub (removed Fedora flatpak repository)
+- Cockpit, QEmu, Distrobox, Sunshine, VSCode, Syncthing and Tailscale preinstalled
+- Italian locales and various dictionaries
+- [CachyOS kernel](https://copr.fedorainfracloud.org/coprs/bieszczaders/kernel-cachyos/)
 - scheduled to update weekly
 - designed to be modular (fork the repo to try!)
 

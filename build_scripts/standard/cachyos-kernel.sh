@@ -9,6 +9,7 @@ mv /usr/lib/kernel/install.d/05-rpmostree.install \
 
 dnf5 -y remove kernel kernel-core kernel-modules kernel-modules-core kernel-modules-extra
 
+# initramfs rebuilt in common.sh
 rm -rf /usr/lib/modules/*
 
 dnf5 -y install kernel-cachyos
