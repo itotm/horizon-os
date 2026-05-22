@@ -23,6 +23,25 @@ sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plasma-wallpaper-potd-enhanced/releases/download/v1.4.3/com.plasma.wallpaper.potd-enhanced-1.4.3.tar.gz /usr/share/plasma/wallpapers
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/kickoff-simplified/releases/download/v1.3.4/org.kde.plasma.kickoff-simplified-1.3.4.tar.gz /usr/share/plasma/plasmoids
+sleep 1
+./ctx/download-github.sh https://github.com/itotm/plymouth-themes/releases/download/v1.1/fedora-logo-spinner.tar.gz /usr/share/plymouth/themes
+
+plymouth-set-default-theme fedora-logo-spinner
+
+KERNEL_VERSION=$(ls -1 /usr/lib/modules/ | head -n1)
+echo "Kernel: ${KERNEL_VERSION}"
+depmod -a "${KERNEL_VERSION}"
+INITRAMFS_IMAGE="/usr/lib/modules/${KERNEL_VERSION}/initramfs.img"
+echo "Starting initramfs regeneration for kernel version: ${KERNEL_VERSION}"
+    dracut \
+    --kver "${KERNEL_VERSION}" \
+    --force \
+    --add 'ostree' \
+    --no-hostonly \
+    --reproducible \
+    "${INITRAMFS_IMAGE}"
+
+chmod 0600 "${INITRAMFS_IMAGE}"
 
 cp -r /ctx/sys_files/* /
 systemctl enable horizon-setup-system.service

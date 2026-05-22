@@ -1,0 +1,19 @@
+#!/bin/bash
+set -oue pipefail
+
+dnf5 -y copr enable bieszczaders/kernel-cachyos
+
+# Disable rpmostree kernel install hook to prevent it from running dracut prematurely
+mv /usr/lib/kernel/install.d/05-rpmostree.install \
+   /usr/lib/kernel/install.d/05-rpmostree.install.disabled
+
+dnf5 -y remove kernel kernel-core kernel-modules kernel-modules-core kernel-modules-extra
+
+rm -rf /usr/lib/modules/*
+
+dnf5 -y install kernel-cachyos
+
+mv /usr/lib/kernel/install.d/05-rpmostree.install.disabled \
+   /usr/lib/kernel/install.d/05-rpmostree.install
+
+dnf5 -y copr disable bieszczaders/kernel-cachyos
