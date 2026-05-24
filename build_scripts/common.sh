@@ -66,10 +66,11 @@ if [ -d /boot ]; then
     rm -f /boot/loader/entries/*.conf.bak 2>/dev/null || true
 fi
 
+echo "Cleanup"
+
 # Clean /run and /tmp
 rm -rf /run/cockpit
 rm -rf /run/dnf
-rm -rf /run/systemd
 
 # Clean /tmp
 tmpfiles --remove 2>/dev/null || true
