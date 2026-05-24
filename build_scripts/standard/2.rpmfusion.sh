@@ -18,4 +18,4 @@ RPMFUSION_PACKAGES=(
     amule
     nvtop
 )
-dnf5 -y install --allowerasing "${RPMFUSION_PACKAGES[@]}"
+dnf5 -y install --nobest --allowerasing "${RPMFUSION_PACKAGES[@]}"

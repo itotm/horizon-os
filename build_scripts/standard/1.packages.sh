@@ -6,6 +6,7 @@ sed -i '/^\[main\]/a max_parallel_downloads=10' /etc/dnf/dnf.conf
 REMOVE_PACKAGES=(
     kde-connect
     plasma-discover-rpm-ostree
+    virtualbox-guest-additions
 )
 dnf5 -y remove "${REMOVE_PACKAGES[@]}"
 
