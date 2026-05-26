@@ -13,7 +13,7 @@ A custom bootc image built with Universal Blue template and based on Fedora Kino
 - [Apps](./sys_files/usr/libexec/horizon-install-flatpaks) from Flathub (removed Fedora flatpak repository)
 - Cockpit, QEmu, Distrobox, Sunshine, VSCode, Syncthing and Tailscale preinstalled
 - Italian locales and various dictionaries
-- [CachyOS kernel](https://copr.fedorainfracloud.org/coprs/bieszczaders/kernel-cachyos/)
+- [CachyOS kernel](https://copr.fedorainfracloud.org/coprs/itotm/cachyos-kernel-znver4/) optimized for AMD Zen 4/5
 - scheduled to update weekly
 - designed to be modular (fork the repo to try!)
 
