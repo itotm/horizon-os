@@ -19,6 +19,5 @@ RPMFUSION_PACKAGES=(
     libavcodec-freeworld
     libdvdcss
     amule
-    nvtop
 )
 dnf5 -y install --nobest --allowerasing "${RPMFUSION_PACKAGES[@]}"

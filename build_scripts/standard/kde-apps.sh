@@ -5,13 +5,11 @@ KDE_PACKAGES=(
     elisa-player
     gwenview
     isoimagewriter
-    k3b
     kamoso
     kate
     kcalc
     kcolorchooser
     kdiff3
-    kdiskmark
     kmahjongg
     kmines
     kid3

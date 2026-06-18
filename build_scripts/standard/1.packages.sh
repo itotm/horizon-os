@@ -13,6 +13,7 @@ dnf5 -y remove "${REMOVE_PACKAGES[@]}"
 dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=1
 
 INSTALL_PACKAGES=(
+    btrfs-assistant
     cascadia-fonts-all
     du-dust
     duf
@@ -26,7 +27,6 @@ INSTALL_PACKAGES=(
     hunspell-it
     hunspell-la
     hunspell-cs
-    hunspell-de
     hunspell-fr
     hwinfo
     hyperfine
@@ -38,16 +38,20 @@ INSTALL_PACKAGES=(
     mc
     mozilla-openh264
     ncdu
+    nvtop
     openh264
+    plasma-union
     policycoreutils-gui
     powerstat
     powertop
     rclone
     ripgrep
+    snapper
     syncthing
     tldr
     tmux
     traceroute
+    vlc
     xsane
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
