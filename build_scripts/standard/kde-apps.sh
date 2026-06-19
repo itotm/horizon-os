@@ -10,6 +10,7 @@ KDE_PACKAGES=(
     kcalc
     kcolorchooser
     kdiff3
+    kdotool
     kmahjongg
     kmines
     kid3
