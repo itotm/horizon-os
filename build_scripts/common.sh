@@ -8,7 +8,7 @@ fi
 dnf5 -y autoremove
 dnf5 -y clean all
 
-./ctx/download-github.sh https://github.com/itotm/eleven-twilight/releases/download/v2.0/ElevenTwilight-2.0.tar.gz /usr/share/icons
+./ctx/download-github.sh https://github.com/itotm/eleven-twilight/releases/download/v2.1/ElevenTwilight-2.1.tar.gz /usr/share/icons
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plasma-colors/releases/download/v1.0/ClearSimple.colors.tar.gz /usr/share/color-schemes
 sleep 1
