@@ -65,17 +65,25 @@ for KERNEL_VERSION in $(ls -1 /usr/lib/modules/); do
     DEST_DIR="/usr/lib/modules/${KERNEL_VERSION}/kernel/drivers/hwmon/zenpower"
     mkdir -p "${DEST_DIR}"
 
-    # Install all produced .ko files
+    # Compress and install all produced .ko files.
+    # We compress the source .ko first, verify integrity, then install —
+    # this avoids the corrupted .ko.xz that results from compressing in-place
+    # after copying (xz -f with 2>/dev/null was hiding failures).
     for KO_FILE in "${BUILD_DIR}/zenpower5"/*.ko; do
         [ -f "${KO_FILE}" ] || continue
-        echo ">>> Installing ${KO_FILE} -> ${DEST_DIR}/"
-        install -m 644 "${KO_FILE}" "${DEST_DIR}/"
-    done
 
-    # Compress modules if the kernel uses xz (Fedora >= 38)
-    for KO_FILE in "${DEST_DIR}"/*.ko; do
-        [ -f "${KO_FILE}" ] || continue
-        xz -f "${KO_FILE}" 2>/dev/null || true
+        echo ">>> Compressing ${KO_FILE}..."
+        xz -f -k "${KO_FILE}"          # -k keeps the original .ko as fallback
+        XZ_FILE="${KO_FILE}.xz"
+
+        # Verify the compressed file is valid before installing
+        if xz --test "${XZ_FILE}"; then
+            echo ">>> Installing ${XZ_FILE} -> ${DEST_DIR}/"
+            install -m 644 "${XZ_FILE}" "${DEST_DIR}/"
+        else
+            echo "WARNING: xz integrity check failed for ${XZ_FILE}, installing uncompressed .ko"
+            install -m 644 "${KO_FILE}" "${DEST_DIR}/"
+        fi
     done
 
     echo ">>> Running depmod for ${KERNEL_VERSION}..."
