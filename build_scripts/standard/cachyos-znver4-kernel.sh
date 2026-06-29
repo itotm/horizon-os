@@ -1,4 +1,5 @@
 #!/bin/bash
+exit 0
 set -oue pipefail
 
 dnf5 -y copr enable itotm/cachyos-kernel-znver4
