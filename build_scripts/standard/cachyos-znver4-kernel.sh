@@ -12,7 +12,7 @@ dnf5 -y remove kernel kernel-core kernel-modules kernel-modules-core kernel-modu
 # initramfs rebuilt in common.sh
 rm -rf /usr/lib/modules/*
 
-dnf5 -y install kernel-cachyos-znver4-lto
+dnf5 -y install kernel-cachyos-znver4
 
 mv /usr/lib/kernel/install.d/05-rpmostree.install.disabled \
    /usr/lib/kernel/install.d/05-rpmostree.install
