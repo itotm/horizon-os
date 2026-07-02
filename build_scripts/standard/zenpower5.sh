@@ -112,7 +112,6 @@ dnf5 -y remove \
     gcc \
     gcc-c++ \
     make \
-    git \
     || true   # do not fail if some packages were already present before this script
 
 echo ""

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -oue pipefail
 
-dnf5 -y install kernel-devel gcc
+dnf5 -y install kernel-devel gcc git
 
 KERNEL_VERSION=$(ls -1 /usr/lib/modules/ | head -n1)
 BUILD_DIR="/tmp/corefreq-build"
