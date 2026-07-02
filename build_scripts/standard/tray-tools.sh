@@ -25,7 +25,7 @@ mkdir -p "${WORK_DIR}"
 # Dependencies
 # ---------------------------------------------------------------------------
 # Common to both (base toolchain)
-COMMON_DEPS=(gcc-c++ cmake)
+COMMON_DEPS=(git gcc-c++ cmake)
 
 # tail-tray specific
 TAIL_TRAY_DEPS=(
@@ -41,6 +41,7 @@ KWIN_M2T_DEPS=(
     qt6-qtbase-devel qt6-qtdeclarative-devel
     kf6-kpackage-devel kf6-kwindowsystem-devel
     kf6-kconfig-devel kf6-kcoreaddons-devel
+    kf6-kstatusnotifieritem-devel kf6-kservice-devel
 )
 
 BUILD_DEPS=("${COMMON_DEPS[@]}")
@@ -144,5 +145,6 @@ dnf5 -y remove "${DEVEL_DEPS[@]}" || true
 
 echo "==> cleaning up source/build tree and dnf cache"
 rm -rf "${WORK_DIR}"
+dnf5 -y clean all
 
 echo "==> done."
