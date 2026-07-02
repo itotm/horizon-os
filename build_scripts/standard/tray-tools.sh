@@ -63,8 +63,11 @@ dnf5 -y install "${BUILD_DEPS[@]}"
 # ---------------------------------------------------------------------------
 latest_tag() {
     local repo="$1" fallback_branch="$2" tag
-    tag="$(curl -fsSL "https://api.github.com/repos/${repo}/releases/latest" \
-        | grep -m1 '"tag_name"' | sed -E 's/.*"tag_name":\s*"([^"]+)".*/\1/')"
+    # Don't use curl -f / let it abort here: repos with no GitHub releases
+    # return 404 on this endpoint, which must fall back to the branch
+    # instead of killing the whole script under set -e.
+    tag="$(curl -sSL "https://api.github.com/repos/${repo}/releases/latest" \
+        | grep -m1 '"tag_name"' | sed -E 's/.*"tag_name":\s*"([^"]+)".*/\1/' || true)"
     [[ -z "${tag}" ]] && tag="${fallback_branch}"
     echo "${tag}"
 }

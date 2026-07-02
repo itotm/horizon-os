@@ -22,6 +22,7 @@ INSTALL_PACKAGES=(
     fuse
     fuse-libs
     fzf
+    git
     grsync
     htop
     hunspell-it
