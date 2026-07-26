@@ -94,21 +94,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@main
-        with:
-          # this might remove tools that are actually needed,
-          # if set to "true" but frees about 6 GB
-          tool-cache: false
-          
-          # all of these default to true, but feel free to set to
-          # "false" if necessary for your workflow
-          android: true
-          dotnet: false
-          haskell: false
-          large-packages: false
-          docker-images: false
-          swap-storage: false
+      # - name: Free Disk Space (Ubuntu)
+      #   uses: jlumbroso/free-disk-space@main
+      #   with:
+      #     # this might remove tools that are actually needed,
+      #     # if set to "true" but frees about 6 GB
+      #     tool-cache: false
+
+      #     # all of these default to true, but feel free to set to
+      #     # "false" if necessary for your workflow
+      #     android: true
+      #     dotnet: false
+      #     haskell: false
+      #     large-packages: false
+      #     docker-images: false
+      #     swap-storage: false
 
       - name: Get current date and version
         id: date
@@ -131,6 +131,18 @@ jobs:
             echo "is_friday=true" >> $GITHUB_OUTPUT
           else
             echo "is_friday=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Day parity for alternating Docker Hub / Quay.io pushes
+          DAY_OF_MONTH=$(date -u +%d)
+          # Strip leading zero to avoid octal interpretation
+          DAY_NUM=$((10#$DAY_OF_MONTH))
+          if [ $((DAY_NUM % 2)) -eq 0 ]; then
+            echo "push_dockerhub=true" >> $GITHUB_OUTPUT
+            echo "push_quay=false" >> $GITHUB_OUTPUT
+          else
+            echo "push_dockerhub=false" >> $GITHUB_OUTPUT
+            echo "push_quay=true" >> $GITHUB_OUTPUT
           fi
 
       # Image metadata for https://artifacthub.io/ - This is optional but is highly recommended so we all can get a index of all the custom images
@@ -277,21 +289,21 @@ jobs:
           echo "GHCR cleanup complete."
 
       - name: Login to Docker Hub
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.push_dockerhub == 'true'
         run: |
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo skopeo login docker.io \
             -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
       - name: Push To Docker Hub
         id: push_dockerhub
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.push_dockerhub == 'true'
         run: |
           for tag in ${{ steps.metadata.outputs.tags }}; do
             sudo skopeo copy ${{ env.IMAGE_REF }} docker://docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:$tag
           done
 
       - name: Delete old images from Docker Hub
-        if: steps.push_dockerhub.outcome == 'success'
+        if: steps.push_dockerhub.outcome == 'success' && steps.date.outputs.push_dockerhub == 'true'
         run: |
           DOCKERHUB_REPO="${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}"
           CUTOFF_DATE=$(date -u -d '5 days ago' +%s)
@@ -328,21 +340,21 @@ jobs:
           echo "Docker Hub cleanup complete."
 
       - name: Login to Quay.io
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.push_quay == 'true'
         run: |
           echo "${{ secrets.QUAY_TOKEN }}" | sudo skopeo login quay.io \
             -u ${{ secrets.QUAY_USERNAME }} --password-stdin
 
       - name: Push To Quay.io
         id: push_quay
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.push_quay == 'true'
         run: |
           for tag in ${{ steps.metadata.outputs.tags }}; do
             sudo skopeo copy ${{ env.IMAGE_REF }} docker://quay.io/${{ secrets.QUAY_NAMESPACE }}/${{ env.IMAGE_NAME }}:$tag
           done
 
       - name: Delete old images from Quay.io
-        if: steps.push_quay.outcome == 'success'
+        if: steps.push_quay.outcome == 'success' && steps.date.outputs.push_quay == 'true'
         run: |
           QUAY_REPO="${{ secrets.QUAY_NAMESPACE }}/${{ env.IMAGE_NAME }}"
           CUTOFF_DATE=$(date -u -d '5 days ago' +%s)
