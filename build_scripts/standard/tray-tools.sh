@@ -10,7 +10,7 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 # Toggles: which components to build
 # ---------------------------------------------------------------------------
-BUILD_TAIL_TRAY="${BUILD_TAIL_TRAY:-1}"
+BUILD_TAIL_TRAY="${BUILD_TAIL_TRAY:0}"
 BUILD_KWIN_MINIMIZE2TRAY="${BUILD_KWIN_MINIMIZE2TRAY:-1}"
 
 # tail-tray specific options
