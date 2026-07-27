@@ -1,6 +1,9 @@
 #!/bin/bash
 set -oue pipefail
 
+# font cache regeneration
+fc-cache -f
+
 if [ "${DISABLE_REPOS:-true}" = "true" ]; then
 	sed -i 's/^enabled=.*/enabled=0/' /etc/yum.repos.d/*.repo
 fi

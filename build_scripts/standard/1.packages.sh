@@ -26,9 +26,7 @@ INSTALL_PACKAGES=(
     grsync
     htop
     hunspell-it
-    hunspell-la
     hunspell-cs
-    hunspell-fr
     hwinfo
     hyperfine
     imapsync
@@ -41,7 +39,6 @@ INSTALL_PACKAGES=(
     ncdu
     nvtop
     openh264
-    plasma-union
     policycoreutils-gui
     powerstat
     powertop
