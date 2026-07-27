@@ -6,7 +6,6 @@ dnf -y install --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/ter
 TERRA_PACKAGES=(
     cleartype-fonts
     ms-core-fonts
-    klassy
     tail-tray
 )
 dnf5 -y install "${TERRA_PACKAGES[@]}"

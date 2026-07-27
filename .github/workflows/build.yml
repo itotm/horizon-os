@@ -245,7 +245,7 @@ jobs:
         if: steps.push_ghcr.outcome == 'success'
         run: |
           PACKAGE_NAME="${{ env.IMAGE_NAME }}"
-          CUTOFF_DATE=$(date -u -d '15 days ago' +%s)
+          CUTOFF_DATE=$(date -u -d '30 days ago' +%s)
 
           echo "Fetching versions for ${PACKAGE_NAME}..."
           PAGE=1
@@ -306,7 +306,7 @@ jobs:
         if: steps.push_dockerhub.outcome == 'success' && steps.date.outputs.push_dockerhub == 'true'
         run: |
           DOCKERHUB_REPO="${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}"
-          CUTOFF_DATE=$(date -u -d '5 days ago' +%s)
+          CUTOFF_DATE=$(date -u -d '15 days ago' +%s)
 
           # Get auth token for listing tags
           TOKEN=$(curl -s -H "Content-Type: application/json" \
@@ -357,7 +357,7 @@ jobs:
         if: steps.push_quay.outcome == 'success' && steps.date.outputs.push_quay == 'true'
         run: |
           QUAY_REPO="${{ secrets.QUAY_NAMESPACE }}/${{ env.IMAGE_NAME }}"
-          CUTOFF_DATE=$(date -u -d '5 days ago' +%s)
+          CUTOFF_DATE=$(date -u -d '15 days ago' +%s)
 
           echo "Fetching tags for ${QUAY_REPO}..."
           PAGE=1
