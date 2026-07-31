@@ -51,5 +51,6 @@ INSTALL_PACKAGES=(
     traceroute
     vlc
     xsane
+    yt-dlp
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
