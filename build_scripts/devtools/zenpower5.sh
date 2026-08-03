@@ -4,13 +4,12 @@
 # Source: https://github.com/mattkeenan/zenpower5
 #
 # Steps:
-#  1. Install build tools (kernel-devel, gcc, make)
-#  2. Clone zenpower5 source at a pinned commit/branch
-#  3. Build the module for every kernel version found in /usr/lib/modules/
-#  4. Install the .ko in the correct location and run depmod
-#  5. Blacklist k10temp (required: it uses the same PCI device as zenpower)
-#  6. Enable automatic module loading at boot
-#  7. Remove build tools to keep the image clean
+#  1. Clone zenpower5 source at a pinned commit/branch
+#  2. Build the module for every kernel version found in /usr/lib/modules/
+#  3. Install the .ko in the correct location and run depmod
+#  4. Blacklist k10temp (required: it uses the same PCI device as zenpower)
+#  5. Enable automatic module loading at boot
+#  6. Cleanup build artifacts
 
 set -oue pipefail
 
@@ -21,16 +20,7 @@ ZENPOWER5_REF="master"
 ZENPOWER5_REPO="https://github.com/mattkeenan/zenpower5.git"
 BUILD_DIR="/tmp/zenpower5-build"
 
-# ── 1. Build dependencies ─────────────────────────────────────────────────────
-echo ">>> Installing build dependencies..."
-dnf5 -y install \
-    kernel-devel \
-    gcc \
-    gcc-c++ \
-    make \
-    git
-
-# ── 2. Clone source ───────────────────────────────────────────────────────────
+# ── 1. Clone source ───────────────────────────────────────────────────────────
 echo ">>> Cloning zenpower5 (ref: ${ZENPOWER5_REF})..."
 mkdir -p "${BUILD_DIR}"
 git clone --depth=1 --branch "${ZENPOWER5_REF}" "${ZENPOWER5_REPO}" "${BUILD_DIR}/zenpower5" \
@@ -40,7 +30,7 @@ cd "${BUILD_DIR}/zenpower5"
 ZENPOWER5_COMMIT=$(git rev-parse --short HEAD)
 echo ">>> Actual commit: ${ZENPOWER5_COMMIT}"
 
-# ── 3 & 4. Build and install for every kernel present ────────────────────────
+# ── 2 & 3. Build and install for every kernel present ────────────────────────
 # bootc/ostree builds can have more than one kernel under /usr/lib/modules/.
 # The loop ensures the module is compiled for all of them.
 BUILT_COUNT=0
@@ -86,7 +76,7 @@ fi
 
 echo ">>> Module built for ${BUILT_COUNT} kernel(s)."
 
-# ── 5. Blacklist k10temp ──────────────────────────────────────────────────────
+# ── 4. Blacklist k10temp ──────────────────────────────────────────────────────
 # zenpower uses the same PCI device as k10temp; they cannot coexist.
 echo ">>> Blacklisting k10temp..."
 mkdir -p /etc/modprobe.d
@@ -96,23 +86,15 @@ cat > /etc/modprobe.d/zenpower5.conf << 'EOF'
 blacklist k10temp
 EOF
 
-# ── 6. Enable automatic loading at boot ──────────────────────────────────────
+# ── 5. Enable automatic loading at boot ──────────────────────────────────────
 echo ">>> Enabling automatic loading of zenpower at boot..."
 mkdir -p /etc/modules-load.d
 echo "zenpower" > /etc/modules-load.d/zenpower5.conf
 
-# ── 7. Cleanup ────────────────────────────────────────────────────────────────
+# ── 6. Cleanup ────────────────────────────────────────────────────────────────
 echo ">>> Removing build directory..."
 cd /
 rm -rf "${BUILD_DIR}"
-
-echo ">>> Removing build dependencies..."
-dnf5 -y remove \
-    kernel-devel \
-    gcc \
-    gcc-c++ \
-    make \
-    || true   # do not fail if some packages were already present before this script
 
 echo ""
 echo ">>> zenpower5 installed successfully (commit: ${ZENPOWER5_COMMIT})"
