@@ -27,7 +27,6 @@ FLATPAK_PACKAGES=(
     org.avidemux.Avidemux
     org.bunkus.mkvtoolnix-gui
     org.chromium.Chromium
-    org.fkoehler.KTailctl
     org.gnome.meld
     org.gimp.GIMP
     org.inkscape.Inkscape
@@ -35,6 +34,7 @@ FLATPAK_PACKAGES=(
     org.libreoffice.LibreOffice
     org.mozilla.thunderbird
     org.qbittorrent.qBittorrent
+    org.remmina.Remmina
 )
 
 for package in "${FLATPAK_PACKAGES[@]}"; do
