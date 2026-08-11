@@ -18,6 +18,5 @@ RPMFUSION_PACKAGES=(
     intel-media-driver
     libavcodec-freeworld
     libdvdcss
-    amule
 )
 dnf5 -y install --nobest --allowerasing "${RPMFUSION_PACKAGES[@]}"
