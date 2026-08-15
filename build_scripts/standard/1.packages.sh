@@ -9,7 +9,6 @@ REMOVE_PACKAGES=(
     virtualbox-guest-additions
 )
 dnf5 -y remove "${REMOVE_PACKAGES[@]}"
-export TMPDIR=/var/tmp
 
 dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=1
 
