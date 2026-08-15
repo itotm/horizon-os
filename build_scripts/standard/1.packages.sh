@@ -1,8 +1,6 @@
 #!/bin/bash
 set -oue pipefail
 
-export TMPDIR=/var/tmp
-
 sed -i '/^\[main\]/a max_parallel_downloads=10' /etc/dnf/dnf.conf
 
 REMOVE_PACKAGES=(

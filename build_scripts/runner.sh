@@ -1,6 +1,8 @@
 #!/bin/sh
 set -oue pipefail
 
+export TMPDIR=/var/tmp
+
 FLAG_NAME="$1"
 SCRIPT_TO_RUN="$2"
 
