@@ -1,6 +1,8 @@
 #!/bin/bash
 set -oue pipefail
 
+export TMPDIR=/var/tmp
+
 sed -i '/^\[main\]/a max_parallel_downloads=10' /etc/dnf/dnf.conf
 
 REMOVE_PACKAGES=(
@@ -9,6 +11,7 @@ REMOVE_PACKAGES=(
     virtualbox-guest-additions
 )
 dnf5 -y remove "${REMOVE_PACKAGES[@]}"
+export TMPDIR=/var/tmp
 
 dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=1
 
