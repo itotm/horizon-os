@@ -1,0 +1,372 @@
+---
+name: Build container image
+on:
+  #schedule:
+   # - cron: "1 0 * * *" # Every day at 00:01 UTC
+  workflow_dispatch:
+    inputs:
+      fedora_version:
+        description: "Fedora base image"
+        required: false
+        default: "44"
+        type: choice
+        options:
+          - "43"
+          - "44"
+          - "45"
+      enable_common:
+        description: "Common"
+        required: false
+        default: true
+        type: boolean
+      enable_standard:
+        description: "Standard"
+        required: false
+        default: true
+        type: boolean
+      enable_extended:
+        description: "Extended"
+        required: false
+        default: false
+        type: boolean
+      enable_virttools:
+        description: "Virtualization Tools"
+        required: false
+        default: true
+        type: boolean
+      enable_devtools:
+        description: "Developer Tools"
+        required: false
+        default: true
+        type: boolean
+      enable_experimental:
+        description: "Experimental"
+        required: false
+        default: false
+        type: boolean
+      disable_repos:
+        description: "Disable Repos"
+        required: false
+        default: true
+        type: boolean
+      enable_rechunker:
+        description: "Enable image chunking"
+        required: false
+        default: true
+        type: boolean
+env:
+  IMAGE_DESC: "HorizonOS - Customized Fedora Kinoite Image"
+  IMAGE_KEYWORDS: "bootc,fedora,kinoite,atomic"
+  IMAGE_LOGO_URL: "https://horizon-os.itotm.org/logo.png"
+  IMAGE_NAME: "${{ github.event.repository.name }}"
+  IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
+  DEFAULT_TAG: "latest"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  build_push:
+    name: Build and push image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Prepare environment
+        run: |
+          # Lowercase the image uri
+          echo "IMAGE_REGISTRY=${IMAGE_REGISTRY,,}" >> ${GITHUB_ENV}
+          echo "IMAGE_NAME=${IMAGE_NAME,,}" >> ${GITHUB_ENV}
+
+      # These stage versions are pinned by https://github.com/renovatebot/renovate
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Get current date and version
+        id: date
+        run: |
+          echo "date=$(date -u +%Y\-%m\-%d\T%H\:%M\:%S\Z)" >> $GITHUB_OUTPUT
+          BUILD_DATE=$(date -u +%Y%m%d)
+          BUILD_NUMBER=${{ github.run_number }}
+          VERSION="${BUILD_DATE}.${BUILD_NUMBER}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+          DAY_OF_WEEK=$(date -u +%u)
+          if [ "$DAY_OF_WEEK" = "5" ]; then
+            echo "is_friday=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_friday=false" >> $GITHUB_OUTPUT
+          fi
+
+          DAY_OF_MONTH=$(date -u +%d)
+          DAY_NUM=$((10#$DAY_OF_MONTH))
+          if [ $((DAY_NUM % 2)) -eq 0 ]; then
+            echo "push_dockerhub=true" >> $GITHUB_OUTPUT
+            echo "push_quay=false" >> $GITHUB_OUTPUT
+          else
+            echo "push_dockerhub=false" >> $GITHUB_OUTPUT
+            echo "push_quay=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Image Metadata
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        id: metadata
+        with:
+          tags: |
+            type=raw,value=${{ env.DEFAULT_TAG }},enable=${{ inputs.fedora_version == '' || inputs.fedora_version == '44' }}
+            type=raw,value=${{ steps.date.outputs.version }}
+            type=raw,value=f${{ inputs.fedora_version || '44' }}
+            type=sha,enable=${{ github.event_name == 'pull_request' }}
+            type=ref,event=pr
+          labels: |
+            io.artifacthub.package.readme-url=https://raw.githubusercontent.com/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}/${{ github.sha }}/README.md
+            org.opencontainers.image.created=${{ steps.date.outputs.date }}
+            org.opencontainers.image.description=${{ env.IMAGE_DESC }}
+            org.opencontainers.image.documentation=https://raw.githubusercontent.com/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}/${{ github.sha }}/README.md
+            org.opencontainers.image.source=https://github.com/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}/blob/${{ github.sha }}/Containerfile
+            org.opencontainers.image.title=${{ env.IMAGE_NAME }}
+            org.opencontainers.image.url=https://github.com/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}/tree/${{ github.sha }}
+            org.opencontainers.image.vendor=${{ github.repository_owner }}
+            org.opencontainers.image.version=${{ steps.date.outputs.version }}
+            io.artifacthub.package.deprecated=false
+            io.artifacthub.package.keywords=${{ env.IMAGE_KEYWORDS }}
+            io.artifacthub.package.license=Apache-2.0
+            io.artifacthub.package.logo-url=${{ env.IMAGE_LOGO_URL }}
+            io.artifacthub.package.prerelease=false
+            containers.bootc=1
+          sep-tags: " "
+          sep-annotations: " "
+
+      - name: Build Image
+        id: build_image
+        run: |
+          sudo buildah build \
+            --file ./Containerfile \
+            --tag raw-img \
+            --build-arg FEDORA_VERSION=${{ github.event.inputs.fedora_version || '44' }} \
+            --build-arg BUILD_NUMBER=${{ github.run_number }} \
+            --build-arg IMAGE_VERSION=${{ steps.date.outputs.version }} \
+            --build-arg ENABLE_COMMON=${{ github.event.inputs.enable_common || true }} \
+            --build-arg ENABLE_STANDARD=${{ github.event.inputs.enable_standard || true }} \
+            --build-arg ENABLE_EXTENDED=${{ github.event.inputs.enable_extended || false }} \
+            --build-arg ENABLE_VIRTTOOLS=${{ github.event.inputs.enable_virttools || true }} \
+            --build-arg ENABLE_DEVTOOLS=${{ github.event.inputs.enable_devtools || true }} \
+            --build-arg ENABLE_EXPERIMENTAL=${{ github.event.inputs.enable_experimental || false }} \
+            --build-arg DISABLE_REPOS=${{ github.event.inputs.disable_repos || true }} \
+            --label "${{ steps.metadata.outputs.labels }}" \
+            .
+
+      - name: Log image size
+        run: |
+          IMAGE_ID=$(sudo buildah images --format "{{.ID}}" raw-img | head -n 1)
+          IMAGE_SIZE=$(sudo buildah images --format "{{.Size}}" raw-img | head -n 1)
+          echo "Built image ID: $IMAGE_ID"
+          echo "Image size: $IMAGE_SIZE"
+
+      # The following steps only publish from the default branch.
+      - name: Login to GHCR for previous chunked image
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.enable_rechunker != 'false'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | sudo podman login ghcr.io \
+            -u ${{ github.actor }} --password-stdin
+
+      - name: Prepare previous chunked image
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.enable_rechunker != 'false'
+        run: |
+          PREVIOUS_IMAGE="${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}"
+
+          if sudo skopeo inspect "docker://${PREVIOUS_IMAGE}" 2>/dev/null \
+              | jq -e '.LayersData[1:] | all(.Annotations?["ostree.components"]?)' >/dev/null; then
+            echo "Pulling previous chunked image: ${PREVIOUS_IMAGE}"
+            sudo podman pull "${PREVIOUS_IMAGE}"
+          else
+            echo "No compatible previous chunked image found; building a fresh layer plan."
+          fi
+
+      - name: Run build-chunked-oci
+        id: rechunk
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.enable_rechunker != 'false'
+        run: |
+          FEDORA_VERSION="${{ github.event.inputs.fedora_version || '44' }}"
+          CHUNKED_IMAGE="${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}"
+
+          sudo podman run --rm \
+            --privileged \
+            -v "/var/lib/containers:/var/lib/containers" \
+            --entrypoint /usr/bin/rpm-ostree \
+            "quay.io/fedora-ostree-desktops/kinoite:${FEDORA_VERSION}" \
+            compose build-chunked-oci \
+            --max-layers 127 \
+            --format-version=2 \
+            --bootc \
+            --from "localhost/raw-img" \
+            --output "containers-storage:${CHUNKED_IMAGE}"
+
+          echo "IMAGE_REF=containers-storage:${CHUNKED_IMAGE}" >> "$GITHUB_ENV"
+
+      - name: Tag raw-img as current if chunking skipped
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.enable_rechunker == 'false'
+        run: |
+          sudo buildah tag raw-img ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}
+          echo "IMAGE_REF=containers-storage:${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}" >> "$GITHUB_ENV"
+
+      - name: Push To GHCR
+        id: push_ghcr
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | sudo podman login ghcr.io -u ${{ github.actor }} --password-stdin
+          for tag in ${{ steps.metadata.outputs.tags }}; do
+            sudo skopeo copy ${{ env.IMAGE_REF }} docker://${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:$tag
+          done
+
+      - name: Delete old images from GHCR
+        if: steps.push_ghcr.outcome == 'success'
+        run: |
+          PACKAGE_NAME="${{ env.IMAGE_NAME }}"
+          CUTOFF_DATE=$(date -u -d '30 days ago' +%s)
+          echo "Fetching versions for ${PACKAGE_NAME}..."
+          PAGE=1
+          while true; do
+            RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/user/packages/container/${PACKAGE_NAME}/versions?per_page=100&page=${PAGE}")
+            COUNT=$(echo "$RESPONSE" | jq 'length')
+            if [ "$COUNT" = "0" ] || [ -z "$COUNT" ]; then
+              break
+            fi
+            echo "$RESPONSE" | jq -c '.[]' | while read -r VERSION; do
+              VERSION_ID=$(echo "$VERSION" | jq -r '.id')
+              TAGS=$(echo "$VERSION" | jq -r '.metadata.container.tags // [] | join(",")')
+              UPDATED_AT=$(echo "$VERSION" | jq -r '.updated_at')
+              VERSION_TS=$(date -u -d "$UPDATED_AT" +%s 2>/dev/null || echo 0)
+              if echo "$TAGS" | grep -q "${{ env.DEFAULT_TAG }}"; then
+                continue
+              fi
+              if [ "$VERSION_TS" -lt "$CUTOFF_DATE" ] 2>/dev/null; then
+                echo "Deleting version ID: ${VERSION_ID} (tags: ${TAGS}, updated: ${UPDATED_AT})"
+                curl -s -X DELETE \
+                  -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                  -H "Accept: application/vnd.github+json" \
+                  "https://api.github.com/user/packages/container/${PACKAGE_NAME}/versions/${VERSION_ID}"
+              fi
+            done
+            if [ "$COUNT" -lt 100 ]; then
+              break
+            fi
+            PAGE=$((PAGE + 1))
+          done
+          echo "GHCR cleanup complete."
+
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.push_dockerhub == 'true'
+        run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo skopeo login docker.io \
+            -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Push To Docker Hub
+        id: push_dockerhub
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.push_dockerhub == 'true'
+        run: |
+          for tag in ${{ steps.metadata.outputs.tags }}; do
+            sudo skopeo copy ${{ env.IMAGE_REF }} docker://docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:$tag
+          done
+
+      - name: Delete old images from Docker Hub
+        if: steps.push_dockerhub.outcome == 'success' && steps.date.outputs.push_dockerhub == 'true'
+        run: |
+          DOCKERHUB_REPO="${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}"
+          CUTOFF_DATE=$(date -u -d '15 days ago' +%s)
+          TOKEN=$(curl -s -H "Content-Type: application/json" \
+            -X POST -d '{"username": "${{ secrets.DOCKERHUB_USERNAME }}", "password": "${{ secrets.DOCKERHUB_TOKEN }}"}' \
+            "https://hub.docker.com/v2/users/login/" | jq -r '.token')
+          echo "Fetching tags for ${DOCKERHUB_REPO}..."
+          PAGE_URL="https://hub.docker.com/v2/repositories/${DOCKERHUB_REPO}/tags/?page_size=100"
+          while [ "$PAGE_URL" != "null" ] && [ -n "$PAGE_URL" ]; do
+            RESPONSE=$(curl -s -H "Authorization: Bearer ${TOKEN}" "$PAGE_URL")
+            echo "$RESPONSE" | jq -c '.results[]?' | while read -r TAG; do
+              TAG_NAME=$(echo "$TAG" | jq -r '.name')
+              LAST_UPDATED=$(echo "$TAG" | jq -r '.last_updated')
+              TAG_TS=$(date -u -d "$LAST_UPDATED" +%s 2>/dev/null || echo 0)
+              if [ "$TAG_NAME" = "${{ env.DEFAULT_TAG }}" ]; then
+                continue
+              fi
+              if [ "$TAG_TS" -lt "$CUTOFF_DATE" ] 2>/dev/null; then
+                echo "Deleting tag: ${TAG_NAME} (updated: ${LAST_UPDATED})"
+                sudo skopeo delete docker://docker.io/${DOCKERHUB_REPO}:${TAG_NAME}
+              fi
+            done
+            PAGE_URL=$(echo "$RESPONSE" | jq -r '.next // "null"')
+          done
+          echo "Docker Hub cleanup complete."
+
+      - name: Login to Quay.io
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.push_quay == 'true'
+        run: |
+          echo "${{ secrets.QUAY_TOKEN }}" | sudo skopeo login quay.io \
+            -u ${{ secrets.QUAY_USERNAME }} --password-stdin
+
+      - name: Push To Quay.io
+        id: push_quay
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.push_quay == 'true'
+        run: |
+          for tag in ${{ steps.metadata.outputs.tags }}; do
+            sudo skopeo copy ${{ env.IMAGE_REF }} docker://quay.io/${{ secrets.QUAY_NAMESPACE }}/${{ env.IMAGE_NAME }}:$tag
+          done
+
+      - name: Delete old images from Quay.io
+        if: steps.push_quay.outcome == 'success' && steps.date.outputs.push_quay == 'true'
+        run: |
+          QUAY_REPO="${{ secrets.QUAY_NAMESPACE }}/${{ env.IMAGE_NAME }}"
+          CUTOFF_DATE=$(date -u -d '15 days ago' +%s)
+          echo "Fetching tags for ${QUAY_REPO}..."
+          PAGE=1
+          while true; do
+            RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.QUAY_TOKEN }}" \
+              "https://quay.io/api/v1/repository/${QUAY_REPO}/tag/?page=${PAGE}&limit=100&onlyActiveTags=true")
+
+            TAGS=$(echo "$RESPONSE" | jq -r '.tags[]? | select(.name != "${{ env.DEFAULT_TAG }}") | "\(.name) \(.start_ts)"')
+
+            if [ -z "$TAGS" ]; then
+              break
+            fi
+            echo "$TAGS" | while read -r TAG_NAME TAG_TS; do
+              if [ "$TAG_TS" -lt "$CUTOFF_DATE" ] 2>/dev/null; then
+                echo "Deleting tag: ${TAG_NAME} (created: $(date -u -d @${TAG_TS} +%Y-%m-%d))"
+                sudo skopeo delete docker://quay.io/${QUAY_REPO}:${TAG_NAME}
+              fi
+            done
+            HAS_MORE=$(echo "$RESPONSE" | jq -r '.has_additional // false')
+            if [ "$HAS_MORE" != "true" ]; then
+              break
+            fi
+            PAGE=$((PAGE + 1))
+          done
+
+          echo "Cleanup complete."
+
+      # - name: Install Cosign
+      #   uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+      #   if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+      # - name: Login to GitHub Container Registry
+      #   uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+      #   if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Sign container image
+      #   if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+      #   run: |
+      #     IMAGE_FULL="${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}"
+      #     for tag in ${{ steps.metadata.outputs.tags }}; do
+      #       cosign sign -y --key env://COSIGN_PRIVATE_KEY $IMAGE_FULL:$tag
+      #     done
+      #   env:
+      #     COSIGN_EXPERIMENTAL: false
+      #     COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
