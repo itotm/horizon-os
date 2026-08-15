@@ -1,8 +1,8 @@
 ---
 name: Build container image
 on:
-  schedule:
-    - cron: "1 0 * * *" # Every day at 00:01 UTC
+ # schedule:
+  #  - cron: "1 0 * * *" # Every day at 00:01 UTC
   workflow_dispatch:
     inputs:
       fedora_version:
@@ -206,7 +206,7 @@ jobs:
 
       # These `if` statements are so that pull requests for your custom images do not make it publish any packages under your name without you knowing
       # They also check if the runner is on the default branch so that things like the merge queue (if you enable it), are going to work
-- name: Run Rechunker (chunkah)
+      - name: Run Rechunker (chunkah)
         id: rechunk
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.enable_rechunker != 'false'
         run: |
