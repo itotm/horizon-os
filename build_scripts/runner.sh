@@ -6,13 +6,6 @@ SCRIPT_TO_RUN="$2"
 
 FLAG_VALUE=$(eval echo "\$$FLAG_NAME")
 
-for db in /var/lib/rpm/rpmdb.sqlite /usr/lib/sysimage/rpm/rpmdb.sqlite; do
-    if [ -f "$db" ]; then
-        echo "Found: $db"
-        sqlite3 "$db" "PRAGMA integrity_check;" || echo "CORRUPT: $db"
-    fi
-done
-
 if [ "$FLAG_VALUE" = "true" ]; then
     if [ -d "$SCRIPT_TO_RUN" ]; then
         for script in "$SCRIPT_TO_RUN"/*; do
@@ -25,6 +18,13 @@ if [ "$FLAG_VALUE" = "true" ]; then
         echo "----------> Running $(basename "$SCRIPT_TO_RUN")"
         sh "$SCRIPT_TO_RUN"
     fi
+
+    for db in /var/lib/rpm/rpmdb.sqlite /usr/lib/sysimage/rpm/rpmdb.sqlite; do
+        if [ -f "$db" ]; then
+            echo "Found: $db"
+            sqlite3 "$db" "PRAGMA integrity_check;" || echo "CORRUPT: $db"
+        fi
+    done
 else
     exit 0
 fi

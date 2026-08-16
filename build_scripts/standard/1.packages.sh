@@ -45,6 +45,7 @@ INSTALL_PACKAGES=(
     rclone
     ripgrep
     snapper
+    sqlite
     syncthing
     tldr
     tmux
