@@ -1,12 +1,17 @@
 #!/bin/sh
 set -oue pipefail
 
-export TMPDIR=/var/tmp
-
 FLAG_NAME="$1"
 SCRIPT_TO_RUN="$2"
 
 FLAG_VALUE=$(eval echo "\$$FLAG_NAME")
+
+for db in /var/lib/rpm/rpmdb.sqlite /usr/lib/sysimage/rpm/rpmdb.sqlite; do
+    if [ -f "$db" ]; then
+        echo "Found: $db"
+        sqlite3 "$db" "PRAGMA integrity_check;" || echo "CORRUPT: $db"
+    fi
+done
 
 if [ "$FLAG_VALUE" = "true" ]; then
     if [ -d "$SCRIPT_TO_RUN" ]; then
