@@ -7,6 +7,8 @@ SCRIPT_TO_RUN="$2"
 FLAG_VALUE=$(eval echo "\$$FLAG_NAME")
 
 if [ "$FLAG_VALUE" = "true" ]; then
+    rpm -qa | wc -l
+
     if [ -d "$SCRIPT_TO_RUN" ]; then
         for script in "$SCRIPT_TO_RUN"/*; do
             if [ -f "$script" ] && [ -x "$script" ]; then
