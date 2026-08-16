@@ -206,31 +206,29 @@ jobs:
 
       # These `if` statements are so that pull requests for your custom images do not make it publish any packages under your name without you knowing
       # They also check if the runner is on the default branch so that things like the merge queue (if you enable it), are going to work
-      - name: Run Rechunker (chunkah)
-        id: rechunk
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.enable_rechunker != 'false'
-        run: |
-          set -euo pipefail
+- name: Rechunk image with rpm-ostree build-chunked-oci
+  run: |
+    set -euo pipefail
 
-          # Tag raw-img so podman/chunkah can reference it
-          sudo podman tag localhost/raw-img localhost/raw-img:latest
+    # Tag raw-img so podman can reference it
+    sudo podman tag localhost/raw-img localhost/raw-img:latest
 
-          # Capture image config/labels before chunking (they'd otherwise be lost)
-          CHUNKAH_CONFIG_STR=$(sudo podman inspect localhost/raw-img:latest)
+    # rpm-ostree needs to run inside a container that has it installed and
+    # needs access to the host's containers-storage to read/write images.
+    # fedora-bootc images ship rpm-ostree by default.
+    sudo podman run --rm --privileged \
+      --pid=host \
+      -v /var/lib/containers:/var/lib/containers \
+      -v /run/containers/storage:/run/containers/storage \
+      quay.io/fedora/fedora-bootc:44 \
+      rpm-ostree compose build-chunked-oci \
+        --bootc \
+        --format-version=2 \
+        --max-layers=128 \
+        --from=localhost/raw-img:latest \
+        --output=containers-storage:localhost/rechunked-img:latest
 
-          # Run chunkah: strip OSTree sysroot data, drop OSTree labels, split into content-based layers
-          sudo podman run --rm \
-            --mount=type=image,src=localhost/raw-img:latest,dst=/chunkah \
-            -e CHUNKAH_CONFIG_STR="${CHUNKAH_CONFIG_STR}" \
-            quay.io/coreos/chunkah build \
-              --prune /sysroot/ \
-              --max-layers 128 \
-              --label ostree.commit- \
-              --label ostree.final-diffid- \
-              -t localhost/rechunked-img:latest \
-            | sudo podman load
-
-          echo "ref=containers-storage:localhost/rechunked-img:latest" >> "$GITHUB_OUTPUT"
+    echo "ref=containers-storage:localhost/rechunked-img:latest" >> "$GITHUB_OUTPUT"
 
       - name: Tag raw-img as current if Rechunker skipped
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.enable_rechunker == 'false'
