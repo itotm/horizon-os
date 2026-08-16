@@ -52,7 +52,7 @@ on:
       enable_rechunker:
         description: "Enable Rechunker"
         required: false
-        default: true
+        default: false
         type: boolean
       clear_plan:
         description: "Clear plan for Rechunker"
