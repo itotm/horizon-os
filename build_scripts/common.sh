@@ -60,3 +60,4 @@ sed -i "s/^PRETTY_NAME=.*/PRETTY_NAME=\"HorizonOS ${IMAGE_VERSION}\"/" /usr/lib/
 echo "${IMAGE_VERSION}" > /etc/horizon-version
 
 sqlite3 /usr/lib/sysimage/rpm/rpmdb.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
+rpm -qa | wc -l
