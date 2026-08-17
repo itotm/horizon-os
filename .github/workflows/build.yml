@@ -2,7 +2,7 @@
 name: Build container image
 on:
   schedule:
-    - cron: "1 0 * * *" # Every day at 00:01 UTC
+    - cron: "0 0 * * *" 
   workflow_dispatch:
     inputs:
       fedora_version:
@@ -23,11 +23,6 @@ on:
         description: "Standard"
         required: false
         default: true
-        type: boolean
-      enable_extended:
-        description: "Extended"
-        required: false
-        default: false
         type: boolean
       enable_virttools:
         description: "Virtualization Tools"
@@ -189,7 +184,6 @@ jobs:
             --build-arg IMAGE_VERSION=${{ steps.date.outputs.version }} \
             --build-arg ENABLE_COMMON=${{ github.event.inputs.enable_common || true }} \
             --build-arg ENABLE_STANDARD=${{ github.event.inputs.enable_standard || true }} \
-            --build-arg ENABLE_EXTENDED=${{ github.event.inputs.enable_extended || false }} \
             --build-arg ENABLE_VIRTTOOLS=${{ github.event.inputs.enable_virttools || true }} \
             --build-arg ENABLE_DEVTOOLS=${{ github.event.inputs.enable_devtools || true }} \
             --build-arg ENABLE_EXPERIMENTAL=${{ github.event.inputs.enable_experimental || false }} \
@@ -208,7 +202,7 @@ jobs:
       # They also check if the runner is on the default branch so that things like the merge queue (if you enable it), are going to work
       - name: Run Rechunker
         id: rechunk
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.enable_rechunker != 'false'
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.enable_rechunker == 'true'
         #uses: hhd-dev/rechunk@v1.2.4
         uses: ublue-os/legacy-rechunk@v1.0.0
         with:
@@ -219,17 +213,17 @@ jobs:
           clear-plan: ${{ github.event.inputs.clear_plan == 'true' && 'true' || '' }}
 
       - name: Tag raw-img as current if Rechunker skipped
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.enable_rechunker == 'false'
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.enable_rechunker != 'true'
         run: |
           sudo buildah tag raw-img ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}
 
       - name: Set IMAGE_REF variable
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
-          if [ "${{ github.event.inputs.enable_rechunker }}" = "false" ]; then
-            echo "IMAGE_REF=containers-storage:${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}" >> $GITHUB_ENV
-          else
+          if [ "${{ github.event.inputs.enable_rechunker }}" = "true" ]; then
             echo "IMAGE_REF=${{ steps.rechunk.outputs.ref }}" >> $GITHUB_ENV
+          else
+            echo "IMAGE_REF=containers-storage:${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}" >> $GITHUB_ENV
           fi
 
       - name: Push To GHCR

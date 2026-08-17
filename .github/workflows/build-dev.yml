@@ -90,7 +90,6 @@ jobs:
             --build-arg IMAGE_VERSION=${{ steps.date.outputs.version }} \
             --build-arg ENABLE_COMMON=true \
             --build-arg ENABLE_STANDARD=true \
-            --build-arg ENABLE_EXTENDED=false \
             --build-arg ENABLE_VIRTTOOLS=true \
             --build-arg ENABLE_DEVTOOLS=true \
             --build-arg ENABLE_EXPERIMENTAL=false \

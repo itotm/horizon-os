@@ -14,7 +14,6 @@ dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=1
 
 INSTALL_PACKAGES=(
     btrfs-assistant
-    cascadia-fonts-all
     du-dust
     duf
     fastfetch
@@ -42,16 +41,12 @@ INSTALL_PACKAGES=(
     policycoreutils-gui
     powerstat
     powertop
-    rclone
     ripgrep
     snapper
     sqlite
-    syncthing
     tldr
     tmux
     traceroute
-    vlc
     xsane
-    yt-dlp
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"

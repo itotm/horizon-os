@@ -22,11 +22,6 @@ on:
         required: false
         default: true
         type: boolean
-      enable_extended:
-        description: "Extended"
-        required: false
-        default: false
-        type: boolean
       enable_virttools:
         description: "Virtualization Tools"
         required: false
@@ -91,7 +86,6 @@ jobs:
             --build-arg IMAGE_VERSION=${{ steps.date.outputs.version }} \
             --build-arg ENABLE_COMMON=${{ github.event.inputs.enable_common || true }} \
             --build-arg ENABLE_STANDARD=${{ github.event.inputs.enable_standard || true }} \
-            --build-arg ENABLE_EXTENDED=${{ github.event.inputs.enable_extended || false }} \
             --build-arg ENABLE_VIRTTOOLS=${{ github.event.inputs.enable_virttools || true }} \
             --build-arg ENABLE_DEVTOOLS=${{ github.event.inputs.enable_devtools || true }} \
             --build-arg ENABLE_EXPERIMENTAL=true \
