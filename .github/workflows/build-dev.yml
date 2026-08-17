@@ -114,18 +114,20 @@ jobs:
           # Split the built image into content-based layers. Passing the inspect
           # output via CHUNKAH_CONFIG_STR preserves labels/config (e.g. containers.bootc=1).
           # --max-layers is bumped above the 64 default for bootable images.
+          # The host dir is mounted on /run/src (a path that does not exist in the
+          # chunkah image) and chunkah writes into /run/src/out.
           mkdir -p chunked
           sudo podman run --rm \
             --mount=type=image,src=$IMG_REF,dest=/chunkah \
-            --mount=type=bind,src="$PWD/chunked",target=/run/out \
+            --mount=type=bind,src="$PWD/chunked",target=/run/src \
             -e CHUNKAH_CONFIG_STR="$(sudo podman inspect $IMG_REF)" \
             quay.io/coreos/chunkah build \
             --max-layers 128 \
-            --output oci:/run/out
+            --output oci:/run/src/out
 
           # Import the chunked image back into container storage, replacing the
           # original so the push step below can use it as-is.
-          sudo skopeo copy oci:"$PWD/chunked" containers-storage:$IMG_REF
+          sudo skopeo copy oci:"$PWD/chunked/out" containers-storage:$IMG_REF
 
           IMAGE_SIZE=$(sudo buildah images --format "{{.Size}}" $IMG_REF | head -n 1)
           echo "Chunked image size: $IMAGE_SIZE"
