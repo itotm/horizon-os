@@ -132,8 +132,11 @@ jobs:
           else
             SOURCE_IMAGE="localhost/${{ env.IMAGE_NAME }}:build"
           fi
-          sudo buildah config --label "${{ steps.metadata.outputs.labels }}" "$SOURCE_IMAGE"
-          sudo buildah commit "$SOURCE_IMAGE" localhost/${{ env.IMAGE_NAME }}:final
+          # buildah config operates on a working container, not directly on an
+          # image, so create one from the source image first.
+          CTR=$(sudo buildah from "$SOURCE_IMAGE")
+          sudo buildah config --label "${{ steps.metadata.outputs.labels }}" "$CTR"
+          sudo buildah commit "$CTR" localhost/${{ env.IMAGE_NAME }}:final
           echo "IMAGE_REF=containers-storage:localhost/${{ env.IMAGE_NAME }}:final" >> $GITHUB_ENV
 
       - name: Push To GHCR
