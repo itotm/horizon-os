@@ -114,7 +114,7 @@ jobs:
         if: github.event.inputs.enable_rechunker == 'true'
         uses: projectbluefin/actions/bootc-build/chunka@cad7d15c30224a7a1a49c5ff0fd2054ca57b9cfd # v1
         with:
-          source-image: "localhost/${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}"
+          source-image: "${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}"
           max-layers: "128"
 
       - name: Push To GHCR
