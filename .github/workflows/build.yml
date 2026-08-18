@@ -45,14 +45,9 @@ on:
         default: true
         type: boolean
       enable_rechunker:
-        description: "Enable Rechunker"
+        description: "Enable Rechunker (chunka)"
         required: false
-        default: false
-        type: boolean
-      clear_plan:
-        description: "Clear plan for Rechunker"
-        required: false
-        default: false
+        default: true
         type: boolean
 
 env:
@@ -88,22 +83,6 @@ jobs:
       # These stage versions are pinned by https://github.com/renovatebot/renovate
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      # - name: Free Disk Space (Ubuntu)
-      #   uses: jlumbroso/free-disk-space@main
-      #   with:
-      #     # this might remove tools that are actually needed,
-      #     # if set to "true" but frees about 6 GB
-      #     tool-cache: false
-
-      #     # all of these default to true, but feel free to set to
-      #     # "false" if necessary for your workflow
-      #     android: true
-      #     dotnet: false
-      #     haskell: false
-      #     large-packages: false
-      #     docker-images: false
-      #     swap-storage: false
 
       - name: Get current date and version
         id: date
@@ -200,28 +179,24 @@ jobs:
 
       # These `if` statements are so that pull requests for your custom images do not make it publish any packages under your name without you knowing
       # They also check if the runner is on the default branch so that things like the merge queue (if you enable it), are going to work
-      - name: Run Rechunker
+      - name: Run Rechunker (chunka)
         id: rechunk
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.enable_rechunker == 'true'
-        #uses: hhd-dev/rechunk@v1.2.4
-        uses: ublue-os/legacy-rechunk@v1.0.0
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.enable_rechunker != 'false'
+        uses: projectbluefin/actions/bootc-build/chunka@cad7d15c30224a7a1a49c5ff0fd2054ca57b9cfd # v1
         with:
-          ref: "raw-img"
-          prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}
-          version: ${{ steps.date.outputs.version }}
-          labels: ${{ steps.metadata.outputs.labels }}
-          clear-plan: ${{ github.event.inputs.clear_plan == 'true' && 'true' || '' }}
+          source-image: "raw-img"
+          max-layers: "128"
 
       - name: Tag raw-img as current if Rechunker skipped
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.enable_rechunker != 'true'
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.enable_rechunker == 'false'
         run: |
           sudo buildah tag raw-img ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}
 
       - name: Set IMAGE_REF variable
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
-          if [ "${{ github.event.inputs.enable_rechunker }}" = "true" ]; then
-            echo "IMAGE_REF=${{ steps.rechunk.outputs.ref }}" >> $GITHUB_ENV
+          if [ "${{ github.event.inputs.enable_rechunker }}" != "false" ]; then
+            echo "IMAGE_REF=containers-storage:${{ steps.rechunk.outputs.image-ref }}" >> $GITHUB_ENV
           else
             echo "IMAGE_REF=containers-storage:${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}" >> $GITHUB_ENV
           fi
@@ -380,26 +355,3 @@ jobs:
           done
 
           echo "Cleanup complete."
-
-      # - name: Install Cosign
-      #   uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
-      #   if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-
-      # - name: Login to GitHub Container Registry
-      #   uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
-      #   if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-      #   with:
-      #     registry: ghcr.io
-      #     username: ${{ github.actor }}
-      #     password: ${{ secrets.GITHUB_TOKEN }}
-
-      # - name: Sign container image
-      #   if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-      #   run: |
-      #     IMAGE_FULL="${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}"
-      #     for tag in ${{ steps.metadata.outputs.tags }}; do
-      #       cosign sign -y --key env://COSIGN_PRIVATE_KEY $IMAGE_FULL:$tag
-      #     done
-      #   env:
-      #     COSIGN_EXPERIMENTAL: false
-      #     COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}

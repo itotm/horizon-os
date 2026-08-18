@@ -1,16 +1,19 @@
 #!/bin/bash
 set -oue pipefail
 
-# font cache regeneration
+echo "----------> Font cache regeneration"
 fc-cache -f
 
+echo "----------> Disabling repos"
 if [ "${DISABLE_REPOS:-true}" = "true" ]; then
 	sed -i 's/^enabled=.*/enabled=0/' /etc/yum.repos.d/*.repo
 fi
 
+echo "----------> Cleaning up dnf cache"
 dnf5 -y autoremove
 dnf5 -y clean all
 
+echo "----------> Downloading GitHub assets"
 ./ctx/download-github.sh https://github.com/itotm/eleven-twilight/releases/download/v2.2/ElevenTwilight-2.2.tar.gz /usr/share/icons
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plasma-colors/releases/download/v1.0/ClearSimple.colors.tar.gz /usr/share/color-schemes
@@ -29,8 +32,10 @@ sleep 1
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plymouth-themes/releases/download/v1.1/fedora-logo-spinner.tar.gz /usr/share/plymouth/themes
 
+echo "----------> Setting Plymouth theme"
 plymouth-set-default-theme fedora-logo-spinner
 
+echo "----------> Regenerating initramfs"
 KERNEL_VERSION=$(ls -1 /usr/lib/modules/ | head -n1)
 echo "Kernel: ${KERNEL_VERSION}"
 depmod -a "${KERNEL_VERSION}"
@@ -46,9 +51,11 @@ echo "Starting initramfs regeneration for kernel version: ${KERNEL_VERSION}"
 
 chmod 0600 "${INITRAMFS_IMAGE}"
 
+echo "----------> Copying system files"
 cp -r /ctx/sys_files/* /
 systemctl enable horizon-setup-system.service
 
+echo "----------> Setting up HorizonOS branding"
 cat > /etc/xdg/kcm-about-distrorc <<EOF
 [General]
 Variant=HorizonOS ${IMAGE_VERSION}
@@ -59,7 +66,13 @@ sed -i "s/^PRETTY_NAME=.*/PRETTY_NAME=\"HorizonOS ${IMAGE_VERSION}\"/" /usr/lib/
 
 echo "${IMAGE_VERSION}" > /etc/horizon-version
 
-echo "------ sqlite cleanup"
+echo "----------> Sqlite cleanup"
 sqlite3 /usr/lib/sysimage/rpm/rpmdb.sqlite "PRAGMA wal_checkpoint(TRUNCATE); PRAGMA journal_mode=DELETE;"
-echo "------ final package count"
+
+echo "----------> Final package count"
 rpm -qa | wc -l
+
+echo "----------> Final disk usage"
+df -h
+
+echo "----------> Completed build script"
