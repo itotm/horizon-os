@@ -203,10 +203,18 @@ jobs:
           else
             SOURCE_IMAGE="localhost/${{ env.IMAGE_NAME }}:build"
           fi
-          # buildah config operates on a working container, not directly on an
-          # image, so create one from the source image first.
+
           CTR=$(sudo buildah from "$SOURCE_IMAGE")
-          sudo buildah config --label "${{ steps.metadata.outputs.labels }}" "$CTR"
+
+          # Split the newline-separated labels output into individual --label flags
+          LABELS_RAW="${{ steps.metadata.outputs.labels }}"
+          readarray -t LABEL_LINES <<< "$LABELS_RAW"
+          LABEL_ARGS=()
+          for line in "${LABEL_LINES[@]}"; do
+            [ -n "$line" ] && LABEL_ARGS+=(--label "$line")
+          done
+
+          sudo buildah config "${LABEL_ARGS[@]}" "$CTR"
           sudo buildah commit "$CTR" localhost/${{ env.IMAGE_NAME }}:final
           echo "IMAGE_REF=containers-storage:localhost/${{ env.IMAGE_NAME }}:final" >> $GITHUB_ENV
 
