@@ -89,7 +89,6 @@ jobs:
         run: |
           sudo buildah build \
             --file ./Containerfile \
-            --tag ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }} \
             --build-arg FEDORA_VERSION=${{ github.event.inputs.fedora_version || '44' }} \
             --build-arg BUILD_NUMBER=${{ github.run_number }} \
             --build-arg IMAGE_VERSION=${{ steps.date.outputs.version }} \
@@ -105,8 +104,8 @@ jobs:
 
       - name: Log image size
         run: |
-          IMAGE_ID=$(sudo buildah images --format "{{.ID}}" ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }} | head -n 1)
-          IMAGE_SIZE=$(sudo buildah images --format "{{.Size}}" ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }} | head -n 1)
+          IMAGE_ID=$(sudo buildah images --format "{{.ID}}" localhost/${{ env.IMAGE_NAME }}:build | head -n 1)
+          IMAGE_SIZE=$(sudo buildah images --format "{{.Size}}" localhost/${{ env.IMAGE_NAME }}:build | head -n 1)
           echo "Built image ID: $IMAGE_ID"
           echo "Image size: $IMAGE_SIZE"
 
@@ -122,13 +121,20 @@ jobs:
           source-image: "localhost/${{ env.IMAGE_NAME }}:build"
           max-layers: "128"
 
-      - name: Set IMAGE_REF variable
+      # The rechunker (chunka) produces a new image that loses the metadata
+      # labels applied during the build. Re-apply them to the final image so
+      # the pushed tag carries the correct version/description regardless of
+      # whether rechunking ran or not.
+      - name: Apply metadata labels
         run: |
           if [ "${{ github.event.inputs.enable_rechunker }}" = "true" ]; then
-            echo "IMAGE_REF=containers-storage:${{ steps.rechunk.outputs.image-ref }}" >> $GITHUB_ENV
+            SOURCE_IMAGE="${{ steps.rechunk.outputs.image-ref }}"
           else
-            echo "IMAGE_REF=containers-storage:localhost/${{ env.IMAGE_NAME }}:build" >> $GITHUB_ENV
+            SOURCE_IMAGE="localhost/${{ env.IMAGE_NAME }}:build"
           fi
+          sudo buildah config --label "${{ steps.metadata.outputs.labels }}" "$SOURCE_IMAGE"
+          sudo buildah commit "$SOURCE_IMAGE" localhost/${{ env.IMAGE_NAME }}:final
+          echo "IMAGE_REF=containers-storage:localhost/${{ env.IMAGE_NAME }}:final" >> $GITHUB_ENV
 
       - name: Push To GHCR
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
