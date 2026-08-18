@@ -59,5 +59,7 @@ sed -i "s/^PRETTY_NAME=.*/PRETTY_NAME=\"HorizonOS ${IMAGE_VERSION}\"/" /usr/lib/
 
 echo "${IMAGE_VERSION}" > /etc/horizon-version
 
-sqlite3 /usr/lib/sysimage/rpm/rpmdb.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
+echo "------ sqlite cleanup"
+sqlite3 /usr/lib/sysimage/rpm/rpmdb.sqlite "PRAGMA wal_checkpoint(TRUNCATE); PRAGMA journal_mode=DELETE;"
+echo "------ final package count"
 rpm -qa | wc -l
