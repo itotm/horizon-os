@@ -79,6 +79,8 @@ jobs:
           # Lowercase the image uri
           echo "IMAGE_REGISTRY=${IMAGE_REGISTRY,,}" >> ${GITHUB_ENV}
           echo "IMAGE_NAME=${IMAGE_NAME,,}" >> ${GITHUB_ENV}
+          # Full local image ref (used for build, rechunk and push)
+          echo "IMAGE_REF=${IMAGE_REGISTRY,,}/${IMAGE_NAME,,}:${DEFAULT_TAG}" >> ${GITHUB_ENV}
 
       # These stage versions are pinned by https://github.com/renovatebot/renovate
       - name: Checkout
@@ -157,7 +159,7 @@ jobs:
         run: |
           sudo buildah build \
             --file ./Containerfile \
-            --tag raw-img \
+            --tag ${{ env.IMAGE_REF }} \
             --build-arg FEDORA_VERSION=${{ github.event.inputs.fedora_version || '44' }} \
             --build-arg BUILD_NUMBER=${{ github.run_number }} \
             --build-arg IMAGE_VERSION=${{ steps.date.outputs.version }} \
@@ -172,8 +174,8 @@ jobs:
 
       - name: Log image size
         run: |
-          IMAGE_ID=$(sudo buildah images --format "{{.ID}}" raw-img | head -n 1)
-          IMAGE_SIZE=$(sudo buildah images --format "{{.Size}}" raw-img | head -n 1)
+          IMAGE_ID=$(sudo buildah images --format "{{.ID}}" ${{ env.IMAGE_REF }} | head -n 1)
+          IMAGE_SIZE=$(sudo buildah images --format "{{.Size}}" ${{ env.IMAGE_REF }} | head -n 1)
           echo "Built image ID: $IMAGE_ID"
           echo "Image size: $IMAGE_SIZE"
 
@@ -184,22 +186,8 @@ jobs:
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.enable_rechunker != 'false'
         uses: projectbluefin/actions/bootc-build/chunka@cad7d15c30224a7a1a49c5ff0fd2054ca57b9cfd # v1
         with:
-          source-image: "raw-img"
+          source-image: "${{ env.IMAGE_REF }}"
           max-layers: "128"
-
-      - name: Tag raw-img as current if Rechunker skipped
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.enable_rechunker == 'false'
-        run: |
-          sudo buildah tag raw-img ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}
-
-      - name: Set IMAGE_REF variable
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-        run: |
-          if [ "${{ github.event.inputs.enable_rechunker }}" != "false" ]; then
-            echo "IMAGE_REF=containers-storage:${{ steps.rechunk.outputs.image-ref }}" >> $GITHUB_ENV
-          else
-            echo "IMAGE_REF=containers-storage:${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}" >> $GITHUB_ENV
-          fi
 
       - name: Push To GHCR
         id: push_ghcr
@@ -207,7 +195,7 @@ jobs:
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | sudo podman login ghcr.io -u ${{ github.actor }} --password-stdin
           for tag in ${{ steps.metadata.outputs.tags }}; do
-            sudo skopeo copy ${{ env.IMAGE_REF }} docker://${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:$tag
+            sudo skopeo copy containers-storage:${{ env.IMAGE_REF }} docker://${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:$tag
           done
 
       - name: Delete old images from GHCR
@@ -268,7 +256,7 @@ jobs:
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.push_dockerhub == 'true'
         run: |
           for tag in ${{ steps.metadata.outputs.tags }}; do
-            sudo skopeo copy ${{ env.IMAGE_REF }} docker://docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:$tag
+            sudo skopeo copy containers-storage:${{ env.IMAGE_REF }} docker://docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:$tag
           done
 
       - name: Delete old images from Docker Hub
@@ -319,7 +307,7 @@ jobs:
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.push_quay == 'true'
         run: |
           for tag in ${{ steps.metadata.outputs.tags }}; do
-            sudo skopeo copy ${{ env.IMAGE_REF }} docker://quay.io/${{ secrets.QUAY_NAMESPACE }}/${{ env.IMAGE_NAME }}:$tag
+            sudo skopeo copy containers-storage:${{ env.IMAGE_REF }} docker://quay.io/${{ secrets.QUAY_NAMESPACE }}/${{ env.IMAGE_NAME }}:$tag
           done
 
       - name: Delete old images from Quay.io
