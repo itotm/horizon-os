@@ -85,13 +85,17 @@ jobs:
 
       - name: Build Image
         id: build_image
+        # Labels are passed through the environment rather than interpolated
+        # directly into the script: the value is multi-line and user-controlled.
+        env:
+          METADATA_LABELS: ${{ steps.metadata.outputs.labels }}
         run: |
-          LABELS_RAW="${{ steps.metadata.outputs.labels }}"
-          readarray -t LABEL_LINES <<< "$LABELS_RAW"
+          set -euo pipefail
+
           LABEL_ARGS=()
-          for line in "${LABEL_LINES[@]}"; do
+          while IFS= read -r line; do
             [ -n "$line" ] && LABEL_ARGS+=(--label "$line")
-          done
+          done <<< "$METADATA_LABELS"
 
           sudo buildah build \
             --file ./Containerfile \
@@ -132,18 +136,32 @@ jobs:
       # the pushed tag carries the correct version/description regardless of
       # whether rechunking ran or not.
       - name: Apply metadata labels
+        env:
+          METADATA_LABELS: ${{ steps.metadata.outputs.labels }}
         run: |
+          set -euo pipefail
+
           if [ "${{ github.event.inputs.enable_rechunker }}" = "true" ]; then
             SOURCE_IMAGE="${{ steps.rechunk.outputs.image-ref }}"
           else
             SOURCE_IMAGE="localhost/${{ env.IMAGE_NAME }}:build"
           fi
+          echo "Applying labels on top of: $SOURCE_IMAGE"
+
+          LABEL_ARGS=()
+          while IFS= read -r line; do
+            [ -n "$line" ] && LABEL_ARGS+=(--label "$line")
+          done <<< "$METADATA_LABELS"
+
           # buildah config operates on a working container, not directly on an
           # image, so create one from the source image first.
           CTR=$(sudo buildah from "$SOURCE_IMAGE")
-          sudo buildah config --label "${{ steps.metadata.outputs.labels }}" "$CTR"
-          sudo buildah commit "$CTR" localhost/${{ env.IMAGE_NAME }}:final
+          sudo buildah config "${LABEL_ARGS[@]}" "$CTR"
+          sudo buildah commit --rm --format oci "$CTR" localhost/${{ env.IMAGE_NAME }}:final
           echo "IMAGE_REF=containers-storage:localhost/${{ env.IMAGE_NAME }}:final" >> $GITHUB_ENV
+
+          echo "Final labels:"
+          sudo skopeo inspect containers-storage:localhost/${{ env.IMAGE_NAME }}:final | jq '.Labels'
 
       - name: Push To GHCR
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)

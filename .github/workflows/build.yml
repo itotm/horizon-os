@@ -2,7 +2,7 @@
 name: Build container image
 on:
   schedule:
-    - cron: "0 0 * * *" 
+    - cron: "0 0 * * *"
   workflow_dispatch:
     inputs:
       fedora_version:
@@ -11,9 +11,9 @@ on:
         default: "44"
         type: choice
         options:
-          - "43"
           - "44"
           - "45"
+          - "rawhide"
       enable_common:
         description: "Common"
         required: false
@@ -65,7 +65,7 @@ jobs:
   build_push:
     name: Build and push image
     runs-on: ubuntu-26.04
-    timeout-minutes: 40
+    timeout-minutes: 30
 
     permissions:
       contents: read
@@ -145,7 +145,6 @@ jobs:
             io.artifacthub.package.deprecated=false
             io.artifacthub.package.keywords=${{ env.IMAGE_KEYWORDS }}
             io.artifacthub.package.license=Apache-2.0
-            io.artifacthub.package.logo-url=${{ env.IMAGE_LOGO_URL }}
             io.artifacthub.package.prerelease=false
             containers.bootc=1
           sep-tags: " "
@@ -153,13 +152,17 @@ jobs:
 
       - name: Build Image
         id: build_image
+        # Labels are passed through the environment rather than interpolated
+        # directly into the script: the value is multi-line and user-controlled.
+        env:
+          METADATA_LABELS: ${{ steps.metadata.outputs.labels }}
         run: |
-          LABELS_RAW="${{ steps.metadata.outputs.labels }}"
-          readarray -t LABEL_LINES <<< "$LABELS_RAW"
+          set -euo pipefail
+
           LABEL_ARGS=()
-          for line in "${LABEL_LINES[@]}"; do
+          while IFS= read -r line; do
             [ -n "$line" ] && LABEL_ARGS+=(--label "$line")
-          done
+          done <<< "$METADATA_LABELS"
 
           sudo buildah build \
             --file ./Containerfile \
@@ -177,7 +180,7 @@ jobs:
             .
 
       - name: Debug labels after build
-        run: sudo buildah inspect --format '{{"{{"}}.Docker.Config.Labels{{"}}"}}' localhost/${{ env.IMAGE_NAME }}:build
+        run: sudo skopeo inspect containers-storage:localhost/${{ env.IMAGE_NAME }}:build | jq '.Labels'
 
       - name: Log image size
         run: |
@@ -200,79 +203,119 @@ jobs:
           source-image: "localhost/${{ env.IMAGE_NAME }}:build"
           max-layers: "128"
 
+      # chunkah rebuilds the image from the flattened rootfs and drops the config
+      # labels in the process: whatever survives is inherited from the base image,
+      # not what `buildah build --label` set. Re-apply them here, on the final
+      # artifact, right before pushing. This adds one empty layer (a few dozen
+      # bytes) on top of the rechunked image, which does not affect OTA deltas.
+      - name: Re-apply OCI labels
+        id: final_image
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        env:
+          METADATA_LABELS: ${{ steps.metadata.outputs.labels }}
+        run: |
+          set -euo pipefail
+
+          if [ "${{ steps.rechunk.outcome }}" = "success" ]; then
+            SRC="${{ steps.rechunk.outputs.image-ref }}"
+          else
+            SRC="localhost/${{ env.IMAGE_NAME }}:build"
+          fi
+          echo "Applying labels on top of: $SRC"
+
+          LABEL_ARGS=()
+          while IFS= read -r line; do
+            [ -n "$line" ] && LABEL_ARGS+=(--label "$line")
+          done <<< "$METADATA_LABELS"
+
+          CTR=$(sudo buildah from "$SRC")
+          sudo buildah config "${LABEL_ARGS[@]}" "$CTR"
+          sudo buildah commit --rm --format oci "$CTR" localhost/${{ env.IMAGE_NAME }}:final
+
+          echo "image=localhost/${{ env.IMAGE_NAME }}:final" >> $GITHUB_OUTPUT
+
+          echo "Final labels:"
+          sudo skopeo inspect containers-storage:localhost/${{ env.IMAGE_NAME }}:final | jq '.Labels'
+
+      # Copying out of containers-storage recompresses the layers on every call,
+      # which yields a different manifest digest each time and would publish the
+      # same content as several distinct package versions. Copy once, capture the
+      # digest, then point the remaining tags at that same manifest with
+      # registry-to-registry copies.
       - name: Push To GHCR
         id: push_ghcr
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
-          if [ "${{ github.event.inputs.enable_rechunker }}" != "false" ]; then
-            SOURCE_IMAGE="${{ steps.rechunk.outputs.image-ref }}"
-          else
-            SOURCE_IMAGE="localhost/${{ env.IMAGE_NAME }}:build"
-          fi
-          echo "${{ secrets.GITHUB_TOKEN }}" | sudo podman login ghcr.io -u ${{ github.actor }} --password-stdin
-          for tag in ${{ steps.metadata.outputs.tags }}; do
-            sudo skopeo copy containers-storage:"$SOURCE_IMAGE" docker://${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:$tag
+          set -euo pipefail
+
+          REPO="${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}"
+          TAGS=(${{ steps.metadata.outputs.tags }})
+
+          echo "${{ secrets.GITHUB_TOKEN }}" | sudo skopeo login ghcr.io -u ${{ github.actor }} --password-stdin
+
+          sudo skopeo copy --digestfile /tmp/ghcr-digest \
+            containers-storage:"${{ steps.final_image.outputs.image }}" \
+            "docker://${REPO}:${TAGS[0]}"
+          DIGEST=$(cat /tmp/ghcr-digest)
+          echo "Pushed ${REPO}:${TAGS[0]} -> ${DIGEST}"
+
+          for tag in "${TAGS[@]:1}"; do
+            sudo skopeo copy "docker://${REPO}@${DIGEST}" "docker://${REPO}:${tag}"
+            echo "Tagged ${REPO}:${tag} -> ${DIGEST}"
           done
+
+          echo "repo=${REPO}" >> $GITHUB_OUTPUT
+          echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
+          echo "ref=docker://${REPO}@${DIGEST}" >> $GITHUB_OUTPUT
 
       - name: Delete old images from GHCR
         if: steps.push_ghcr.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PACKAGE_NAME: ${{ env.IMAGE_NAME }}
+          KEEP_TAG: ${{ env.DEFAULT_TAG }}
         run: |
-          PACKAGE_NAME="${{ env.IMAGE_NAME }}"
+          set -euo pipefail
+
           CUTOFF_DATE=$(date -u -d '30 days ago' +%s)
-
           echo "Fetching versions for ${PACKAGE_NAME}..."
-          PAGE=1
-          while true; do
-            RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Accept: application/vnd.github+json" \
-              "https://api.github.com/user/packages/container/${PACKAGE_NAME}/versions?per_page=100&page=${PAGE}")
 
-            # Check if response is empty array
-            COUNT=$(echo "$RESPONSE" | jq 'length')
-            if [ "$COUNT" = "0" ] || [ -z "$COUNT" ]; then
-              break
-            fi
-
-            echo "$RESPONSE" | jq -c '.[]' | while read -r VERSION; do
-              VERSION_ID=$(echo "$VERSION" | jq -r '.id')
-              TAGS=$(echo "$VERSION" | jq -r '.metadata.container.tags // [] | join(",")')
-              UPDATED_AT=$(echo "$VERSION" | jq -r '.updated_at')
+          # `gh api` paginates on its own and fails the step on a non-2xx response,
+          # unlike a bare `curl -s`. The default tag is excluded by exact array
+          # membership rather than a substring match on the joined list, so tags
+          # such as `latest-foo` are no longer treated as protected.
+          gh api --paginate "/user/packages/container/${PACKAGE_NAME}/versions" \
+            --jq ".[]
+                  | select((.metadata.container.tags // []) | index(\"${KEEP_TAG}\") | not)
+                  | [.id, .updated_at, ((.metadata.container.tags // []) | join(\",\"))]
+                  | @tsv" \
+          | while IFS=$'\t' read -r VERSION_ID UPDATED_AT TAGS; do
               VERSION_TS=$(date -u -d "$UPDATED_AT" +%s 2>/dev/null || echo 0)
+              [ "$VERSION_TS" -lt "$CUTOFF_DATE" ] || continue
 
-              # Skip if it has the default tag
-              if echo "$TAGS" | grep -q "${{ env.DEFAULT_TAG }}"; then
-                continue
-              fi
-
-              if [ "$VERSION_TS" -lt "$CUTOFF_DATE" ] 2>/dev/null; then
-                echo "Deleting version ID: ${VERSION_ID} (tags: ${TAGS}, updated: ${UPDATED_AT})"
-                curl -s -X DELETE \
-                  -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-                  -H "Accept: application/vnd.github+json" \
-                  "https://api.github.com/user/packages/container/${PACKAGE_NAME}/versions/${VERSION_ID}"
-              fi
+              echo "Deleting version ID: ${VERSION_ID} (tags: ${TAGS:-<untagged>}, updated: ${UPDATED_AT})"
+              gh api --silent --method DELETE \
+                "/user/packages/container/${PACKAGE_NAME}/versions/${VERSION_ID}"
             done
-
-            if [ "$COUNT" -lt 100 ]; then
-              break
-            fi
-            PAGE=$((PAGE + 1))
-          done
 
           echo "GHCR cleanup complete."
 
       - name: Login to Docker Hub
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.push_dockerhub == 'true'
+        if: steps.push_ghcr.outcome == 'success' && steps.date.outputs.push_dockerhub == 'true'
         run: |
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo skopeo login docker.io \
             -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
+      # Mirroring from the GHCR digest instead of containers-storage keeps the same
+      # manifest digest across all registries and skips a full re-upload.
       - name: Push To Docker Hub
         id: push_dockerhub
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.push_dockerhub == 'true'
+        if: steps.push_ghcr.outcome == 'success' && steps.date.outputs.push_dockerhub == 'true'
         run: |
+          set -euo pipefail
+          SRC="${{ steps.push_ghcr.outputs.ref }}"
           for tag in ${{ steps.metadata.outputs.tags }}; do
-            sudo skopeo copy ${{ env.IMAGE_REF }} docker://docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:$tag
+            sudo skopeo copy "$SRC" docker://docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:$tag
           done
 
       - name: Delete old images from Docker Hub
@@ -313,17 +356,19 @@ jobs:
           echo "Docker Hub cleanup complete."
 
       - name: Login to Quay.io
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.push_quay == 'true'
+        if: steps.push_ghcr.outcome == 'success' && steps.date.outputs.push_quay == 'true'
         run: |
           echo "${{ secrets.QUAY_TOKEN }}" | sudo skopeo login quay.io \
             -u ${{ secrets.QUAY_USERNAME }} --password-stdin
 
       - name: Push To Quay.io
         id: push_quay
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.date.outputs.push_quay == 'true'
+        if: steps.push_ghcr.outcome == 'success' && steps.date.outputs.push_quay == 'true'
         run: |
+          set -euo pipefail
+          SRC="${{ steps.push_ghcr.outputs.ref }}"
           for tag in ${{ steps.metadata.outputs.tags }}; do
-            sudo skopeo copy ${{ env.IMAGE_REF }} docker://quay.io/${{ secrets.QUAY_NAMESPACE }}/${{ env.IMAGE_NAME }}:$tag
+            sudo skopeo copy "$SRC" docker://quay.io/${{ secrets.QUAY_NAMESPACE }}/${{ env.IMAGE_NAME }}:$tag
           done
 
       - name: Delete old images from Quay.io
