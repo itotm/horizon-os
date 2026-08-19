@@ -53,7 +53,6 @@ on:
 env:
   IMAGE_DESC: "HorizonOS - Customized Fedora Kinoite Image"
   IMAGE_KEYWORDS: "bootc,fedora,kinoite,atomic"
-  IMAGE_LOGO_URL: "https://horizon-os.itotm.org/logo.png"
   IMAGE_NAME: "${{ github.event.repository.name }}"
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
   DEFAULT_TAG: "latest"
@@ -155,6 +154,13 @@ jobs:
       - name: Build Image
         id: build_image
         run: |
+          LABELS_RAW="${{ steps.metadata.outputs.labels }}"
+          readarray -t LABEL_LINES <<< "$LABELS_RAW"
+          LABEL_ARGS=()
+          for line in "${LABEL_LINES[@]}"; do
+            [ -n "$line" ] && LABEL_ARGS+=(--label "$line")
+          done
+
           sudo buildah build \
             --file ./Containerfile \
             --build-arg FEDORA_VERSION=${{ github.event.inputs.fedora_version || '44' }} \
@@ -167,8 +173,11 @@ jobs:
             --build-arg ENABLE_EXPERIMENTAL=${{ github.event.inputs.enable_experimental || false }} \
             --build-arg DISABLE_REPOS=${{ github.event.inputs.disable_repos || true }} \
             --tag localhost/${{ env.IMAGE_NAME }}:build \
-            --label "${{ steps.metadata.outputs.labels }}" \
+            "${LABEL_ARGS[@]}" \
             .
+
+      - name: Debug labels after build
+        run: sudo buildah inspect localhost/${{ env.IMAGE_NAME }}:build --format '{{"{{"}}.Docker.Config.Labels{{"}}"}}'
 
       - name: Log image size
         run: |
@@ -191,11 +200,8 @@ jobs:
           source-image: "localhost/${{ env.IMAGE_NAME }}:build"
           max-layers: "128"
 
-      # The rechunker (chunka) produces a new image that loses the metadata
-      # labels applied during the build. Re-apply them to the final image so
-      # the pushed tags carry the correct version/description regardless of
-      # whether rechunking ran or not.
-      - name: Apply metadata labels
+      - name: Push To GHCR
+        id: push_ghcr
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
           if [ "${{ github.event.inputs.enable_rechunker }}" != "false" ]; then
@@ -203,28 +209,9 @@ jobs:
           else
             SOURCE_IMAGE="localhost/${{ env.IMAGE_NAME }}:build"
           fi
-
-          CTR=$(sudo buildah from "$SOURCE_IMAGE")
-
-          # Split the newline-separated labels output into individual --label flags
-          LABELS_RAW="${{ steps.metadata.outputs.labels }}"
-          readarray -t LABEL_LINES <<< "$LABELS_RAW"
-          LABEL_ARGS=()
-          for line in "${LABEL_LINES[@]}"; do
-            [ -n "$line" ] && LABEL_ARGS+=(--label "$line")
-          done
-
-          sudo buildah config "${LABEL_ARGS[@]}" "$CTR"
-          sudo buildah commit "$CTR" localhost/${{ env.IMAGE_NAME }}:final
-          echo "IMAGE_REF=containers-storage:localhost/${{ env.IMAGE_NAME }}:final" >> $GITHUB_ENV
-
-      - name: Push To GHCR
-        id: push_ghcr
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-        run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | sudo podman login ghcr.io -u ${{ github.actor }} --password-stdin
           for tag in ${{ steps.metadata.outputs.tags }}; do
-            sudo skopeo copy ${{ env.IMAGE_REF }} docker://${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:$tag
+            sudo skopeo copy containers-storage:"$SOURCE_IMAGE" docker://${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:$tag
           done
 
       - name: Delete old images from GHCR

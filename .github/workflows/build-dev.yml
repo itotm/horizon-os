@@ -20,7 +20,6 @@ on:
 env:
   IMAGE_DESC: "HorizonOS - Customized Fedora Kinoite Image (Dev)"
   IMAGE_KEYWORDS: "bootc,fedora,kinoite,atomic,dev"
-  IMAGE_LOGO_URL: "https://horizon-os.itotm.org/logo.png"
   IMAGE_NAME: "${{ github.event.repository.name }}"
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
   DEFAULT_TAG: "dev"
@@ -87,6 +86,13 @@ jobs:
       - name: Build Image
         id: build_image
         run: |
+          LABELS_RAW="${{ steps.metadata.outputs.labels }}"
+          readarray -t LABEL_LINES <<< "$LABELS_RAW"
+          LABEL_ARGS=()
+          for line in "${LABEL_LINES[@]}"; do
+            [ -n "$line" ] && LABEL_ARGS+=(--label "$line")
+          done
+
           sudo buildah build \
             --file ./Containerfile \
             --build-arg FEDORA_VERSION=${{ github.event.inputs.fedora_version || '44' }} \
@@ -99,7 +105,7 @@ jobs:
             --build-arg ENABLE_EXPERIMENTAL=false \
             --build-arg DISABLE_REPOS=true \
             --tag localhost/${{ env.IMAGE_NAME }}:build \
-            --label "${{ steps.metadata.outputs.labels }}" \
+            "${LABEL_ARGS[@]}" \
             .
 
       - name: Log image size
