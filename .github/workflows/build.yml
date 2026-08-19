@@ -177,7 +177,7 @@ jobs:
             .
 
       - name: Debug labels after build
-        run: sudo buildah inspect localhost/${{ env.IMAGE_NAME }}:build --format '{{"{{"}}.Docker.Config.Labels{{"}}"}}'
+        run: sudo buildah inspect --format '{{"{{"}}.Docker.Config.Labels{{"}}"}}' localhost/${{ env.IMAGE_NAME }}:build
 
       - name: Log image size
         run: |
