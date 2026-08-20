@@ -2,7 +2,6 @@
 set -oue pipefail
 
 HEAVY_PACKAGES=(
-    cascadia-fonts-all
     rclone
     syncthing
     vlc

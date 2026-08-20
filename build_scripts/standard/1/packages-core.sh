@@ -14,6 +14,7 @@ dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=1
 
 INSTALL_PACKAGES=(
     btrfs-assistant
+    cascadia-mono-fonts
     du-dust
     duf
     fastfetch
