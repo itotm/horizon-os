@@ -220,7 +220,7 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | sudo skopeo login ghcr.io -u ${{ github.actor }} --password-stdin
 
           sudo skopeo copy --digestfile /tmp/ghcr-digest \
-            containers-storage:"${{ steps.final_image.outputs.image }}" \
+            containers-storage:localhost/${{ env.IMAGE_NAME }}:build \
             "docker://${REPO}:${TAGS[0]}"
           DIGEST=$(cat /tmp/ghcr-digest)
           echo "Pushed ${REPO}:${TAGS[0]} -> ${DIGEST}"

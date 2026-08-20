@@ -1,10 +1,8 @@
 #!/bin/bash
 set -oue pipefail
 
-echo "----------> Font cache regeneration"
 fc-cache -f
 
-echo "----------> Disabling repos"
 if [ "${DISABLE_REPOS:-true}" = "true" ]; then
 	sed -i 's/^enabled=.*/enabled=0/' /etc/yum.repos.d/*.repo
 fi
@@ -32,7 +30,6 @@ sleep 1
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plymouth-themes/releases/download/v1.1/fedora-logo-spinner.tar.gz /usr/share/plymouth/themes
 
-echo "----------> Setting Plymouth theme"
 plymouth-set-default-theme fedora-logo-spinner
 
 echo "----------> Regenerating initramfs"
@@ -51,11 +48,9 @@ echo "Starting initramfs regeneration for kernel version: ${KERNEL_VERSION}"
 
 chmod 0600 "${INITRAMFS_IMAGE}"
 
-echo "----------> Copying system files"
 cp -r /ctx/sys_files/* /
 systemctl enable horizon-setup-system.service
 
-echo "----------> Setting up HorizonOS branding"
 cat > /etc/xdg/kcm-about-distrorc <<EOF
 [General]
 Variant=HorizonOS ${IMAGE_VERSION}
@@ -74,5 +69,3 @@ rpm -qa | wc -l
 
 echo "----------> Final disk usage"
 df -h
-
-echo "----------> Completed build script"
