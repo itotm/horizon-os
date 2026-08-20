@@ -179,9 +179,6 @@ jobs:
             "${LABEL_ARGS[@]}" \
             .
 
-      - name: Debug labels after build
-        run: sudo skopeo inspect containers-storage:localhost/${{ env.IMAGE_NAME }}:build | jq '.Labels'
-
       - name: Log image size
         run: |
           IMAGE_ID=$(sudo buildah images --format "{{.ID}}" localhost/${{ env.IMAGE_NAME }}:build | head -n 1)
@@ -203,46 +200,8 @@ jobs:
           source-image: "localhost/${{ env.IMAGE_NAME }}:build"
           max-layers: "128"
 
-      # chunka writes its output over the input tag (OUTPUT_TAG="${OUTPUT:-${SOURCE}}"
-      # with OUTPUT unset), so localhost/<name>:build IS the rechunked image here.
-      #
-      # Labels are applied with `buildah build --label`, NOT `buildah config` +
-      # `buildah commit`: buildah carries a Docker v2s2 config and an OCI v1 config
-      # side by side, and `buildah config --label` only updates the Docker one. The
-      # commit then serialises the untouched OCI config, so the labels reach
-      # `skopeo inspect containers-storage:` but never the manifest that gets pushed.
-      # `--label` on a build goes through the Dockerfile executor and lands in both.
-      - name: Re-apply OCI labels
-        id: final_image
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-        env:
-          METADATA_LABELS: ${{ steps.metadata.outputs.labels }}
-        run: |
-          set -euo pipefail
-
-          if [ "${{ steps.rechunk.outcome }}" = "success" ]; then
-            SRC="${{ steps.rechunk.outputs.image-ref }}"
-          else
-            SRC="localhost/${{ env.IMAGE_NAME }}:build"
-          fi
-          echo "Applying labels on top of: $SRC"
-
-          LABEL_ARGS=()
-          while IFS= read -r line; do
-            [ -n "$line" ] && LABEL_ARGS+=(--label "$line")
-          done <<< "$METADATA_LABELS"
-
-          CTX=$(mktemp -d)
-          printf 'FROM %s\n' "$SRC" > "${CTX}/Containerfile.labels"
-
-          sudo buildah build \
-            --format oci \
-            --file "${CTX}/Containerfile.labels" \
-            --tag localhost/${{ env.IMAGE_NAME }}:final \
-            "${LABEL_ARGS[@]}" \
-            "$CTX"
-
-          echo "image=localhost/${{ env.IMAGE_NAME }}:final" >> $GITHUB_OUTPUT
+      - name: Debug labels
+        run: sudo skopeo inspect containers-storage:localhost/${{ env.IMAGE_NAME }}:build | jq '.Labels'
 
       # Copying out of containers-storage recompresses the layers on every call,
       # which yields a different manifest digest each time and would publish the
