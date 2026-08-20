@@ -200,9 +200,6 @@ jobs:
           source-image: "localhost/${{ env.IMAGE_NAME }}:build"
           max-layers: "128"
 
-      - name: Debug labels
-        run: sudo skopeo inspect containers-storage:localhost/${{ env.IMAGE_NAME }}:build | jq '.Labels'
-
       # Copying out of containers-storage recompresses the layers on every call,
       # which yields a different manifest digest each time and would publish the
       # same content as several distinct package versions. Copy once, capture the
@@ -233,13 +230,6 @@ jobs:
           echo "repo=${REPO}" >> $GITHUB_OUTPUT
           echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
           echo "ref=docker://${REPO}@${DIGEST}" >> $GITHUB_OUTPUT
-
-      - name: Verify published labels
-        if: steps.push_ghcr.outcome == 'success'
-        run: |
-          set -euo pipefail
-          sudo skopeo inspect "${{ steps.push_ghcr.outputs.ref }}" \
-            | jq '{digest: .Digest, created: .Created, labels: .Labels}'
 
       - name: Delete old images from GHCR
         if: steps.push_ghcr.outcome == 'success'
