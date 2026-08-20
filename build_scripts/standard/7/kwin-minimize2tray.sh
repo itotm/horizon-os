@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-dnf5 -y copr enable itotm/kwin-minimize2tray
-dnf5 -y install kwin-minimize2tray
-dnf5 -y copr disable itotm/kwin-minimize2tray
+RPM_URL="https://github.com/itotm/kwin-minimize2tray/releases/download/20260510/kwin-minimize2tray-20260510-1.fc44.x86_64.rpm"
+RPM_FILE="/tmp/kwin-minimize2tray-20260510-1.fc44.x86_64.rpm"
+
+curl -fsSL -o "${RPM_FILE}" "${RPM_URL}"
+dnf5 -y install "${RPM_FILE}"
+rm -f "${RPM_FILE}"
