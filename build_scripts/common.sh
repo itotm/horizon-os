@@ -3,9 +3,7 @@ set -oue pipefail
 
 fc-cache -f
 
-if [ "${DISABLE_REPOS:-true}" = "true" ]; then
-	sed -i 's/^enabled=.*/enabled=0/' /etc/yum.repos.d/*.repo
-fi
+sed -i 's/^enabled=.*/enabled=0/' /etc/yum.repos.d/*.repo
 
 echo "----------> Cleaning up dnf cache"
 dnf5 -y autoremove
