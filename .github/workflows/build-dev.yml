@@ -1,12 +1,14 @@
 ---
 name: Build container image (dev)
 on:
+  schedule:
+    - cron: "0 0 * * 0"
   workflow_dispatch:
     inputs:
       fedora_version:
         description: "Fedora base image"
         required: false
-        default: "44"
+        default: "45"
         type: choice
         options:
           - "44"
@@ -99,7 +101,7 @@ jobs:
 
           sudo buildah build \
             --file ./Containerfile \
-            --build-arg FEDORA_VERSION=${{ github.event.inputs.fedora_version || '44' }} \
+            --build-arg FEDORA_VERSION=${{ github.event.inputs.fedora_version || '45' }} \
             --build-arg BUILD_NUMBER=${{ github.run_number }} \
             --build-arg IMAGE_VERSION=${{ steps.date.outputs.version }} \
             --build-arg ENABLE_COMMON=true \
@@ -120,7 +122,9 @@ jobs:
 
       - name: Run Rechunker (chunka)
         id: rechunk
-        if: github.event.inputs.enable_rechunker == 'true'
+        # Only run on manual dispatch with the option explicitly enabled.
+        # Scheduled builds and manual runs with the default (false) skip it.
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.enable_rechunker == 'true' }}
         uses: projectbluefin/actions/bootc-build/chunka@cad7d15c30224a7a1a49c5ff0fd2054ca57b9cfd # v1
         with:
           # Use the local-only tag, not the ghcr.io-qualified one: buildah's --from
@@ -140,7 +144,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [ "${{ github.event.inputs.enable_rechunker }}" = "true" ]; then
+          if [ "${{ github.event_name == 'workflow_dispatch' && github.event.inputs.enable_rechunker == 'true' }}" = "true" ]; then
             SOURCE_IMAGE="${{ steps.rechunk.outputs.image-ref }}"
           else
             SOURCE_IMAGE="localhost/${{ env.IMAGE_NAME }}:build"
