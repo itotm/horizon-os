@@ -22,6 +22,7 @@ on:
 env:
   IMAGE_DESC: "HorizonOS - Customized Fedora Kinoite Image (Dev)"
   IMAGE_KEYWORDS: "bootc,fedora,kinoite,atomic,dev"
+  IMAGE_LOGO_URL: "https://github.com/itotm/horizon-os/blob/main/logo.png"
   IMAGE_NAME: "${{ github.event.repository.name }}"
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
   DEFAULT_TAG: "dev"
@@ -95,11 +96,17 @@ jobs:
           set -euo pipefail
 
           LABEL_ARGS=()
+          ANNOTATION_ARGS=()
           while IFS= read -r line; do
-            [ -n "$line" ] && LABEL_ARGS+=(--label "$line")
+            [ -n "$line" ] || continue
+            LABEL_ARGS+=(--label "$line")
+            ANNOTATION_ARGS+=(--annotation "$line")
           done <<< "$METADATA_LABELS"
 
+          # --format oci is buildah's default, but stating it explicitly guards
+          # against a Docker-format manifest, where --annotation is silently dropped.
           sudo buildah build \
+            --format oci \
             --file ./Containerfile \
             --build-arg FEDORA_VERSION=${{ github.event.inputs.fedora_version || '45' }} \
             --build-arg BUILD_NUMBER=${{ github.run_number }} \
@@ -111,6 +118,7 @@ jobs:
             --build-arg ENABLE_EXPERIMENTAL=false \
             --tag localhost/${{ env.IMAGE_NAME }}:build \
             "${LABEL_ARGS[@]}" \
+            "${ANNOTATION_ARGS[@]}" \
             .
 
       - name: Log image size
@@ -152,14 +160,17 @@ jobs:
           echo "Applying labels on top of: $SOURCE_IMAGE"
 
           LABEL_ARGS=()
+          ANNOTATION_ARGS=()
           while IFS= read -r line; do
-            [ -n "$line" ] && LABEL_ARGS+=(--label "$line")
+            [ -n "$line" ] || continue
+            LABEL_ARGS+=(--label "$line")
+            ANNOTATION_ARGS+=(--annotation "$line")
           done <<< "$METADATA_LABELS"
 
           # buildah config operates on a working container, not directly on an
           # image, so create one from the source image first.
           CTR=$(sudo buildah from "$SOURCE_IMAGE")
-          sudo buildah config "${LABEL_ARGS[@]}" "$CTR"
+          sudo buildah config "${LABEL_ARGS[@]}" "${ANNOTATION_ARGS[@]}" "$CTR"
           sudo buildah commit --rm --format oci "$CTR" localhost/${{ env.IMAGE_NAME }}:final
           echo "IMAGE_REF=containers-storage:localhost/${{ env.IMAGE_NAME }}:final" >> $GITHUB_ENV
 

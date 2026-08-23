@@ -48,6 +48,7 @@ on:
 env:
   IMAGE_DESC: "HorizonOS - Customized Fedora Kinoite Image"
   IMAGE_KEYWORDS: "bootc,fedora,kinoite,atomic"
+  IMAGE_LOGO_URL: "https://github.com/itotm/horizon-os/blob/main/logo.png"
   IMAGE_NAME: "${{ github.event.repository.name }}"
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
   DEFAULT_TAG: "latest"
@@ -140,6 +141,7 @@ jobs:
             io.artifacthub.package.deprecated=false
             io.artifacthub.package.keywords=${{ env.IMAGE_KEYWORDS }}
             io.artifacthub.package.license=Apache-2.0
+            io.artifacthub.package.logo-url=${{ env.IMAGE_LOGO_URL }}
             io.artifacthub.package.prerelease=false
             containers.bootc=1
           sep-tags: " "
