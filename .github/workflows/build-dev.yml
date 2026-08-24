@@ -13,11 +13,16 @@ on:
         options:
           - "44"
           - "45"
-      enable_rechunker:
-        description: "Enable Rechunker (chunka)"
+          - "rawhide"
+      rechunk:
+        description: "Rechunk method"
         required: false
-        default: false
-        type: boolean
+        default: "none"
+        type: choice
+        options:
+          - "none"
+          - "rpm-ostree"
+          - "chunkah"
 
 env:
   IMAGE_DESC: "HorizonOS - Customized Fedora Kinoite Image (Dev)"
@@ -133,15 +138,30 @@ jobs:
           RUST_LOG: chunkah=debug
         id: rechunk
         # Only run on manual dispatch with the option explicitly enabled.
-        # Scheduled builds and manual runs with the default (false) skip it.
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.enable_rechunker == 'true' }}
-        uses: projectbluefin/actions/bootc-build/chunka@eb4c546389f19ad9e42f1af052623de73c620ebb # v1
+        # Scheduled builds and manual runs with the default (none) skip it.
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rechunk == 'chunkah' }}
+        uses: projectbluefin/actions/bootc-build/chunka@eb4c546389f19ad9e42f1af052623de73c620bb # v1
         with:
           # Use the local-only tag, not the ghcr.io-qualified one: buildah's --from
           # treats a registry-qualified reference to a mutable tag (e.g. `:dev`)
           # as remotely resolvable and will pull it from GHCR instead of using the
           # image just built in local storage.
           source-image: "localhost/${{ env.IMAGE_NAME }}:build"
+          max-layers: "128"
+
+      - name: Run Rechunker (rpm-ostree)
+        id: rechunk_rpm
+        # Only run on manual dispatch with the option explicitly enabled.
+        # Scheduled builds and manual runs with the default (none) skip it.
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rechunk == 'rpm-ostree' }}
+        uses: projectbluefin/actions/bootc-build/rechunk@0d40e4f46fbb678a0f8ec490743ab9c67ff5beb3 # v1
+        with:
+          # Use the local-only tag, not the ghcr.io-qualified one: buildah's --from
+          # treats a registry-qualified reference to a mutable tag (e.g. `:dev`)
+          # as remotely resolvable and will pull it from GHCR instead of using the
+          # image just built in local storage.
+          source-image: "localhost/${{ env.IMAGE_NAME }}:build"
+          output-image: "${{ env.IMAGE_NAME }}:rechunked"
           max-layers: "128"
 
       # The rechunker (chunka) produces a new image that loses the metadata
@@ -154,8 +174,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [ "${{ github.event_name == 'workflow_dispatch' && github.event.inputs.enable_rechunker == 'true' }}" = "true" ]; then
+          RECHUNK_MODE="${{ github.event.inputs.rechunk || 'none' }}"
+          if [ "$RECHUNK_MODE" = "chunkah" ]; then
             SOURCE_IMAGE="${{ steps.rechunk.outputs.image-ref }}"
+          elif [ "$RECHUNK_MODE" = "rpm-ostree" ]; then
+            SOURCE_IMAGE="${{ steps.rechunk_rpm.outputs.image-ref }}"
           else
             SOURCE_IMAGE="localhost/${{ env.IMAGE_NAME }}:build"
           fi
