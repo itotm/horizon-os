@@ -129,6 +129,8 @@ jobs:
           echo "Image size: $IMAGE_SIZE"
 
       - name: Run Rechunker (chunka)
+        env:
+          RUST_LOG: chunkah=debug
         id: rechunk
         # Only run on manual dispatch with the option explicitly enabled.
         # Scheduled builds and manual runs with the default (false) skip it.
