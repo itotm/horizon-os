@@ -15,4 +15,8 @@ for service in "${SERVICES[@]}"; do
     systemctl enable "${service}" 2>/dev/null || true
 done
 
+echo "Defaults pwfeedback" > /etc/sudoers.d/horizon
+chmod 0440 /etc/sudoers.d/horizon
+visudo --check --file /etc/sudoers.d/horizon || rm -f /etc/sudoers.d/horizon
+
 logger "Services configuration completed"
