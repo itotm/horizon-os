@@ -47,6 +47,11 @@ echo "Starting initramfs regeneration for kernel version: ${KERNEL_VERSION}"
 chmod 0600 "${INITRAMFS_IMAGE}"
 
 cp -r /ctx/sys_files/* /
+
+echo "----------> Hardening sudoers.d permissions"
+chmod 0440 /usr/etc/sudoers.d/*
+visudo --check --file /usr/etc/sudoers.d/horizon
+
 systemctl enable horizon-setup-system.service
 
 cat > /etc/xdg/kcm-about-distrorc <<EOF
