@@ -26,7 +26,7 @@ sleep 1
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/kickoff-simplified/releases/download/v1.3.5/org.kde.plasma.kickoff-simplified-1.3.5.tar.gz /usr/share/plasma/plasmoids
 sleep 1
-./ctx/download-github.sh https://github.com/itotm/plymouth-themes/releases/download/v1.1/fedora-logo-spinner.tar.gz /usr/share/plymouth/themes
+./ctx/download-github.sh https://github.com/itotm/plymouth-themes/releases/download/v1.2/fedora-logo-spinner-1.2.tar.gz /usr/share/plymouth/themes
 
 plymouth-set-default-theme fedora-logo-spinner
 
