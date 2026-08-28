@@ -42,12 +42,16 @@ INSTALL_PACKAGES=(
     policycoreutils-gui
     powerstat
     powertop
+    rclone
     ripgrep
     snapper
     sqlite
+    syncthing
     tldr
     tmux
     traceroute
+    vlc
     xsane
+    yt-dlp
 )
 dnf5 -y install "${INSTALL_PACKAGES[@]}"
