@@ -39,11 +39,17 @@ on:
         required: false
         default: false
         type: boolean
-      enable_rechunker:
-        description: "Enable Rechunker (chunka)"
+      # Keep the default in sync with the fallback in the "Run Rechunker
+      # (chunkah)" condition below: scheduled runs send no input at all.
+      rechunk:
+        description: "Rechunk method"
         required: false
-        default: true
-        type: boolean
+        default: "chunkah"
+        type: choice
+        options:
+          - "none"
+          - "rpm-ostree"
+          - "chunkah"
 
 env:
   IMAGE_DESC: "HorizonOS - Customized Fedora Kinoite Image"
@@ -189,9 +195,9 @@ jobs:
 
       # These `if` statements are so that pull requests for your custom images do not make it publish any packages under your name without you knowing
       # They also check if the runner is on the default branch so that things like the merge queue (if you enable it), are going to work
-      - name: Run Rechunker (chunka)
+      - name: Run Rechunker (chunkah)
         id: rechunk
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.enable_rechunker != 'false'
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && (github.event.inputs.rechunk || 'chunkah') == 'chunkah'
         uses: projectbluefin/actions/bootc-build/chunka@eb4c546389f19ad9e42f1af052623de73c620ebb # v1
         with:
           # Use the local-only tag, not the ghcr.io-qualified one: buildah's --from
@@ -200,6 +206,54 @@ jobs:
           # image just built in local storage.
           source-image: "localhost/${{ env.IMAGE_NAME }}:build"
           max-layers: "128"
+
+      - name: Run Rechunker (rpm-ostree)
+        id: rechunk_rpm
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.rechunk == 'rpm-ostree'
+        uses: projectbluefin/actions/bootc-build/rechunk@eb4c546389f19ad9e42f1af052623de73c620ebb # v1
+        with:
+          # Use the local-only tag, not the ghcr.io-qualified one: buildah's --from
+          # treats a registry-qualified reference to a mutable tag (e.g. `:latest`)
+          # as remotely resolvable and will pull it from GHCR instead of using the
+          # image just built in local storage.
+          source-image: "localhost/${{ env.IMAGE_NAME }}:build"
+          output-image: "${{ env.IMAGE_NAME }}:rechunked"
+
+      # Both rechunkers produce a new image that loses the metadata labels
+      # applied during the build. Re-apply them to the final image so the
+      # pushed tag carries the correct version/description regardless of
+      # whether rechunking ran or not.
+      - name: Apply metadata labels
+        env:
+          METADATA_LABELS: ${{ steps.metadata.outputs.labels }}
+        run: |
+          set -euo pipefail
+
+          # Pick the image the pipeline actually produced: whichever rechunker
+          # ran exposes an image-ref; if both were skipped (rechunk=none, or a
+          # run where the rechunk guards didn't apply), fall back to :build.
+          SOURCE_IMAGE="${{ steps.rechunk.outputs.image-ref }}"
+          [ -n "$SOURCE_IMAGE" ] || SOURCE_IMAGE="${{ steps.rechunk_rpm.outputs.image-ref }}"
+          [ -n "$SOURCE_IMAGE" ] || SOURCE_IMAGE="localhost/${{ env.IMAGE_NAME }}:build"
+          echo "Applying labels on top of: $SOURCE_IMAGE"
+
+          LABEL_ARGS=()
+          ANNOTATION_ARGS=()
+          while IFS= read -r line; do
+            [ -n "$line" ] || continue
+            LABEL_ARGS+=(--label "$line")
+            ANNOTATION_ARGS+=(--annotation "$line")
+          done <<< "$METADATA_LABELS"
+
+          # buildah config operates on a working container, not directly on an
+          # image, so create one from the source image first.
+          CTR=$(sudo buildah from "$SOURCE_IMAGE")
+          sudo buildah config "${LABEL_ARGS[@]}" "${ANNOTATION_ARGS[@]}" "$CTR"
+          sudo buildah commit --rm --format oci "$CTR" localhost/${{ env.IMAGE_NAME }}:final
+          echo "IMAGE_REF=containers-storage:localhost/${{ env.IMAGE_NAME }}:final" >> $GITHUB_ENV
+
+          echo "Final labels:"
+          sudo skopeo inspect containers-storage:localhost/${{ env.IMAGE_NAME }}:final | jq '.Labels'
 
       # Copying out of containers-storage recompresses the layers on every call,
       # which yields a different manifest digest each time and would publish the
@@ -218,7 +272,7 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | sudo skopeo login ghcr.io -u ${{ github.actor }} --password-stdin
 
           sudo skopeo copy --digestfile /tmp/ghcr-digest \
-            containers-storage:localhost/${{ env.IMAGE_NAME }}:build \
+            ${{ env.IMAGE_REF }} \
             "docker://${REPO}:${TAGS[0]}"
           DIGEST=$(cat /tmp/ghcr-digest)
           echo "Pushed ${REPO}:${TAGS[0]} -> ${DIGEST}"
