@@ -186,6 +186,21 @@ jobs:
             "${ANNOTATION_ARGS[@]}" \
             .
 
+          # buildah derives org.opencontainers.image.base.* from whatever
+          # container it commits, so the later label pass would record our own
+          # intermediate :build tag as the base. Capture the real base here,
+          # while it is still in local storage, and carry it forward.
+          BASE_IMAGE="quay.io/fedora/fedora-kinoite:${{ github.event.inputs.fedora_version || '44' }}"
+          BASE_INFO=$(sudo buildah inspect --type image "$BASE_IMAGE")
+          BASE_DIGEST=$(jq -r '.FromImageDigest // empty' <<< "$BASE_INFO")
+          BASE_VERSION=$(jq -r '.OCIv1.config.Labels["org.opencontainers.image.version"] // empty' <<< "$BASE_INFO")
+          echo "Base image: ${BASE_IMAGE} (${BASE_VERSION:-unknown}) @ ${BASE_DIGEST:-unknown}"
+          {
+            echo "BASE_IMAGE=${BASE_IMAGE}"
+            echo "BASE_DIGEST=${BASE_DIGEST}"
+            echo "BASE_VERSION=${BASE_VERSION}"
+          } >> "$GITHUB_ENV"
+
       - name: Log image size
         run: |
           IMAGE_ID=$(sudo buildah images --format "{{.ID}}" localhost/${{ env.IMAGE_NAME }}:build | head -n 1)
@@ -245,6 +260,20 @@ jobs:
             ANNOTATION_ARGS+=(--annotation "$line")
           done <<< "$METADATA_LABELS"
 
+          # Point the base back at Kinoite: buildah would otherwise stamp the
+          # intermediate image this commit is made from, and an explicit value
+          # wins over the one it generates. Kinoite publishes no per-build tag,
+          # so the exact base build is pinned by the digest and spelled out by
+          # kinoite.version.
+          for pair in \
+              "org.opencontainers.image.base.name=${BASE_IMAGE:-}" \
+              "org.opencontainers.image.base.digest=${BASE_DIGEST:-}" \
+              "kinoite.version=${BASE_VERSION:-}"; do
+            [ -n "${pair#*=}" ] || continue
+            LABEL_ARGS+=(--label "$pair")
+            ANNOTATION_ARGS+=(--annotation "$pair")
+          done
+
           # buildah config operates on a working container, not directly on an
           # image, so create one from the source image first.
           CTR=$(sudo buildah from "$SOURCE_IMAGE")
@@ -254,6 +283,8 @@ jobs:
 
           echo "Final labels:"
           sudo skopeo inspect containers-storage:localhost/${{ env.IMAGE_NAME }}:final | jq '.Labels'
+          echo "Final annotations:"
+          sudo skopeo inspect --raw containers-storage:localhost/${{ env.IMAGE_NAME }}:final | jq '.annotations'
 
       # Copying out of containers-storage recompresses the layers on every call,
       # which yields a different manifest digest each time and would publish the
