@@ -29,6 +29,7 @@ INSTALL_PACKAGES=(
     hunspell-cs
     hwinfo
     hyperfine
+    id3v2
     imapsync
     libnatpmp
     libva-utils
