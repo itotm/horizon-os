@@ -39,17 +39,6 @@ on:
         required: false
         default: false
         type: boolean
-      # Keep the default in sync with the fallback in the "Run Rechunker
-      # (chunkah)" condition below: scheduled runs send no input at all.
-      rechunk:
-        description: "Rechunk method"
-        required: false
-        default: "chunkah"
-        type: choice
-        options:
-          - "none"
-          - "rpm-ostree"
-          - "chunkah"
 
 env:
   IMAGE_DESC: "HorizonOS - Customized Fedora Kinoite Image"
@@ -160,6 +149,17 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Pull the base up front so its digest is known before the build and
+          # every label can be set in this single pass. Kinoite publishes no
+          # per-build tag, so the exact base build is pinned by the digest and
+          # spelled out by kinoite.version.
+          BASE_IMAGE="quay.io/fedora/fedora-kinoite:${{ github.event.inputs.fedora_version || '44' }}"
+          sudo buildah pull "$BASE_IMAGE"
+          BASE_INFO=$(sudo buildah inspect --type image "$BASE_IMAGE")
+          BASE_DIGEST=$(jq -r '.FromImageDigest // empty' <<< "$BASE_INFO")
+          BASE_VERSION=$(jq -r '.OCIv1.config.Labels["org.opencontainers.image.version"] // empty' <<< "$BASE_INFO")
+          echo "Base image: ${BASE_IMAGE} (${BASE_VERSION:-unknown}) @ ${BASE_DIGEST:-unknown}"
+
           LABEL_ARGS=()
           ANNOTATION_ARGS=()
           while IFS= read -r line; do
@@ -167,6 +167,15 @@ jobs:
             LABEL_ARGS+=(--label "$line")
             ANNOTATION_ARGS+=(--annotation "$line")
           done <<< "$METADATA_LABELS"
+
+          for pair in \
+              "org.opencontainers.image.base.name=${BASE_IMAGE}" \
+              "org.opencontainers.image.base.digest=${BASE_DIGEST:-}" \
+              "kinoite.version=${BASE_VERSION:-}"; do
+            [ -n "${pair#*=}" ] || continue
+            LABEL_ARGS+=(--label "$pair")
+            ANNOTATION_ARGS+=(--annotation "$pair")
+          done
 
           # --format oci is buildah's default, but stating it explicitly guards
           # against a Docker-format manifest, where --annotation is silently dropped.
@@ -186,33 +195,16 @@ jobs:
             "${ANNOTATION_ARGS[@]}" \
             .
 
-          # buildah derives org.opencontainers.image.base.* from whatever
-          # container it commits, so the later label pass would record our own
-          # intermediate :build tag as the base. Capture the real base here,
-          # while it is still in local storage, and carry it forward.
-          BASE_IMAGE="quay.io/fedora/fedora-kinoite:${{ github.event.inputs.fedora_version || '44' }}"
-          BASE_INFO=$(sudo buildah inspect --type image "$BASE_IMAGE")
-          BASE_DIGEST=$(jq -r '.FromImageDigest // empty' <<< "$BASE_INFO")
-          BASE_VERSION=$(jq -r '.OCIv1.config.Labels["org.opencontainers.image.version"] // empty' <<< "$BASE_INFO")
-          echo "Base image: ${BASE_IMAGE} (${BASE_VERSION:-unknown}) @ ${BASE_DIGEST:-unknown}"
-          {
-            echo "BASE_IMAGE=${BASE_IMAGE}"
-            echo "BASE_DIGEST=${BASE_DIGEST}"
-            echo "BASE_VERSION=${BASE_VERSION}"
-          } >> "$GITHUB_ENV"
-
-      - name: Log image size
-        run: |
-          IMAGE_ID=$(sudo buildah images --format "{{.ID}}" localhost/${{ env.IMAGE_NAME }}:build | head -n 1)
-          IMAGE_SIZE=$(sudo buildah images --format "{{.Size}}" localhost/${{ env.IMAGE_NAME }}:build | head -n 1)
-          echo "Built image ID: $IMAGE_ID"
-          echo "Image size: $IMAGE_SIZE"
-
       # These `if` statements are so that pull requests for your custom images do not make it publish any packages under your name without you knowing
       # They also check if the runner is on the default branch so that things like the merge queue (if you enable it), are going to work
-      - name: Run Rechunker (chunkah)
+      #
+      # chunkah rewrites the image in place (output-image defaults to source-image)
+      # and carries over the config labels and manifest annotations set at build
+      # time, base.name/base.digest included, so no metadata pass is needed after
+      # it. The push below therefore reads the same :build tag either way.
+      - name: Run Rechunker
         id: rechunk
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && (github.event.inputs.rechunk || 'chunkah') == 'chunkah'
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         uses: projectbluefin/actions/bootc-build/chunka@eb4c546389f19ad9e42f1af052623de73c620ebb # v1
         with:
           # Use the local-only tag, not the ghcr.io-qualified one: buildah's --from
@@ -222,69 +214,16 @@ jobs:
           source-image: "localhost/${{ env.IMAGE_NAME }}:build"
           max-layers: "128"
 
-      - name: Run Rechunker (rpm-ostree)
-        id: rechunk_rpm
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.inputs.rechunk == 'rpm-ostree'
-        uses: projectbluefin/actions/bootc-build/rechunk@eb4c546389f19ad9e42f1af052623de73c620ebb # v1
-        with:
-          # Use the local-only tag, not the ghcr.io-qualified one: buildah's --from
-          # treats a registry-qualified reference to a mutable tag (e.g. `:latest`)
-          # as remotely resolvable and will pull it from GHCR instead of using the
-          # image just built in local storage.
-          source-image: "localhost/${{ env.IMAGE_NAME }}:build"
-          output-image: "${{ env.IMAGE_NAME }}:rechunked"
-
-      # Both rechunkers produce a new image that loses the metadata labels
-      # applied during the build. Re-apply them to the final image so the
-      # pushed tag carries the correct version/description regardless of
-      # whether rechunking ran or not.
-      - name: Apply metadata labels
-        env:
-          METADATA_LABELS: ${{ steps.metadata.outputs.labels }}
+      - name: Inspect final image
         run: |
           set -euo pipefail
-
-          # Pick the image the pipeline actually produced: whichever rechunker
-          # ran exposes an image-ref; if both were skipped (rechunk=none, or a
-          # run where the rechunk guards didn't apply), fall back to :build.
-          SOURCE_IMAGE="${{ steps.rechunk.outputs.image-ref }}"
-          [ -n "$SOURCE_IMAGE" ] || SOURCE_IMAGE="${{ steps.rechunk_rpm.outputs.image-ref }}"
-          [ -n "$SOURCE_IMAGE" ] || SOURCE_IMAGE="localhost/${{ env.IMAGE_NAME }}:build"
-          echo "Applying labels on top of: $SOURCE_IMAGE"
-
-          LABEL_ARGS=()
-          ANNOTATION_ARGS=()
-          while IFS= read -r line; do
-            [ -n "$line" ] || continue
-            LABEL_ARGS+=(--label "$line")
-            ANNOTATION_ARGS+=(--annotation "$line")
-          done <<< "$METADATA_LABELS"
-
-          # Point the base back at Kinoite: buildah would otherwise stamp the
-          # intermediate image this commit is made from, and an explicit value
-          # wins over the one it generates. Kinoite publishes no per-build tag,
-          # so the exact base build is pinned by the digest and spelled out by
-          # kinoite.version.
-          for pair in \
-              "org.opencontainers.image.base.name=${BASE_IMAGE:-}" \
-              "org.opencontainers.image.base.digest=${BASE_DIGEST:-}" \
-              "kinoite.version=${BASE_VERSION:-}"; do
-            [ -n "${pair#*=}" ] || continue
-            LABEL_ARGS+=(--label "$pair")
-            ANNOTATION_ARGS+=(--annotation "$pair")
-          done
-
-          # buildah config operates on a working container, not directly on an
-          # image, so create one from the source image first.
-          CTR=$(sudo buildah from "$SOURCE_IMAGE")
-          sudo buildah config "${LABEL_ARGS[@]}" "${ANNOTATION_ARGS[@]}" "$CTR"
-          sudo buildah commit --rm --format oci "$CTR" localhost/${{ env.IMAGE_NAME }}:final
-          echo "IMAGE_REF=containers-storage:localhost/${{ env.IMAGE_NAME }}:final" >> $GITHUB_ENV
-
+          IMAGE="containers-storage:localhost/${{ env.IMAGE_NAME }}:build"
+          echo "Image size: $(sudo buildah images --format '{{.Size}}' localhost/${{ env.IMAGE_NAME }}:build | head -n 1)"
+          echo "Layers: $(sudo skopeo inspect --raw "$IMAGE" | jq '.layers | length')"
           echo "Final labels:"
-          sudo skopeo inspect containers-storage:localhost/${{ env.IMAGE_NAME }}:final | jq '.Labels'
+          sudo skopeo inspect "$IMAGE" | jq '.Labels'
           echo "Final annotations:"
-          sudo skopeo inspect --raw containers-storage:localhost/${{ env.IMAGE_NAME }}:final | jq '.annotations'
+          sudo skopeo inspect --raw "$IMAGE" | jq '.annotations'
 
       # Copying out of containers-storage recompresses the layers on every call,
       # which yields a different manifest digest each time and would publish the
@@ -303,7 +242,7 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | sudo skopeo login ghcr.io -u ${{ github.actor }} --password-stdin
 
           sudo skopeo copy --digestfile /tmp/ghcr-digest \
-            ${{ env.IMAGE_REF }} \
+            containers-storage:localhost/${{ env.IMAGE_NAME }}:build \
             "docker://${REPO}:${TAGS[0]}"
           DIGEST=$(cat /tmp/ghcr-digest)
           echo "Pushed ${REPO}:${TAGS[0]} -> ${DIGEST}"
