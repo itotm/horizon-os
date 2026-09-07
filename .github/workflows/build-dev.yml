@@ -169,7 +169,7 @@ jobs:
         # Only run on manual dispatch with the option explicitly enabled.
         # Scheduled builds and manual runs with the default (none) skip it.
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rechunk == 'rpm-ostree' }}
-        uses: projectbluefin/actions/bootc-build/rechunk@eb4c546389f19ad9e42f1af052623de73c620ebb # v1
+        uses: projectbluefin/actions/bootc-build/rechunk@1ca03ea1f681c17fd104870aa154f8b5fd34e1d9 # v1
         with:
           # Use the local-only tag, not the ghcr.io-qualified one: buildah's --from
           # treats a registry-qualified reference to a mutable tag (e.g. `:dev`)
