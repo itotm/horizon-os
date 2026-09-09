@@ -15,6 +15,7 @@ KDE_PACKAGES=(
     kmines
     kid3
     kolourpaint
+    koko
     kompare
     kommit
     kpat

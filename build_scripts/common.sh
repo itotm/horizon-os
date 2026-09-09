@@ -132,8 +132,7 @@ find /var -xdev -mindepth 1 \
         fi
     done > /usr/lib/tmpfiles.d/horizon-var.conf
 
-echo "Generated $(wc -l < /usr/lib/tmpfiles.d/horizon-var.conf) entries:"
-cat /usr/lib/tmpfiles.d/horizon-var.conf
+echo "Generated $(wc -l < /usr/lib/tmpfiles.d/horizon-var.conf) entries"
 
 echo "----------> Cleaning runtime-only directories"
 # Package scriptlets (cockpit, dnf, ...) write into /run while the image is
