@@ -19,7 +19,6 @@ KDE_PACKAGES=(
     kompare
     kommit
     kpat
-    krdc
     krename
     krusader
     ksystemlog
