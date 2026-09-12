@@ -41,6 +41,7 @@ INSTALL_PACKAGES=(
     ncdu
     nvtop
     openh264
+    piper
     policycoreutils-gui
     powerstat
     powertop
