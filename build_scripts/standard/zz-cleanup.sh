@@ -108,5 +108,8 @@ dnf5 -y remove \
     "${REMOVE_GUEST_TOOLS[@]}" \
     "${REMOVE_FIREFOX_LANGPACKS[@]}"
 
-dnf5 -y swap glibc-all-langpacks glibc-langpack-en
-dnf5 -y install glibc-langpack-it
+# Locales: keep only en and it. Install the individual langpacks first (they
+# coexist with glibc-all-langpacks), then remove the full package. Do not use
+# "swap": in one build it downgraded glibc to an older version from updates-archive.
+dnf5 -y install glibc-langpack-en glibc-langpack-it
+dnf5 -y remove glibc-all-langpacks
