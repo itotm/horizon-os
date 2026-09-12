@@ -94,15 +94,8 @@ REMOVE_GUEST_TOOLS=(
     spice-webdavd
 )
 
-REMOVE_FONTS=(
-    default-fonts-cjk-mono
-    default-fonts-cjk-sans
-    default-fonts-cjk-serif
+REMOVE_FIREFOX_LANGPACKS=(
     firefox-langpacks
-    google-noto-sans-cjk-vf-fonts
-    google-noto-sans-mono-cjk-vf-fonts
-    google-noto-serif-cjk-vf-fonts
-    google-noto-serif-fonts
 )
 
 dnf5 -y remove \
@@ -113,7 +106,7 @@ dnf5 -y remove \
     "${REMOVE_AWS[@]}" \
     "${REMOVE_PRINTERS[@]}" \
     "${REMOVE_GUEST_TOOLS[@]}" \
-    "${REMOVE_FONTS[@]}"
+    "${REMOVE_FIREFOX_LANGPACKS[@]}"
 
 dnf5 -y swap glibc-all-langpacks glibc-langpack-en
 dnf5 -y install glibc-langpack-it
