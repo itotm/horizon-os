@@ -16,11 +16,21 @@ if ! grep -q "# HorizonOS customizations" ~/.bashrc; then
         echo "export LESS_TERMCAP_so=$'\e[01;44;37m'"
         echo "export LESS_TERMCAP_ue=$'\e[0m'"
         echo "export LESS_TERMCAP_us=$'\e[01;32m'"
-        echo "bind 'set completion-ignore-case on'"
         echo "if command -v dust >/dev/null 2>&1; then alias du='dust'; fi"
         echo "if command -v mc >/dev/null 2>&1; then alias mc='mc -u'; fi"
         echo "if command -v fzf >/dev/null 2>&1; then eval \"\$(fzf --bash)\"; fi"
     } | tee -a ~/.bashrc
+fi
+
+if ! grep -q "# HorizonOS customizations" ~/.inputrc 2>/dev/null; then
+    {
+        if [ ! -s ~/.inputrc ]; then
+            echo "\$include /etc/inputrc"
+        fi
+        echo ""
+        echo "# HorizonOS customizations"
+        echo "set completion-ignore-case on"
+    } | tee -a ~/.inputrc
 fi
 
 logger "Bash configuration complete"
