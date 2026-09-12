@@ -1,0 +1,119 @@
+#!/bin/bash
+set -oue pipefail
+
+REMOVE_IBUS=(
+    anthy-unicode
+    cldr-emoji-annotation
+    cldr-emoji-annotation-dtd
+    ibus
+    ibus-anthy
+    ibus-anthy-python
+    ibus-chewing
+    ibus-hangul
+    ibus-libpinyin
+    ibus-m17n
+    ibus-panel
+    ibus-setup
+    ibus-typing-booster
+    libchewing
+    libhangul
+    libpinyin
+    libpinyin-data
+    m17n-db
+    m17n-lib
+    python3-ibus
+    unicode-ucd
+)
+
+REMOVE_FIRMWARE=(
+    alsa-sof-firmware
+    atheros-firmware
+    brcmfmac-firmware
+    cirrus-audio-firmware
+    intel-audio-firmware
+    intel-gpu-firmware
+    intel-vsc-firmware
+    iwlegacy-firmware
+    iwlwifi-dvm-firmware
+    iwlwifi-mld-firmware
+    iwlwifi-mvm-firmware
+    libertas-firmware
+    microcode_ctl
+    nvidia-gpu-firmware
+    nxpwireless-firmware
+    qcom-wwan-firmware
+    thermald
+    tiwilink-firmware
+)
+
+REMOVE_INTEL_VAAPI=(
+    intel-media-driver
+    intel-mediasdk
+    libva-intel-media-driver
+)
+
+REMOVE_MARIADB=(
+    akonadi-server
+    akonadi-server-mysql
+    mariadb
+    mariadb-backup
+    mariadb-cracklib-password-check
+    mariadb-errmsg
+    mariadb-gssapi-server
+    mariadb-server
+    mysql-selinux
+)
+
+REMOVE_AWS=(
+    python3-boto3
+    python3-botocore
+    python3-s3transfer
+)
+
+REMOVE_PRINTERS=(
+    braille-printer-app
+    dymo-cups-drivers
+    gutenprint
+    gutenprint-cups
+    gutenprint-libs
+    hplip
+    hplip-common
+    hplip-libs
+    ImageMagick
+    ImageMagick-libs
+    libsane-hpaio
+    ptouch-driver
+    splix
+)
+
+REMOVE_GUEST_TOOLS=(
+    open-vm-tools
+    open-vm-tools-desktop
+    qemu-guest-agent
+    spice-vdagent
+    spice-webdavd
+)
+
+REMOVE_FONTS=(
+    default-fonts-cjk-mono
+    default-fonts-cjk-sans
+    default-fonts-cjk-serif
+    firefox-langpacks
+    google-noto-sans-cjk-vf-fonts
+    google-noto-sans-mono-cjk-vf-fonts
+    google-noto-serif-cjk-vf-fonts
+    google-noto-serif-fonts
+)
+
+dnf5 -y remove \
+    "${REMOVE_IBUS[@]}" \
+    "${REMOVE_FIRMWARE[@]}" \
+    "${REMOVE_INTEL_VAAPI[@]}" \
+    "${REMOVE_MARIADB[@]}" \
+    "${REMOVE_AWS[@]}" \
+    "${REMOVE_PRINTERS[@]}" \
+    "${REMOVE_GUEST_TOOLS[@]}" \
+    "${REMOVE_FONTS[@]}"
+
+dnf5 -y swap glibc-all-langpacks glibc-langpack-en
+dnf5 -y install glibc-langpack-it
