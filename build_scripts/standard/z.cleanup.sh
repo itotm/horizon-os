@@ -90,8 +90,8 @@ REMOVE_GUEST_TOOLS=(
     open-vm-tools
     open-vm-tools-desktop
     #qemu-guest-agent
-    spice-vdagent
-    spice-webdavd
+    #spice-vdagent
+    #spice-webdavd
     virtualbox-guest-additions
 )
 
