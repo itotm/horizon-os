@@ -10,8 +10,3 @@ FONT_PACKAGES=(
     jetbrains-mono-fonts
 )
 dnf5 -y install "${FONT_PACKAGES[@]}"
-
-echo "----------> Installing Crimson Pro from GitHub"
-/ctx/download-github.sh \
-    https://github.com/Fonthausen/CrimsonPro/tree/master/fonts/otf \
-    /usr/share/fonts/crimson-pro
