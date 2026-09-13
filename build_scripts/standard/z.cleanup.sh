@@ -89,9 +89,10 @@ REMOVE_PRINTERS=(
 REMOVE_GUEST_TOOLS=(
     open-vm-tools
     open-vm-tools-desktop
-    qemu-guest-agent
+    #qemu-guest-agent
     spice-vdagent
     spice-webdavd
+    virtualbox-guest-additions
 )
 
 REMOVE_FIREFOX_LANGPACKS=(
