@@ -79,8 +79,6 @@ REMOVE_PRINTERS=(
     hplip
     hplip-common
     hplip-libs
-    ImageMagick
-    ImageMagick-libs
     libsane-hpaio
     ptouch-driver
     splix
