@@ -1,0 +1,10 @@
+# Without use-sigstore-attachments containers/image never looks for the
+# sha256-<digest>.sig tag that cosign publishes next to the image, so the
+# sigstoreSigned rules in /etc/containers/policy.json would always fail.
+docker:
+  ghcr.io/itotm/horizon-os:
+    use-sigstore-attachments: true
+  docker.io/itotm/horizon-os:
+    use-sigstore-attachments: true
+  quay.io/itotm/horizon-os:
+    use-sigstore-attachments: true
