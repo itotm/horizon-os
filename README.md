@@ -13,6 +13,7 @@ A custom bootc image built with Universal Blue template and based on Fedora Kino
 - [Apps](./sys_files/usr/libexec/horizon-install-flatpaks) from Flathub (removed Fedora flatpak repository)
 - Cockpit, QEmu, Distrobox, VSCode, Syncthing and Tailscale preinstalled
 - Italian locales and various dictionaries
+- [Epson Perfection V200 Photo](./build_scripts/standard/epson-v200.sh) scanner driver (Image Scan! for Linux)
 - scheduled to update weekly
 - designed to be modular (fork the repo to try!)
 

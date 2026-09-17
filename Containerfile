@@ -8,6 +8,7 @@ ARG ENABLE_EXPERIMENTAL=false
 FROM alpine AS ctx
 COPY build_scripts /
 RUN find . -name "*.sh" -exec chmod +x {} \;
+COPY rpms rpms
 COPY sys_files sys_files
 RUN chmod +x ./sys_files/usr/libexec/horizon-*
 
