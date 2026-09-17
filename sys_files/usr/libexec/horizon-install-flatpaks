@@ -35,6 +35,7 @@ FLATPAK_PACKAGES=(
     org.mozilla.thunderbird
     org.qbittorrent.qBittorrent
     org.remmina.Remmina
+    org.videolan.VLC
 )
 
 for package in "${FLATPAK_PACKAGES[@]}"; do
