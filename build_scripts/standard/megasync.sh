@@ -24,7 +24,8 @@ set -oue pipefail
 # an already deployed machine those files would never appear. They are
 # relocated to /usr/lib/opt instead (--badreloc, since the package does not
 # declare /opt as relocatable) and /var/opt/megasync is a symlink back to them,
-# declared in tmpfiles.d so that it is recreated on every boot.
+# declared in tmpfiles.d so that it is created on every boot: /var/opt itself
+# does not exist in the build container, it is a tmpfiles.d entry too.
 
 MEGA_REPO="https://mega.nz/linux/repo/Fedora_${FEDORA_VERSION}/x86_64"
 
@@ -50,8 +51,7 @@ curl --http1.1 --retry 3 --retry-delay 10 -fsSL -o "/tmp/megasync.rpm" "${MEGA_R
 rpm -ivh --noscripts --badreloc --relocate /opt=/usr/lib/opt "/tmp/megasync.rpm"
 rm -f "/tmp/megasync.rpm"
 
-echo "----------> Linking /opt/megasync to /usr/lib/opt/megasync"
-ln -s /usr/lib/opt/megasync /var/opt/megasync
+echo "----------> Declaring the /opt/megasync symlink"
 cat > /usr/lib/tmpfiles.d/megasync.conf <<'TMPFILES'
 L /var/opt/megasync - - - - /usr/lib/opt/megasync
 TMPFILES
