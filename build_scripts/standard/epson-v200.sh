@@ -14,7 +14,8 @@ set -oue pipefail
 # /etc/sane.d/dll.conf; they register the plugin in /var/lib/iscan/interpreter,
 # which bootc would not carry across updates; and they symlink iscan into
 # GIMP's plug-in directory, which is not wanted.
-# --nodigest: the packages predate rpm's digest requirement and carry none.
+# --nodigest --nosignature: the packages are neither digested nor signed, and
+# since Fedora 45 rpm refuses to install an unsigned package by default.
 
 RPM_DIR="/ctx/rpms/epson-v200"
 
@@ -27,7 +28,7 @@ ISCAN_DEPS=(
 )
 dnf5 -y install "${ISCAN_DEPS[@]}"
 
-rpm -ivh --noscripts --nodigest "${RPM_DIR}"/*.rpm
+rpm -ivh --noscripts --nodigest --nosignature "${RPM_DIR}"/*.rpm
 
 echo "----------> Enabling the epkowa SANE backend"
 mkdir -p /etc/sane.d/dll.d
