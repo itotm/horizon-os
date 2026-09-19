@@ -9,6 +9,7 @@ REMOVE_IBUS=(
     ibus-anthy
     ibus-anthy-python
     ibus-chewing
+    ibus-gtk2
     ibus-hangul
     ibus-libpinyin
     ibus-m17n
@@ -31,14 +32,12 @@ REMOVE_FIRMWARE=(
     brcmfmac-firmware
     cirrus-audio-firmware
     intel-audio-firmware
-    intel-gpu-firmware
     intel-vsc-firmware
     iwlegacy-firmware
     iwlwifi-dvm-firmware
     iwlwifi-mld-firmware
     iwlwifi-mvm-firmware
     libertas-firmware
-    microcode_ctl
     nvidia-gpu-firmware
     nxpwireless-firmware
     qcom-wwan-firmware
@@ -46,10 +45,10 @@ REMOVE_FIRMWARE=(
     tiwilink-firmware
 )
 
+# Intel VA-API: intel-media-driver (RPM Fusion, Broadwell+) is installed by
+# 2.rpmfusion.sh and stays. Only the legacy Media SDK goes: ffmpeg uses libvpl for QSV.
 REMOVE_INTEL_VAAPI=(
-    intel-media-driver
     intel-mediasdk
-    libva-intel-media-driver
 )
 
 REMOVE_MARIADB=(

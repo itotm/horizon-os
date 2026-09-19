@@ -6,6 +6,7 @@ FONT_PACKAGES=(
     adobe-source-serif-pro-fonts
     alerque-libertinus-fonts
     cascadia-mono-fonts
+    dejavu-sans-fonts
     intel-one-mono-fonts
     jetbrains-mono-fonts
 )
