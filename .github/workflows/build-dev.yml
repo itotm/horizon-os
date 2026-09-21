@@ -157,7 +157,7 @@ jobs:
         # Only run on manual dispatch with the option explicitly enabled.
         # Scheduled builds and manual runs with the default (none) skip it.
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rechunk == 'chunkah' }}
-        uses: projectbluefin/actions/bootc-build/chunka@d0d12d2577eb5a629b411ba86973f971bc0639a3 # v1
+        uses: projectbluefin/actions/bootc-build/chunka@837850b6100b22c7920476035e7e1c28fdbba67f # v1
         with:
           # Use the local-only tag, not the ghcr.io-qualified one: buildah's --from
           # treats a registry-qualified reference to a mutable tag (e.g. `:dev`)
