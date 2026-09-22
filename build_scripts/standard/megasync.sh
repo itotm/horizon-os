@@ -18,6 +18,18 @@ MEGASYNC_RPM=$(curl --http1.1 -fsSL "${MEGA_REPO}/" \
   | sort -V \
   | tail -n1)
 
+MEGASYNC_DEPS=(
+    kf5-qqc2-desktop-style
+    libatomic
+    qt5-qtbase
+    qt5-qtdeclarative
+    qt5-qtquickcontrols
+    qt5-qtquickcontrols2
+    qt5-qtsvg
+    qt5-qtx11extras
+)
+dnf5 -y install "${MEGASYNC_DEPS[@]}"
+
 curl --http1.1 --retry 3 --retry-delay 10 -fsSL -o "/tmp/megasync.rpm" "${MEGA_REPO}/${MEGASYNC_RPM}"
 rpm --import "${MEGA_REPO_BASE}/repodata/repomd.xml.key"
 rpm -ivh --noscripts --badreloc --relocate /opt=/usr/lib/opt "/tmp/megasync.rpm"
