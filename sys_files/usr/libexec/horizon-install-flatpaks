@@ -7,7 +7,7 @@ flatpak override --user --filesystem=xdg-config/gtk-3.0:ro
 flatpak override --user --filesystem=xdg-config/gtk-4.0:ro
 
 FLATPAK_PACKAGES=(
-    org.gtk.Gtk3theme.Breeze
+    app.comaps.comaps
     com.calibre_ebook.calibre
     com.github.PintaProject.Pinta
     com.github.tchx84.Flatseal
@@ -29,6 +29,7 @@ FLATPAK_PACKAGES=(
     org.chromium.Chromium
     org.gnome.meld
     org.gimp.GIMP
+    org.gtk.Gtk3theme.Breeze
     org.inkscape.Inkscape
     org.kde.krdc
     org.libreoffice.LibreOffice
