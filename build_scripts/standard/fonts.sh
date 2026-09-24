@@ -6,8 +6,8 @@ FONT_PACKAGES=(
     adobe-source-serif-pro-fonts
     alerque-libertinus-fonts
     cascadia-mono-fonts
-    dejavu-sans-fonts
     intel-one-mono-fonts
+    liberation-fonts-all
     jetbrains-mono-fonts
 )
 dnf5 -y install "${FONT_PACKAGES[@]}"
