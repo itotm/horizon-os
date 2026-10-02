@@ -42,13 +42,13 @@ sudo bootc switch quay.io/itotm/horizon-os:latest
 
 ## Image signing
 
-Every published image is signed with [cosign](https://github.com/sigstore/cosign); the public key is [horizon-os.pub](./sys_files/etc/pki/containers/horizon-os.pub). To check a tag before installing it:
+Every published image except the `dev` tag is signed with [cosign](https://github.com/sigstore/cosign); the public key is [horizon-os.pub](./sys_files/etc/pki/containers/horizon-os.pub). To check a tag before installing it:
 
 ```bash
 cosign verify --key sys_files/etc/pki/containers/horizon-os.pub ghcr.io/itotm/horizon-os:latest
 ```
 
-The image ships that key together with a [policy.json](./sys_files/etc/containers/policy.json) that only accepts signed `horizon-os` images from the three registries above (and accepts anything else, so Distrobox, Toolbox and Podman keep working). The stock Kinoite you install from has neither, so the very first `bootc switch` cannot be verified. From the first boot of HorizonOS on, the policy applies to every pull on the system, `bootc upgrade` included; to additionally make bootc refuse to run without such a policy, switch once more from inside HorizonOS:
+The image ships that key together with a [policy.json](./sys_files/etc/containers/policy.json) that only accepts signed `horizon-os` images from the three registries above (except `ghcr.io/itotm/horizon-os:dev`, accepted unsigned, and anything else, so Distrobox, Toolbox and Podman keep working). The stock Kinoite you install from has neither, so the very first `bootc switch` cannot be verified. From the first boot of HorizonOS on, the policy applies to every pull on the system, `bootc upgrade` included; to additionally make bootc refuse to run without such a policy, switch once more from inside HorizonOS:
 
 ```bash
 sudo bootc switch --enforce-container-sigpolicy ghcr.io/itotm/horizon-os:latest

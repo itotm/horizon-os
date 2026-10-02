@@ -58,7 +58,7 @@ jobs:
   build_push:
     name: Build and push image
     runs-on: ubuntu-26.04
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     permissions:
       contents: read
@@ -270,6 +270,12 @@ jobs:
       # same content as several distinct package versions. Copy once, capture the
       # digest, then point the remaining tags at that same manifest with
       # registry-to-registry copies.
+      #
+      # Only the per-build version tag is pushed here: the tags installed
+      # systems follow (latest, f44) are moved by "Tag image" once the
+      # signature exists. A run that dies in between (timeout, dropped
+      # connection) then leaves them on the previous, signed image instead of
+      # an unsigned one that every `bootc upgrade` would reject.
       - name: Push To GHCR
         id: push_ghcr
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
@@ -277,20 +283,14 @@ jobs:
           set -euo pipefail
 
           REPO="${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}"
-          TAGS=(${{ steps.metadata.outputs.tags }})
 
           echo "${{ secrets.GITHUB_TOKEN }}" | sudo skopeo login ghcr.io -u ${{ github.actor }} --password-stdin
 
           sudo skopeo copy --digestfile /tmp/ghcr-digest \
             containers-storage:localhost/${{ env.IMAGE_NAME }}:build \
-            "docker://${REPO}:${TAGS[0]}"
+            "docker://${REPO}:${{ steps.date.outputs.version }}"
           DIGEST=$(cat /tmp/ghcr-digest)
-          echo "Pushed ${REPO}:${TAGS[0]} -> ${DIGEST}"
-
-          for tag in "${TAGS[@]:1}"; do
-            sudo skopeo copy "docker://${REPO}@${DIGEST}" "docker://${REPO}:${tag}"
-            echo "Tagged ${REPO}:${tag} -> ${DIGEST}"
-          done
+          echo "Pushed ${REPO}:${{ steps.date.outputs.version }} -> ${DIGEST}"
 
           echo "repo=${REPO}" >> $GITHUB_OUTPUT
           echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
@@ -314,6 +314,18 @@ jobs:
           cosign sign -y --new-bundle-format=false --use-signing-config=false \
             --key env://COSIGN_PRIVATE_KEY "$SIGN_REF"
           cosign verify --key "$COSIGN_PUBLIC_KEY" "$SIGN_REF"
+
+      - name: Tag image (GHCR)
+        if: steps.push_ghcr.outcome == 'success'
+        run: |
+          set -euo pipefail
+          REPO="${{ steps.push_ghcr.outputs.repo }}"
+          DIGEST="${{ steps.push_ghcr.outputs.digest }}"
+          for tag in ${{ steps.metadata.outputs.tags }}; do
+            [ "$tag" != "${{ steps.date.outputs.version }}" ] || continue
+            sudo skopeo copy "docker://${REPO}@${DIGEST}" "docker://${REPO}:${tag}"
+            echo "Tagged ${REPO}:${tag} -> ${DIGEST}"
+          done
 
       - name: Delete old images from GHCR
         if: steps.push_ghcr.outcome == 'success'
@@ -370,7 +382,8 @@ jobs:
       # skopeo copies the image manifest only, never the signature tag next to
       # it, so each mirror is signed on its own. The digest is read back from the
       # mirror rather than assumed equal to GHCR's, so the signature always
-      # matches what actually landed there.
+      # matches what actually landed there. As on GHCR, only the version tag is
+      # pushed before signing and the others follow once it is signed.
       - name: Push To Docker Hub
         id: push_dockerhub
         if: steps.push_ghcr.outcome == 'success' && steps.date.outputs.push_dockerhub == 'true'
@@ -378,9 +391,8 @@ jobs:
           set -euo pipefail
           SRC="${{ steps.push_ghcr.outputs.ref }}"
           REPO="docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}"
-          for tag in ${{ steps.metadata.outputs.tags }}; do
-            sudo skopeo copy --digestfile /tmp/dockerhub-digest "$SRC" "docker://${REPO}:${tag}"
-          done
+          sudo skopeo copy --digestfile /tmp/dockerhub-digest "$SRC" \
+            "docker://${REPO}:${{ steps.date.outputs.version }}"
           DIGEST=$(cat /tmp/dockerhub-digest)
           echo "Pushed ${REPO} -> ${DIGEST} (GHCR: ${{ steps.push_ghcr.outputs.digest }})"
           echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
@@ -396,6 +408,18 @@ jobs:
           cosign sign -y --new-bundle-format=false --use-signing-config=false \
             --key env://COSIGN_PRIVATE_KEY "$SIGN_REF"
           cosign verify --key "$COSIGN_PUBLIC_KEY" "$SIGN_REF"
+
+      - name: Tag image (Docker Hub)
+        if: steps.push_dockerhub.outcome == 'success' && steps.date.outputs.push_dockerhub == 'true'
+        run: |
+          set -euo pipefail
+          REPO="docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}"
+          DIGEST="${{ steps.push_dockerhub.outputs.digest }}"
+          for tag in ${{ steps.metadata.outputs.tags }}; do
+            [ "$tag" != "${{ steps.date.outputs.version }}" ] || continue
+            sudo skopeo copy "docker://${REPO}@${DIGEST}" "docker://${REPO}:${tag}"
+            echo "Tagged ${REPO}:${tag} -> ${DIGEST}"
+          done
 
       - name: Delete old images from Docker Hub
         if: steps.push_dockerhub.outcome == 'success' && steps.date.outputs.push_dockerhub == 'true'
@@ -457,9 +481,8 @@ jobs:
           set -euo pipefail
           SRC="${{ steps.push_ghcr.outputs.ref }}"
           REPO="quay.io/${{ secrets.QUAY_NAMESPACE }}/${{ env.IMAGE_NAME }}"
-          for tag in ${{ steps.metadata.outputs.tags }}; do
-            sudo skopeo copy --digestfile /tmp/quay-digest "$SRC" "docker://${REPO}:${tag}"
-          done
+          sudo skopeo copy --digestfile /tmp/quay-digest "$SRC" \
+            "docker://${REPO}:${{ steps.date.outputs.version }}"
           DIGEST=$(cat /tmp/quay-digest)
           echo "Pushed ${REPO} -> ${DIGEST} (GHCR: ${{ steps.push_ghcr.outputs.digest }})"
           echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
@@ -475,6 +498,18 @@ jobs:
           cosign sign -y --new-bundle-format=false --use-signing-config=false \
             --key env://COSIGN_PRIVATE_KEY "$SIGN_REF"
           cosign verify --key "$COSIGN_PUBLIC_KEY" "$SIGN_REF"
+
+      - name: Tag image (Quay.io)
+        if: steps.push_quay.outcome == 'success' && steps.date.outputs.push_quay == 'true'
+        run: |
+          set -euo pipefail
+          REPO="quay.io/${{ secrets.QUAY_NAMESPACE }}/${{ env.IMAGE_NAME }}"
+          DIGEST="${{ steps.push_quay.outputs.digest }}"
+          for tag in ${{ steps.metadata.outputs.tags }}; do
+            [ "$tag" != "${{ steps.date.outputs.version }}" ] || continue
+            sudo skopeo copy "docker://${REPO}@${DIGEST}" "docker://${REPO}:${tag}"
+            echo "Tagged ${REPO}:${tag} -> ${DIGEST}"
+          done
 
       - name: Delete old images from Quay.io
         if: steps.push_quay.outcome == 'success' && steps.date.outputs.push_quay == 'true'

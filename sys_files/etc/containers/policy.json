@@ -6,6 +6,11 @@
     ],
     "transports": {
         "docker": {
+            "ghcr.io/itotm/horizon-os:dev": [
+                {
+                    "type": "insecureAcceptAnything"
+                }
+            ],
             "ghcr.io/itotm/horizon-os": [
                 {
                     "type": "sigstoreSigned",
