@@ -10,7 +10,9 @@ dnf5 -y autoremove
 dnf5 -y clean all
 
 echo "----------> Downloading GitHub assets"
-./ctx/download-github.sh https://github.com/itotm/eleven-twilight/releases/download/v2.6/ElevenTwilight-2.6.tar.gz /usr/share/icons
+./ctx/download-github.sh https://github.com/itotm/eleven-twilight/releases/download/v2.7/ElevenTwilight-2.7.tar.gz /usr/share/icons
+sleep 1
+./ctx/download-github.sh https://github.com/itotm/eleven-twilight/releases/download/v2.7/ElevenTwilightColoredToolbars-1.1.tar.gz /usr/share/icons
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plasma-colors/releases/download/v1.0/ClearSimple.colors.tar.gz /usr/share/color-schemes
 sleep 1
@@ -22,9 +24,9 @@ sleep 1
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plasma-colors/tree/main/Konsole /usr/share/konsole
 sleep 1
-./ctx/download-github.sh https://github.com/itotm/plasma-wallpaper-potd-enhanced/releases/download/v1.6.0/com.plasma.wallpaper.potd-enhanced-1.6.0.tar.gz /usr/share/plasma/wallpapers
+./ctx/download-github.sh https://github.com/itotm/plasma-wallpaper-potd-enhanced/releases/download/v1.6.1/com.plasma.wallpaper.potd-enhanced-1.6.1.tar.gz /usr/share/plasma/wallpapers
 sleep 1
-./ctx/download-github.sh https://github.com/itotm/kickoff-simplified/releases/download/v1.3.5/org.kde.plasma.kickoff-simplified-1.3.5.tar.gz /usr/share/plasma/plasmoids
+./ctx/download-github.sh https://github.com/itotm/kickoff-simplified/releases/download/v1.3.6/org.kde.plasma.kickoff-simplified-1.3.6.tar.gz /usr/share/plasma/plasmoids
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plymouth-themes/releases/download/v1.2/fedora-logo-spinner-1.2.tar.gz /usr/share/plymouth/themes
 

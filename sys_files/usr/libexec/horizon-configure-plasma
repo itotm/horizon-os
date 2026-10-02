@@ -13,7 +13,7 @@ kwriteconfig6 --file breezerc --group "Common" --key "OutlineEnabled" false
 kwriteconfig6 --file breezerc --group "Windeco" --key "ButtonSize" "ButtonSmall"
 
 # Icons
-kwriteconfig6 --file kdeglobals --group "Icons" --key "Theme" "ElevenTwilight"
+kwriteconfig6 --file kdeglobals --group "Icons" --key "Theme" "ElevenTwilightColoredToolbars"
 
 # KDE
 kwriteconfig6 --file kdeglobals --group "KDE" --key "AnimationDurationFactor" 0.5
