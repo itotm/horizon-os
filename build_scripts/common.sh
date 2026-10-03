@@ -12,7 +12,7 @@ dnf5 -y clean all
 echo "----------> Downloading GitHub assets"
 ./ctx/download-github.sh https://github.com/itotm/eleven-twilight/releases/download/v2.7/ElevenTwilight-2.7.tar.gz /usr/share/icons
 sleep 1
-./ctx/download-github.sh https://github.com/itotm/eleven-twilight/releases/download/v2.7/ElevenTwilightColoredToolbars-1.1.tar.gz /usr/share/icons
+./ctx/download-github.sh https://github.com/itotm/eleven-twilight/releases/download/v2.7/ElevenTwilightColoredToolbars-1.2.tar.gz /usr/share/icons
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plasma-colors/releases/download/v1.0/ClearSimple.colors.tar.gz /usr/share/color-schemes
 sleep 1

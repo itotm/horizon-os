@@ -11,3 +11,12 @@ FONT_PACKAGES=(
     jetbrains-mono-fonts
 )
 dnf5 -y install "${FONT_PACKAGES[@]}"
+
+TERRA_FONT_PACKAGES=(
+    cleartype-fonts
+    ms-core-fonts
+)
+dnf5 -y install \
+    --nogpgcheck \
+    --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' \
+    "${TERRA_FONT_PACKAGES[@]}"
