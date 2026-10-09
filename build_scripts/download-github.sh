@@ -79,40 +79,45 @@ extract_archive() {
 download_contents() {
     local api_url=$1
     local dest_path=$2
+    local temp_file item type name path local_filepath download_url temp_download next_api_url
     
     echo "Creating destination directory (if needed): $dest_path"
     sudo mkdir -p "$dest_path"
     
-    local temp_file=$(mktemp)
+    temp_file=$(mktemp)
     trap 'rm -f "$temp_file"' RETURN
     
-    curl -s -H "Accept: application/vnd.github.v3+json" "$api_url" > "$temp_file"
-    
-    if grep -q "\"message\": \"Not Found\"" "$temp_file"; then
-        echo "Error: The specified folder was not found in the repository. Please check the URL."
-        return 1
+    if ! curl -fsS --retry 3 -H "Accept: application/vnd.github.v3+json" "$api_url" -o "$temp_file"; then
+        echo "Error: GitHub API request failed: $api_url"
+        exit 1
     fi
     
-    jq -c '.[]' "$temp_file" | while read -r item; do
-        local type=$(echo "$item" | jq -r '.type')
-        local name=$(echo "$item" | jq -r '.name')
-        local path=$(echo "$item" | jq -r '.path')
-        local local_filepath="$dest_path/$name"
+    if ! jq -e 'type == "array"' "$temp_file" > /dev/null; then
+        echo "Error: unexpected GitHub API response:"
+        cat "$temp_file"
+        exit 1
+    fi
+    
+    while read -r item; do
+        type=$(echo "$item" | jq -r '.type')
+        name=$(echo "$item" | jq -r '.name')
+        path=$(echo "$item" | jq -r '.path')
+        local_filepath="$dest_path/$name"
         
         if [ "$type" == "file" ]; then
-            local download_url=$(echo "$item" | jq -r '.download_url')
+            download_url=$(echo "$item" | jq -r '.download_url')
             echo " -> Downloading file: $path"
             
-            local temp_download=$(mktemp)
-            curl -s -L "$download_url" -o "$temp_download"
+            temp_download=$(mktemp)
+            curl -fsSL --retry 3 "$download_url" -o "$temp_download"
             mv "$temp_download" "$local_filepath"
             chmod +r "$local_filepath"
         elif [ "$type" == "dir" ]; then
-            local next_api_url=$(echo "$item" | jq -r '.url')
+            next_api_url=$(echo "$item" | jq -r '.url')
             echo " -> Exploring directory: $path"
             download_contents "$next_api_url" "$local_filepath"
         fi
-    done
+    done < <(jq -c '.[]' "$temp_file")
 }
 
 
@@ -126,7 +131,7 @@ if is_archive_url "$URL"; then
         ARCHIVE_NAME=$(basename "$URL")
         TEMP_ARCHIVE="$TEMP_DIR/$ARCHIVE_NAME"
         echo "Downloading archive..."
-        curl -s -L -o "$TEMP_ARCHIVE" "$URL"
+        curl -fsSL --retry 3 -o "$TEMP_ARCHIVE" "$URL"
         extract_archive "$TEMP_ARCHIVE" "$DESTINATION" "$EXTENSION"
         echo "Archive extracted successfully."
     else
@@ -136,7 +141,7 @@ if is_archive_url "$URL"; then
         FILE_NAME=$(basename "$URL")
         DEST_FILE="$DESTINATION/$FILE_NAME"
         echo "Downloading file..."
-        curl -s -L -o "$DEST_FILE" "$URL"
+        curl -fsSL --retry 3 -o "$DEST_FILE" "$URL"
         chmod +r "$DEST_FILE"
         echo "File downloaded successfully."
     fi

@@ -22,7 +22,7 @@ sleep 1
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plasma-colors/releases/download/v1.0/breeze-cursors-light-plasma5.tar.gz /usr/share/icons
 sleep 1
-./ctx/download-github.sh https://github.com/itotm/plasma-colors/tree/main/Konsole /usr/share/konsole
+./ctx/download-github.sh https://github.com/itotm/plasma-colors/releases/download/v1.0/Konsole.tar.gz /usr/share/konsole
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plasma-wallpaper-potd-enhanced/releases/download/v1.6.1/com.plasma.wallpaper.potd-enhanced-1.6.1.tar.gz /usr/share/plasma/wallpapers
 sleep 1
