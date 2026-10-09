@@ -24,7 +24,7 @@ sleep 1
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plasma-colors/releases/download/v1.0/Konsole.tar.gz /usr/share/konsole
 sleep 1
-./ctx/download-github.sh https://github.com/itotm/plasma-wallpaper-potd-enhanced/releases/download/v1.7.0/com.plasma.wallpaper.potd-enhanced-1.7.0.tar.gz /usr/share/plasma/wallpapers
+./ctx/download-github.sh https://github.com/itotm/plasma-wallpaper-potd-enhanced/releases/download/v1.7.1/com.plasma.wallpaper.potd-enhanced-1.7.1.tar.gz /usr/share/plasma/wallpapers
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/kickoff-simplified/releases/download/v1.3.6/org.kde.plasma.kickoff-simplified-1.3.6.tar.gz /usr/share/plasma/plasmoids
 sleep 1
