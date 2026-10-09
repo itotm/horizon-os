@@ -22,6 +22,6 @@ is from Epson's `iscan-gt-f670-bundle-2.30.4.x64.rpm.tar.gz`
 
 Release `v1.0` of [itotm/ksystemstats_scripts](https://github.com/itotm/ksystemstats_scripts).
 
-## kwin-minimize2tray
+## kwin-close2tray
 
-Release `20260510` of [itotm/kwin-minimize2tray](https://github.com/itotm/kwin-minimize2tray).
+Release `v0.1.0` of [itotm/kwin-close2tray](https://github.com/itotm/kwin-close2tray).
