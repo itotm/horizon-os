@@ -7,7 +7,7 @@ logger "HorizonOS system post install"
 /usr/libexec/horizon-configure-services
 /usr/libexec/horizon-configure-sensors
 /usr/libexec/horizon-configure-flatpak
-/usr/libexec/horizon-configure-sddm
+/usr/libexec/horizon-configure-plasmalogin
 
 restorecon -Rv /var/lib/libvirt
 restorecon -Rv /var/log/libvirt

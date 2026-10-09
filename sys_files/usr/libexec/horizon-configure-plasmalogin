@@ -1,0 +1,22 @@
+#!/bin/bash
+set -oue pipefail
+
+logger "Configuring Plasma Login Manager"
+
+USER_NAME=$(awk -F: '$3 >= 1000 && $1 !~ /^systemd-/ {print $1; exit}' /etc/passwd)
+
+# Plasma Setup is Fedora's first-run wizard. Until /etc/plasma-setup-done
+# exists, plasma-setup.service rewrites 99-plasma-setup.conf at every boot with
+# an autologin for its own plasma-setup user, and deletes an empty [Autologin]
+# group from plasmalogin.conf. The user already exists at this point, so mark
+# the wizard as done, exactly as the wizard itself does when it finishes.
+touch /etc/plasma-setup-done
+rm -f /etc/plasmalogin.conf.d/99-plasma-setup.conf
+
+# Autologin goes in the main file, which plasmalogin reads after conf.d and is
+# also what System Settings > Login Screen edits. kwriteconfig6 keeps any other
+# group already there, such as the greeter wallpaper.
+kwriteconfig6 --file /etc/plasmalogin.conf --group Autologin --key User "$USER_NAME"
+kwriteconfig6 --file /etc/plasmalogin.conf --group Autologin --key Session plasma.desktop
+
+logger "Plasma Login Manager configured"
