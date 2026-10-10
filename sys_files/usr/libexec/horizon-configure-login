@@ -1,20 +1,29 @@
 #!/bin/bash
 set -oue pipefail
 
-# this is a dirty workaround for timing issues with plasma services starting before wayland display is available
+# Workaround for Plasma services starting before the Wayland display exists.
+# kcminit and kglobalaccel get started in a separate transaction before
+# plasma-kwin_wayland, so the upstream After= does not hold them back: without
+# the delay they abort with "Failed to create wl_display" and take kded6,
+# ksmserver and plasmashell down with them (still true on Plasma 6.7.5).
+# kded6 and ksmserver already start after kcminit, so delaying kcminit is
+# enough for them; a sleep of their own would only add 3 s to every login.
 
 logger "Configuring Plasma login service overrides"
 
 SYSTEMD_USER_DIR="$HOME/.config/systemd/user"
 
-SERVICES=(
+DELAYED_SERVICES=(
     "plasma-kcminit.service.d"
-    "plasma-kded6.service.d"
     "plasma-kglobalaccel.service.d"
+)
+
+ORDERED_SERVICES=(
+    "plasma-kded6.service.d"
     "plasma-ksmserver.service.d"
 )
 
-OVERRIDE_CONTENT="[Unit]
+DELAYED_CONTENT="[Unit]
 After=plasma-kwin_wayland.service
 
 [Service]
@@ -23,9 +32,22 @@ Restart=on-failure
 RestartSec=4
 "
 
-for service in "${SERVICES[@]}"; do
+ORDERED_CONTENT="[Unit]
+After=plasma-kwin_wayland.service
+
+[Service]
+Restart=on-failure
+RestartSec=4
+"
+
+for service in "${DELAYED_SERVICES[@]}"; do
     mkdir -p "$SYSTEMD_USER_DIR/$service"
-    echo "$OVERRIDE_CONTENT" > "$SYSTEMD_USER_DIR/$service/override.conf"
+    echo "$DELAYED_CONTENT" > "$SYSTEMD_USER_DIR/$service/override.conf"
+done
+
+for service in "${ORDERED_SERVICES[@]}"; do
+    mkdir -p "$SYSTEMD_USER_DIR/$service"
+    echo "$ORDERED_CONTENT" > "$SYSTEMD_USER_DIR/$service/override.conf"
 done
 
 logger "Plasma login service overrides configured"
