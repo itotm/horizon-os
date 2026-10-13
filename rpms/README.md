@@ -24,4 +24,4 @@ Release `v1.0` of [itotm/ksystemstats_scripts](https://github.com/itotm/ksystems
 
 ## kwin-close2tray
 
-Release `v0.2.0` of [itotm/kwin-close2tray](https://github.com/itotm/kwin-close2tray).
+Release `v0.2.1` of [itotm/kwin-close2tray](https://github.com/itotm/kwin-close2tray).
