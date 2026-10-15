@@ -13,3 +13,8 @@ Release `v1.0` of [itotm/ksystemstats_scripts](https://github.com/itotm/ksystems
 ## kwin-close2tray
 
 Release `v0.2.1` of [itotm/kwin-close2tray](https://github.com/itotm/kwin-close2tray).
+
+## sticky
+
+Release `v1.33-1` of [itotm/sticky](https://github.com/itotm/sticky), Linux
+Mint's Sticky with a KDE-style look.
