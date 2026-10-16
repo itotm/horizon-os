@@ -32,4 +32,7 @@ flatpak uninstall -y --unused 2>/dev/null || true
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 flatpak remote-modify --enable flathub
 
+# download it and cs locales (spell-check dictionaries) besides the system language
+flatpak config --set extra-languages "it;cs"
+
 logger "Flatpak configuration completed"

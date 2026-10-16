@@ -9,6 +9,9 @@ if ! command -v flatpak &> /dev/null; then
     exit 0
 fi
 
+# also on installs that predate the setting in horizon-configure-flatpak
+flatpak config --set extra-languages "it;cs"
+
 logger "System update: flatpak"
 flatpak_output=$(flatpak update -y --noninteractive 2>&1 | tee -a "$LOG_FILE")
 logger "flatpak updated"

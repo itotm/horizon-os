@@ -16,5 +16,5 @@ Release `v0.2.1` of [itotm/kwin-close2tray](https://github.com/itotm/kwin-close2
 
 ## sticky
 
-Release `v1.33-3` of [itotm/sticky](https://github.com/itotm/sticky), Linux
+Release `v1.33-4` of [itotm/sticky](https://github.com/itotm/sticky), Linux
 Mint's Sticky with a KDE-style look.
