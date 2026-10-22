@@ -14,7 +14,9 @@ USER_NAME=$(awk -F: '$3 >= 1000 && $1 !~ /^systemd-/ {print $1; exit}' /etc/pass
 # password, so virt-manager no longer asks for one
 usermod -aG libvirt "$USER_NAME"
 
-restorecon -Rv /var/lib/libvirt
-restorecon -Rv /var/log/libvirt
+# -i: /var/log/libvirt only exists once a libvirt daemon has run, and a missing
+# path would fail the whole system post install
+restorecon -iRv /var/lib/libvirt
+restorecon -iRv /var/log/libvirt
 
 logger "libvirt configured"

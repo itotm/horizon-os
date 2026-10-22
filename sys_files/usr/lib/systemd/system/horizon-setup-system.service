@@ -1,6 +1,7 @@
 [Unit]
 Description=Setup HorizonOS after installation or update
 After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=oneshot

@@ -50,6 +50,9 @@ kwriteconfig6 --file plasmashellrc --group "PlasmaViews" --group "Panel 2" --key
 kwriteconfig6 --file plasmashellrc --group "PlasmaViews" --group "Panel 2" --key "panelOpacity" 1
 kwriteconfig6 --file plasmashellrc --group "PlasmaViews" --group "Panel 2" --group "Defaults" --key "thickness" 32
 
+# Launcher: kickoff is the first widget of the default panel (containment 2), so it gets id 3
+kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "3" --key "plugin" "org.kde.plasma.kickoff-simplified"
+
 # Session
 kwriteconfig6 --file ksmserverrc --group "General" --key "confirmLogout" false
 kwriteconfig6 --file ksmserverrc --group "General" --key "loginMode" "emptySession"

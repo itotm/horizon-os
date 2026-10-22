@@ -3,6 +3,17 @@ set -oue pipefail
 
 logger "Starting HorizonOS user setup"
 
+# horizon-setup-system runs in parallel at the first boot and may still be
+# removing Fedora flatpaks and adding flathub: wait for it (max 5 minutes)
+for _ in $(seq 60); do
+    cmp -s /etc/horizon-version /etc/horizon-version-actual && break
+    sleep 5
+done
+if ! cmp -s /etc/horizon-version /etc/horizon-version-actual; then
+    logger "HorizonOS system setup not completed"
+    /usr/libexec/horizon-notify "System configuration" "System setup did not complete, see: journalctl -b -u horizon-setup-system"
+fi
+
 if /usr/libexec/horizon-check-version $HOME/.horizon-version-actual; then
     exit 0
 else

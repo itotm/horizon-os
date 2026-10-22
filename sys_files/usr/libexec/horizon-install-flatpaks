@@ -38,11 +38,17 @@ FLATPAK_PACKAGES=(
     org.remmina.Remmina
 )
 
+FAILED=()
 for package in "${FLATPAK_PACKAGES[@]}"; do
-    if ! flatpak list --app --columns=application | grep -Fxq "$package"; then
+    if ! flatpak list --columns=application | grep -Fxq "$package"; then
         logger "Installing $package"
-        flatpak install -y "$package" || true
+        flatpak install -y --noninteractive flathub "$package" || FAILED+=("$package")
     fi
 done
+
+if [ ${#FAILED[@]} -gt 0 ]; then
+    logger "HorizonOS flatpak installation failed: ${FAILED[*]}"
+    /usr/libexec/horizon-notify "Flatpak installation" "Not installed: ${FAILED[*]}"
+fi
 
 logger "HorizonOS flatpak installation completed"

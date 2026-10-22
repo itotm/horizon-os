@@ -3,8 +3,9 @@ set -oue pipefail
 
 logger "Flatpak configuration"
 
-flatpak list --app --columns=application | while read -r app; do
-    if [ -n "$app" ]; then
+# only Fedora/ISO flatpaks: a re-run must not remove apps installed from flathub
+flatpak list --app --columns=application,origin | while read -r app origin; do
+    if [ -n "$app" ] && [ "$origin" != "flathub" ]; then
         flatpak uninstall -y --delete-data "$app" 2>/dev/null || true
     fi
 done
@@ -15,8 +16,8 @@ flatpak list --runtime --columns=application | while read -r runtime; do
     fi
 done
 
-flatpak list --runtime --columns=application | while read -r runtime; do
-    if [ -n "$runtime" ]; then
+flatpak list --runtime --columns=application,origin | while read -r runtime origin; do
+    if [ -n "$runtime" ] && [ "$origin" != "flathub" ]; then
         flatpak uninstall -y --delete-data "$runtime" 2>/dev/null || true
     fi
 done
