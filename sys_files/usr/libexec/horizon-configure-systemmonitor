@@ -1,0 +1,15 @@
+#!/bin/bash
+set -oue pipefail
+
+logger "Configuring System Monitor for user"
+
+# "System" page built from this PC's sensors, disks and network (https://github.com/itotm/plasma-systemmonitor),
+# first in the page list and start page
+mkdir -p ~/.local/share/plasma-systemmonitor
+if python3 -I /usr/libexec/horizon-systemmonitor-page/generate-page.py -o ~/.local/share/plasma-systemmonitor/System.page; then
+    kwriteconfig6 --file systemmonitorrc --group General --key pageOrder System.page
+    kwriteconfig6 --file systemmonitorrc --group General --key startPage System.page
+    logger "System Monitor configuration complete"
+else
+    logger "System Monitor configuration failed: System page not generated"
+fi

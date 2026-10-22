@@ -8,8 +8,6 @@ logger "HorizonOS system post install"
 /usr/libexec/horizon-configure-sensors
 /usr/libexec/horizon-configure-flatpak
 /usr/libexec/horizon-configure-plasmalogin
-
-restorecon -Rv /var/lib/libvirt
-restorecon -Rv /var/log/libvirt
+/usr/libexec/horizon-configure-libvirt
 
 logger "HorizonOS system post install complete"

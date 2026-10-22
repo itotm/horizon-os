@@ -12,6 +12,7 @@ A custom bootc image built with Universal Blue template and based on Fedora Kino
 - [KDE apps](./build_scripts/standard/kde-apps.sh)
 - [Apps](./sys_files/usr/libexec/horizon-install-flatpaks) from Flathub (removed Fedora flatpak repository)
 - Cockpit, QEmu, Distrobox, VSCode, Syncthing and Tailscale preinstalled
+- [System Monitor page](./sys_files/usr/libexec/horizon-configure-systemmonitor) with this PC's hardware, generated at first login ([plasma-systemmonitor](https://github.com/itotm/plasma-systemmonitor))
 - Italian locales and various dictionaries
 - scheduled to update weekly
 - designed to be modular (fork the repo to try!)
