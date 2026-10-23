@@ -52,6 +52,10 @@ kwriteconfig6 --file plasmashellrc --group "PlasmaViews" --group "Panel 2" --gro
 
 # Launcher: kickoff is the first widget of the default panel (containment 2), so it gets id 3
 kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "3" --key "plugin" "org.kde.plasma.kickoff-simplified"
+kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "3" --group "Configuration" --key "popupWidth" 450
+kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "3" --group "Configuration" --key "popupHeight" 540
+kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "3" --group "Configuration" --group "General" --key "customSideBarWidth" 195
+kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "3" --group "Configuration" --group "General" --key "icon" --delete
 
 # Session
 kwriteconfig6 --file ksmserverrc --group "General" --key "confirmLogout" false
