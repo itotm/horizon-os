@@ -1,0 +1,24 @@
+[Unit]
+Description=Backrest web UI and scheduler for restic backups
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/backrest
+Environment=BACKREST_PORT=127.0.0.1:9898
+Environment=BACKREST_CONFIG=/var/lib/backrest/config.json
+Environment=BACKREST_DATA=/var/lib/backrest/data
+Environment=XDG_CACHE_HOME=/var/cache/backrest
+Environment=RCLONE_CONFIG=/var/lib/backrest/rclone.conf
+StateDirectory=backrest
+StateDirectoryMode=0700
+CacheDirectory=backrest
+CacheDirectoryMode=0700
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

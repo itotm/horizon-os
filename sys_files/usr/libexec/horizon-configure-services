@@ -4,6 +4,7 @@ set -euo pipefail
 logger "Services configuration"
 
 SERVICES=(
+    "backrest.service"
     "horizon-update.timer"
     "cockpit.socket"
     "podman.socket"

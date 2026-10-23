@@ -1,0 +1,39 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+# Read-only btrfs snapshot of /var/home for a Backrest plan to back up from.
+# Each plan gets a fixed path, so restic finds its parent snapshot and only
+# rereads changed files. Called from the plan's command hooks:
+#   CONDITION_SNAPSHOT_START: horizon-backrest-snapshot create {{ .Plan.Id }}
+#   CONDITION_SNAPSHOT_END:   horizon-backrest-snapshot delete {{ .Plan.Id }}
+
+SOURCE="/var/home"
+BASE="/var/lib/backrest/snapshots"
+
+if [ "$#" -ne 2 ] || [[ ! "$1" =~ ^(create|delete)$ ]] || [[ ! "$2" =~ ^[A-Za-z0-9._-]+$ ]]; then
+    echo "Usage: $0 create|delete <plan-id>" >&2
+    exit 2
+fi
+
+ACTION="$1"
+SNAPSHOT="${BASE}/$2"
+
+delete_snapshot() {
+    if [ -e "${SNAPSHOT}" ]; then
+        btrfs subvolume delete "${SNAPSHOT}" > /dev/null
+        logger "Backrest snapshot deleted: ${SNAPSHOT}"
+    fi
+}
+
+case "${ACTION}" in
+    create)
+        # Left over by an interrupted backup
+        delete_snapshot
+        mkdir -p -m 0700 "${BASE}"
+        btrfs subvolume snapshot -r "${SOURCE}" "${SNAPSHOT}" > /dev/null
+        logger "Backrest snapshot created: ${SNAPSHOT}"
+        ;;
+    delete)
+        delete_snapshot
+        ;;
+esac
