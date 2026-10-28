@@ -10,9 +10,9 @@ dnf5 -y autoremove
 dnf5 -y clean all
 
 echo "----------> Downloading GitHub assets"
-./ctx/download-github.sh https://github.com/itotm/eleven-twilight/releases/download/v2.7.2/ElevenTwilight-2.7.2.tar.gz /usr/share/icons
+./ctx/download-github.sh https://github.com/itotm/eleven-twilight/releases/download/v2.7.3/ElevenTwilight-2.7.3.tar.gz /usr/share/icons
 sleep 1
-./ctx/download-github.sh https://github.com/itotm/eleven-twilight/releases/download/v2.7.2/ElevenTwilightColoredToolbars-1.2.tar.gz /usr/share/icons
+./ctx/download-github.sh https://github.com/itotm/eleven-twilight/releases/download/v2.7.3/ElevenTwilightColoredToolbars-1.2.tar.gz /usr/share/icons
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plasma-colors/releases/download/v1.0/ClearSimple.colors.tar.gz /usr/share/color-schemes
 sleep 1
