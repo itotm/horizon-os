@@ -54,8 +54,11 @@ if [ ! -e "${FILE}" ]; then
     mv "${FILE}.new" "${FILE}"
 fi
 
-# The policy has no file context for /var/swap, so a relabel would turn the
-# file into var_t: set swapfile_t on every boot.
+# A new btrfs subvolume has no SELinux label (unlabeled_t), and systemd-logind
+# is denied the lookup of the swap file when it checks for hibernation: give
+# the directory its default var_t. The policy has no file context for the file
+# either, so a relabel would turn it into var_t: set swapfile_t on every boot.
 if selinuxenabled; then
+    restorecon "${DIR}"
     chcon -t swapfile_t "${FILE}"
 fi

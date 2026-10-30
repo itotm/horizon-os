@@ -28,7 +28,7 @@ sleep 1
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/kickoff-simplified/releases/download/v1.3.6/org.kde.plasma.kickoff-simplified-1.3.6.tar.gz /usr/share/plasma/plasmoids
 sleep 1
-./ctx/download-github.sh https://github.com/itotm/plymouth-themes/releases/download/v1.2/fedora-logo-spinner-1.2.tar.gz /usr/share/plymouth/themes
+./ctx/download-github.sh https://github.com/itotm/plymouth-themes/releases/download/v1.3/fedora-logo-spinner-1.3.tar.gz /usr/share/plymouth/themes
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plasma-systemmonitor/archive/refs/tags/v0.3.0.tar.gz /tmp/plasma-systemmonitor
 cp -r /tmp/plasma-systemmonitor/plasma-systemmonitor-0.3.0/sensorfaces/local.graduatedbars /usr/share/ksysguard/sensorfaces/
@@ -73,6 +73,13 @@ cp -r /ctx/sys_files/* /
 
 systemctl enable horizon-setup-system.service
 systemctl enable var-swap-swapfile.swap
+
+# NetworkManager's 04-iscsi dispatcher script queues "reload iscsi.service" as soon
+# as a device comes up; iscsi.service is After=network-online.target and
+# Before=remote-fs.target, so the pending reload holds remote-fs.target, user
+# sessions and the login screen until the network is online (~2.5 s). No iSCSI
+# here: a /dev/null link with the same name in /etc disables the script.
+ln -sf /dev/null /etc/NetworkManager/dispatcher.d/04-iscsi
 
 cat > /etc/xdg/kcm-about-distrorc <<EOF
 [General]
