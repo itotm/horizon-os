@@ -72,6 +72,7 @@ chmod 0600 "${INITRAMFS_IMAGE}"
 cp -r /ctx/sys_files/* /
 
 systemctl enable horizon-setup-system.service
+systemctl enable var-swap-swapfile.swap
 
 cat > /etc/xdg/kcm-about-distrorc <<EOF
 [General]

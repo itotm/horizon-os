@@ -1,0 +1,14 @@
+[Desktop Entry]
+Name=Open Terminal Here
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+MimeType=inode/directory
+X-KDE-Protocols=file
+X-KDE-RequiredNumberOfUrls=1
+X-KDE-Priority=TopLevel
+Actions=openTerminalHere
+
+[Desktop Action openTerminalHere]
+Name=Open Terminal Here
+Icon=utilities-terminal
+Exec=konsole --workdir %f

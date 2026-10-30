@@ -1,0 +1,61 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+# Creates the swap file that zswap writes cold pages to (zswap itself is turned
+# on by /usr/lib/tmpfiles.d/horizon-zswap.conf).
+#
+# Size: zswap keeps compressed pages in up to 20% of RAM (max_pool_percent) and
+# compresses about 3:1, so it can hold about 60% of RAM worth of pages. Each of
+# them keeps a slot in the swap file, so the file has to be at least that big.
+# Clamped to 4-32 GiB and to a tenth of the free space on /var.
+#
+# An existing file is never touched: to resize it,
+#   systemctl stop var-swap-swapfile.swap && rm /var/swap/swapfile
+#   systemctl start var-swap-swapfile.swap
+
+DIR="/var/swap"
+FILE="${DIR}/swapfile"
+
+if [ ! -e "${FILE}" ]; then
+    RAM_MIB=$(awk '/^MemTotal:/ { print int($2 / 1024) }' /proc/meminfo)
+    SIZE_GIB=$(( (RAM_MIB * 6 / 10 + 1023) / 1024 ))
+    if [ "${SIZE_GIB}" -lt 4 ]; then
+        SIZE_GIB=4
+    fi
+    if [ "${SIZE_GIB}" -gt 32 ]; then
+        SIZE_GIB=32
+    fi
+    FREE_GIB=$(df --output=avail -BG /var | tail -n1 | tr -dc '0-9')
+    if [ "${SIZE_GIB}" -gt $(( FREE_GIB / 10 )) ]; then
+        SIZE_GIB=$(( FREE_GIB / 10 ))
+    fi
+    if [ "${SIZE_GIB}" -lt 1 ]; then
+        logger "Swap file not created: only ${FREE_GIB} GiB free on /var"
+        exit 1
+    fi
+
+    logger "Creating a ${SIZE_GIB} GiB swap file in ${FILE}"
+    # Built under a temporary name, so a boot interrupted halfway does not
+    # leave a broken file that the next boot would take as done.
+    rm -f "${FILE}.new"
+    if [ "$(stat -f -c %T /var)" = "btrfs" ]; then
+        # A subvolume of its own: btrfs refuses swapon on a file whose
+        # subvolume has snapshots, and mkswapfile sets NOCOW itself.
+        if [ ! -d "${DIR}" ]; then
+            btrfs subvolume create "${DIR}"
+        fi
+        btrfs filesystem mkswapfile --size "${SIZE_GIB}G" "${FILE}.new"
+    else
+        install -d -m 0700 "${DIR}"
+        fallocate -l "${SIZE_GIB}G" "${FILE}.new"
+        chmod 0600 "${FILE}.new"
+        mkswap "${FILE}.new"
+    fi
+    mv "${FILE}.new" "${FILE}"
+fi
+
+# The policy has no file context for /var/swap, so a relabel would turn the
+# file into var_t: set swapfile_t on every boot.
+if selinuxenabled; then
+    chcon -t swapfile_t "${FILE}"
+fi

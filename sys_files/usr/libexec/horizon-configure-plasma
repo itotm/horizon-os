@@ -82,6 +82,7 @@ kwriteconfig6 --file discoverrc --group "FlatpakSources" --key "Sources" "flathu
 kwriteconfig6 --file dolphinrc --group "General" --key "ShowFullPath" true
 kwriteconfig6 --file dolphinrc --group "General" --key "ShowStatusBar" "FullWidth"
 kwriteconfig6 --file dolphinrc --group "DetailsMode" --key "PreviewSize" 22
+kwriteconfig6 --file dolphinrc --group "ContextMenu" --key "ShowOpenTerminal" false
 
 # Wallpaper
 kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "1" --key "wallpaperplugin" "org.kde.potd"

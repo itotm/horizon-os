@@ -1,0 +1,11 @@
+[Unit]
+Description=Create the swap file for zswap
+DefaultDependencies=no
+RequiresMountsFor=/var
+Conflicts=shutdown.target
+Before=var-swap-swapfile.swap shutdown.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/horizon-swapfile

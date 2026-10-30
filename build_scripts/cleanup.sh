@@ -96,6 +96,12 @@ REMOVE_FIREFOX_LANGPACKS=(
     firefox-langpacks
 )
 
+# Swap is zswap in front of a swap file (horizon-swapfile, horizon-zswap.conf):
+# without its config file zram-generator creates no zram device.
+REMOVE_ZRAM=(
+    zram-generator-defaults
+)
+
 dnf5 -y remove \
     "${REMOVE_IBUS[@]}" \
     "${REMOVE_FIRMWARE[@]}" \
@@ -104,7 +110,8 @@ dnf5 -y remove \
     "${REMOVE_AWS[@]}" \
     "${REMOVE_PRINTERS[@]}" \
     "${REMOVE_GUEST_TOOLS[@]}" \
-    "${REMOVE_FIREFOX_LANGPACKS[@]}"
+    "${REMOVE_FIREFOX_LANGPACKS[@]}" \
+    "${REMOVE_ZRAM[@]}"
 
 # Locales: keep only en and it. Install the individual langpacks first (they
 # coexist with glibc-all-langpacks), then remove the full package. Do not use

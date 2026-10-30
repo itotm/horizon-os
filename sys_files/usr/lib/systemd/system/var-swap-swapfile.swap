@@ -1,0 +1,10 @@
+[Unit]
+Description=Swap file for zswap
+Requires=horizon-swapfile.service
+After=horizon-swapfile.service
+
+[Swap]
+What=/var/swap/swapfile
+
+[Install]
+WantedBy=swap.target
