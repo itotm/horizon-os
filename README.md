@@ -11,9 +11,8 @@ A custom bootc image built with Universal Blue template and based on Fedora Kino
 - media codecs from [RPM Fusion](https://rpmfusion.org/)
 - [KDE apps](./build_scripts/standard/kde-apps.sh)
 - [Apps](./sys_files/usr/libexec/horizon-install-flatpaks) from Flathub (removed Fedora flatpak repository)
-- Cockpit, QEmu, Distrobox, VSCode, Syncthing and Tailscale preinstalled
-- [Backrest](https://github.com/garethgeorge/backrest) with restic as a [system service](./sys_files/usr/lib/systemd/system/backrest.service) (web UI on localhost), plus a [hook script](./sys_files/usr/libexec/horizon-backrest-snapshot) to back up `/var/home` from a read-only btrfs snapshot
-- swap with [zswap](./sys_files/usr/lib/tmpfiles.d/horizon-zswap.conf) (zstd) in front of a [swap file](./sys_files/usr/libexec/horizon-swapfile) sized from RAM, instead of Fedora's 8 GB zram
+- Cockpit, QEmu, Distrobox, VSCode, Syncthing, Backrest and Tailscale preinstalled
+- swap with zswap with zstd instead of zram
 - [System Monitor page](./sys_files/usr/libexec/horizon-configure-systemmonitor) with this PC's hardware, generated at first login ([plasma-systemmonitor](https://github.com/itotm/plasma-systemmonitor))
 - Italian locales and various dictionaries
 - scheduled to update weekly
