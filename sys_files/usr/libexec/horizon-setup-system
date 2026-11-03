@@ -14,7 +14,7 @@ if [ -z "$USER" ]; then
 fi
 
 HOMEDIR=$(eval echo "~$USER")
-WANTS="$HOMEDIR/.config/systemd/user/default.target.wants"
+WANTS="$HOMEDIR/.config/systemd/user/plasma-workspace.target.wants"
 
 mkdir -p "$WANTS"
 

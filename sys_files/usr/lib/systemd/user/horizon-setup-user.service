@@ -2,7 +2,6 @@
 [Unit]
 Description=Setup HorizonOS user aliases, completions and shell enhancements
 After=plasma-workspace.target
-Wants=plasma-workspace.target
 
 [Service]
 Type=oneshot
