@@ -28,7 +28,7 @@ sleep 1
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/kickoff-simplified/releases/download/v1.3.6/org.kde.plasma.kickoff-simplified-1.3.6.tar.gz /usr/share/plasma/plasmoids
 sleep 1
-./ctx/download-github.sh https://github.com/itotm/plymouth-themes/releases/download/v1.3/fedora-logo-spinner-1.3.tar.gz /usr/share/plymouth/themes
+./ctx/download-github.sh https://github.com/itotm/plymouth-themes/releases/download/v1.4/fedora-logo-spinner-1.4.tar.gz /usr/share/plymouth/themes
 sleep 1
 ./ctx/download-github.sh https://github.com/itotm/plasma-systemmonitor/archive/refs/tags/v0.3.0.tar.gz /tmp/plasma-systemmonitor
 cp -r /tmp/plasma-systemmonitor/plasma-systemmonitor-0.3.0/sensorfaces/local.graduatedbars /usr/share/ksysguard/sensorfaces/
