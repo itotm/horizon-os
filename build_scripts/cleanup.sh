@@ -36,7 +36,6 @@ REMOVE_FIRMWARE=(
     iwlegacy-firmware
     iwlwifi-dvm-firmware
     iwlwifi-mld-firmware
-    iwlwifi-mvm-firmware
     libertas-firmware
     nvidia-gpu-firmware
     nxpwireless-firmware

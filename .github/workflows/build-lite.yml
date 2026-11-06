@@ -1,0 +1,40 @@
+---
+# HorizonOS without virtualization (libvirt, QEMU, virt-manager, Distrobox,
+# cockpit-machines) and developer tools (VS Code, gh), for PCs that only need
+# the desktop. Same build as build.yml, published as
+#   ghcr.io/itotm/horizon-os:lite        (followed by installed systems)
+#   ghcr.io/itotm/horizon-os:lite-<version>, :f44-lite
+# Install with: sudo bootc switch ghcr.io/itotm/horizon-os:lite
+name: Build container image (lite)
+on:
+  # Friday 09:00 UTC
+  schedule:
+    - cron: "0 9 * * 5"
+  workflow_dispatch:
+    inputs:
+      fedora_version:
+        description: "Fedora base image"
+        required: false
+        default: "44"
+        type: choice
+        options:
+          - "44"
+          - "45"
+          - "rawhide"
+
+jobs:
+  build:
+    name: Build lite image
+    uses: ./.github/workflows/build.yml
+    # A called workflow cannot get more than its caller grants
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    with:
+      variant: lite
+      # empty on a scheduled run
+      fedora_version: ${{ inputs.fedora_version || '44' }}
+      enable_virttools: false
+      enable_devtools: false
+    secrets: inherit

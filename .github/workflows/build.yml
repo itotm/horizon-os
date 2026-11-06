@@ -39,6 +39,38 @@ on:
         required: false
         default: false
         type: boolean
+  # Called by build-lite.yml (and any other variant): same build, its own tags.
+  workflow_call:
+    inputs:
+      variant:
+        description: "Variant name: replaces the latest tag and prefixes the version and fNN tags (empty = main image)"
+        required: false
+        default: ""
+        type: string
+      fedora_version:
+        required: false
+        default: "44"
+        type: string
+      enable_common:
+        required: false
+        default: true
+        type: boolean
+      enable_standard:
+        required: false
+        default: true
+        type: boolean
+      enable_virttools:
+        required: false
+        default: true
+        type: boolean
+      enable_devtools:
+        required: false
+        default: true
+        type: boolean
+      enable_experimental:
+        required: false
+        default: false
+        type: boolean
 
 env:
   IMAGE_DESC: "HorizonOS - Customized Fedora Kinoite Image"
@@ -46,7 +78,12 @@ env:
   IMAGE_LOGO_URL: "https://github.com/itotm/horizon-os/blob/main/logo.png"
   IMAGE_NAME: "${{ github.event.repository.name }}"
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
-  DEFAULT_TAG: "latest"
+  # The tag installed systems follow: "latest" for the main image, the variant
+  # name (e.g. "lite") when called from a variant workflow.
+  DEFAULT_TAG: ${{ inputs.variant || 'latest' }}
+  # Tags installed systems follow, never deleted by the cleanup steps whichever
+  # workflow runs them: a variant build must not age out "latest" and vice versa.
+  KEEP_TAGS: "latest lite dev"
   # Public half of SIGNING_SECRET; installed into the image from sys_files.
   COSIGN_PUBLIC_KEY: "sys_files/etc/pki/containers/horizon-os.pub"
 
@@ -89,6 +126,10 @@ jobs:
           BUILD_DATE=$(date -u +%Y%m%d)
           BUILD_NUMBER=${{ github.run_number }}
           VERSION="${BUILD_DATE}.${BUILD_NUMBER}"
+          # A variant has its own run numbers: the prefix keeps its version
+          # tags apart from the main image's (lite-20261106.3)
+          VARIANT="${{ inputs.variant }}"
+          VERSION="${VARIANT:+${VARIANT}-}${VERSION}"
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
           # Check if today is Friday (5 = Friday)
@@ -122,7 +163,7 @@ jobs:
           tags: |
             type=raw,value=${{ env.DEFAULT_TAG }},enable=${{ inputs.fedora_version == '' || inputs.fedora_version == '44' }}
             type=raw,value=${{ steps.date.outputs.version }}
-            type=raw,value=f${{ inputs.fedora_version || '44' }}
+            type=raw,value=f${{ inputs.fedora_version || '44' }}${{ inputs.variant && format('-{0}', inputs.variant) || '' }}
             type=sha,enable=${{ github.event_name == 'pull_request' }}
             type=ref,event=pr
           labels: |
@@ -155,7 +196,7 @@ jobs:
           # every label can be set in this single pass. Kinoite publishes no
           # per-build tag, so the exact base build is pinned by the digest and
           # spelled out by kinoite.version.
-          BASE_IMAGE="quay.io/fedora/fedora-kinoite:${{ github.event.inputs.fedora_version || '44' }}"
+          BASE_IMAGE="quay.io/fedora/fedora-kinoite:${{ inputs.fedora_version || '44' }}"
           sudo buildah pull "$BASE_IMAGE"
           BASE_INFO=$(sudo buildah inspect --type image "$BASE_IMAGE")
           BASE_DIGEST=$(jq -r '.FromImageDigest // empty' <<< "$BASE_INFO")
@@ -184,14 +225,14 @@ jobs:
           sudo buildah build \
             --format oci \
             --file ./Containerfile \
-            --build-arg FEDORA_VERSION=${{ github.event.inputs.fedora_version || '44' }} \
+            --build-arg FEDORA_VERSION=${{ inputs.fedora_version || '44' }} \
             --build-arg BUILD_NUMBER=${{ github.run_number }} \
             --build-arg IMAGE_VERSION=${{ steps.date.outputs.version }} \
-            --build-arg ENABLE_COMMON=${{ github.event.inputs.enable_common || true }} \
-            --build-arg ENABLE_STANDARD=${{ github.event.inputs.enable_standard || true }} \
-            --build-arg ENABLE_VIRTTOOLS=${{ github.event.inputs.enable_virttools || true }} \
-            --build-arg ENABLE_DEVTOOLS=${{ github.event.inputs.enable_devtools || true }} \
-            --build-arg ENABLE_EXPERIMENTAL=${{ github.event.inputs.enable_experimental || false }} \
+            --build-arg ENABLE_COMMON=${{ inputs.enable_common }} \
+            --build-arg ENABLE_STANDARD=${{ inputs.enable_standard }} \
+            --build-arg ENABLE_VIRTTOOLS=${{ inputs.enable_virttools }} \
+            --build-arg ENABLE_DEVTOOLS=${{ inputs.enable_devtools }} \
+            --build-arg ENABLE_EXPERIMENTAL=${{ inputs.enable_experimental }} \
             --tag localhost/${{ env.IMAGE_NAME }}:build \
             "${LABEL_ARGS[@]}" \
             "${ANNOTATION_ARGS[@]}" \
@@ -332,23 +373,25 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PACKAGE_NAME: ${{ env.IMAGE_NAME }}
-          KEEP_TAG: ${{ env.DEFAULT_TAG }}
         run: |
           set -euo pipefail
 
           CUTOFF_DATE=$(date -u -d '30 days ago' +%s)
+          # jq condition true for any tag in KEEP_TAGS: . == "latest" or . == "lite" ...
+          KEEP_FILTER=$(printf '. == "%s" or ' ${KEEP_TAGS})
+          KEEP_FILTER="${KEEP_FILTER% or }"
           echo "Fetching versions for ${PACKAGE_NAME}..."
 
           # `gh api` paginates on its own and fails the step on a non-2xx response,
-          # unlike a bare `curl -s`. The default tag is excluded by exact array
-          # membership rather than a substring match on the joined list, so tags
-          # such as `latest-foo` are no longer treated as protected. Signatures
+          # unlike a bare `curl -s`. The tags in KEEP_TAGS are excluded by exact
+          # match rather than a substring match on the joined list, so tags
+          # such as `latest-foo` are not treated as protected. Signatures
           # (tagged sha256-<digest>.sig) are kept too: their timestamp never
           # moves, so the one covering `latest` would age out while the image
           # itself stays, breaking verification on every installed system.
           gh api --paginate "/user/packages/container/${PACKAGE_NAME}/versions" \
             --jq ".[]
-                  | select((.metadata.container.tags // []) | index(\"${KEEP_TAG}\") | not)
+                  | select((.metadata.container.tags // []) | any(${KEEP_FILTER}) | not)
                   | select((.metadata.container.tags // []) | any(startswith(\"sha256-\")) | not)
                   | [.id, .updated_at, ((.metadata.container.tags // []) | join(\",\"))]
                   | @tsv" \
@@ -442,11 +485,14 @@ jobs:
               LAST_UPDATED=$(echo "$TAG" | jq -r '.last_updated')
               TAG_TS=$(date -u -d "$LAST_UPDATED" +%s 2>/dev/null || echo 0)
 
-              # Keep the default tag and the signatures (sha256-<digest>.sig):
-              # the one covering the default tag never gets a newer timestamp
-              # and would otherwise be removed while the image stays.
+              # Keep the tags in KEEP_TAGS and the signatures
+              # (sha256-<digest>.sig): the one covering a kept tag never gets a
+              # newer timestamp and would otherwise be removed while the image stays.
+              case " ${{ env.KEEP_TAGS }} " in
+                *" ${TAG_NAME} "*) continue ;;
+              esac
               case "$TAG_NAME" in
-                "${{ env.DEFAULT_TAG }}"|sha256-*) continue ;;
+                sha256-*) continue ;;
               esac
 
               if [ "$TAG_TS" -lt "$CUTOFF_DATE" ] 2>/dev/null; then
@@ -523,11 +569,12 @@ jobs:
             RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.QUAY_TOKEN }}" \
               "https://quay.io/api/v1/repository/${QUAY_REPO}/tag/?page=${PAGE}&limit=100&onlyActiveTags=true")
 
-            # The default tag and the signatures (sha256-<digest>.sig) are kept:
-            # the signature covering the default tag never gets a newer timestamp
-            # and would otherwise be removed while the image stays.
-            TAGS=$(echo "$RESPONSE" | jq -r '.tags[]?
-              | select(.name != "${{ env.DEFAULT_TAG }}")
+            # The tags in KEEP_TAGS and the signatures (sha256-<digest>.sig) are
+            # kept: the signature covering a kept tag never gets a newer
+            # timestamp and would otherwise be removed while the image stays.
+            TAGS=$(echo "$RESPONSE" | jq -r --arg keep "${{ env.KEEP_TAGS }}" '($keep | split(" ")) as $k
+              | .tags[]?
+              | select(.name as $n | $k | index($n) | not)
               | select(.name | startswith("sha256-") | not)
               | "\(.name) \(.start_ts)"')
 
