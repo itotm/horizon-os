@@ -19,6 +19,7 @@ if ! grep -q "# HorizonOS customizations" ~/.bashrc; then
         echo "if command -v dust >/dev/null 2>&1; then alias du='dust'; fi"
         echo "if command -v mc >/dev/null 2>&1; then alias mc='mc -u'; fi"
         echo "if command -v fzf >/dev/null 2>&1; then eval \"\$(fzf --bash)\"; fi"
+        echo "PROMPT_COMMAND+=(\"history -a\")"
     } | tee -a ~/.bashrc
 fi
 
