@@ -13,7 +13,13 @@ fi
 flatpak config --set extra-languages "it;cs"
 
 logger "System update: flatpak"
-flatpak_output=$(flatpak update -y --noninteractive 2>&1 | tee -a "$LOG_FILE")
+# a failed update must not abort the caller (horizon-setup-system): it would
+# never record the new version and would retry the whole setup at every boot
+if ! flatpak_output=$(flatpak update -y --noninteractive 2>&1 | tee -a "$LOG_FILE"); then
+    logger "flatpak update failed, see $LOG_FILE"
+    echo "false"
+    exit 0
+fi
 logger "flatpak updated"
 
 if echo "$flatpak_output" | grep -q "Changes complete"; then

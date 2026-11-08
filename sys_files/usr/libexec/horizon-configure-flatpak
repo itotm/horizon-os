@@ -8,7 +8,7 @@ logger "Flatpak configuration"
 # flatpak ask which one to remove, and the uninstall aborts
 flatpak list --app --columns=ref,origin | while read -r app origin; do
     if [ -n "$app" ] && [ "$origin" != "flathub" ]; then
-        flatpak uninstall -y --delete-data "$app" 2>/dev/null || true
+        flatpak uninstall -y --delete-data "$app" || logger "Flatpak: could not uninstall $app"
     fi
 done
 
@@ -20,13 +20,14 @@ done
 
 flatpak list --runtime --columns=ref,origin | while read -r runtime origin; do
     if [ -n "$runtime" ] && [ "$origin" != "flathub" ]; then
-        flatpak uninstall -y --delete-data "$runtime" 2>/dev/null || true
+        flatpak uninstall -y --delete-data "$runtime" || logger "Flatpak: could not uninstall $runtime"
     fi
 done
 
 for remote in fedora fedora-testing; do
     if flatpak remotes | grep -q "^$remote"; then
-        flatpak remote-delete "$remote" 2>/dev/null || true
+        # fails while any ref installed from this remote is left
+        flatpak remote-delete "$remote" || logger "Flatpak: could not delete remote $remote"
     fi
 done
 

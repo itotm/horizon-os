@@ -6,6 +6,15 @@ logger "HorizonOS installing flatpaks"
 flatpak override --user --filesystem=xdg-config/gtk-3.0:ro
 flatpak override --user --filesystem=xdg-config/gtk-4.0:ro
 
+# Thunderbird: a mailto: link clicked in Firefox starts a second instance with
+# Firefox's environment. Firefox runs with HOME=/var/home/<user> (the resolved
+# path) while the session uses /home/<user>, and Thunderbird derives its
+# single-instance DBus name from the profile path, so the second instance does
+# not find the running one and fails with "already running but not responding".
+# Pin HOME to the passwd value and drop Firefox's remoting name.
+flatpak override --user --env=HOME="$(getent passwd "$(id -un)" | cut -d: -f6)" org.mozilla.thunderbird
+flatpak override --user --unset-env=MOZ_APP_REMOTINGNAME org.mozilla.thunderbird
+
 FLATPAK_PACKAGES=(
     app.comaps.comaps
     com.calibre_ebook.calibre
