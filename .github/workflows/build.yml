@@ -8,7 +8,7 @@ on:
       fedora_version:
         description: "Fedora base image"
         required: false
-        default: "44"
+        default: "45"
         type: choice
         options:
           - "44"
@@ -49,12 +49,12 @@ on:
         type: string
       fedora_version:
         required: false
-        default: "44"
+        default: "45"
         type: string
       default_fedora_version:
         description: "Fedora version that moves the default tag (latest / the variant name)"
         required: false
-        default: "44"
+        default: "45"
         type: string
       enable_common:
         required: false
@@ -166,9 +166,9 @@ jobs:
           # This generates all the tags for your image, you can add custom tags here too!
           # Default tags are "$DEFAULT_TAG" and version tag in format vAAAAMMGG.build.
           tags: |
-            type=raw,value=${{ env.DEFAULT_TAG }},enable=${{ (inputs.fedora_version || '44') == (inputs.default_fedora_version || '44') }}
+            type=raw,value=${{ env.DEFAULT_TAG }},enable=${{ (inputs.fedora_version || '45') == (inputs.default_fedora_version || '45') }}
             type=raw,value=${{ steps.date.outputs.version }}
-            type=raw,value=f${{ inputs.fedora_version || '44' }},enable=${{ inputs.variant == '' }}
+            type=raw,value=f${{ inputs.fedora_version || '45' }},enable=${{ inputs.variant == '' }}
             type=sha,enable=${{ github.event_name == 'pull_request' }}
             type=ref,event=pr
           labels: |
@@ -201,7 +201,7 @@ jobs:
           # every label can be set in this single pass. Kinoite publishes no
           # per-build tag, so the exact base build is pinned by the digest and
           # spelled out by kinoite.version.
-          BASE_IMAGE="quay.io/fedora/fedora-kinoite:${{ inputs.fedora_version || '44' }}"
+          BASE_IMAGE="quay.io/fedora/fedora-kinoite:${{ inputs.fedora_version || '45' }}"
           sudo buildah pull "$BASE_IMAGE"
           BASE_INFO=$(sudo buildah inspect --type image "$BASE_IMAGE")
           BASE_DIGEST=$(jq -r '.FromImageDigest // empty' <<< "$BASE_INFO")
@@ -230,7 +230,7 @@ jobs:
           sudo buildah build \
             --format oci \
             --file ./Containerfile \
-            --build-arg FEDORA_VERSION=${{ inputs.fedora_version || '44' }} \
+            --build-arg FEDORA_VERSION=${{ inputs.fedora_version || '45' }} \
             --build-arg BUILD_NUMBER=${{ github.run_number }} \
             --build-arg IMAGE_VERSION=${{ steps.date.outputs.version }} \
             --build-arg ENABLE_COMMON=${{ inputs.enable_common }} \
@@ -318,7 +318,7 @@ jobs:
       # registry-to-registry copies.
       #
       # Only the per-build version tag is pushed here: the tags installed
-      # systems follow (latest, f44) are moved by "Tag image" once the
+      # systems follow (latest, f45) are moved by "Tag image" once the
       # signature exists. A run that dies in between (timeout, dropped
       # connection) then leaves them on the previous, signed image instead of
       # an unsigned one that every `bootc upgrade` would reject.
