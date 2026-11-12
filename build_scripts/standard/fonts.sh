@@ -11,8 +11,6 @@ FONT_PACKAGES=(
     cascadia-mono-fonts
     fira-code-fonts
     fontawesome-fonts-all
-    google-carlito-fonts
-    google-crosextra-caladea-fonts
     google-roboto-fonts
     intel-one-mono-fonts
     jetbrains-mono-fonts
@@ -25,7 +23,11 @@ FONT_PACKAGES=(
 dnf5 -y install "${FONT_PACKAGES[@]}"
 
 TERRA_FONT_PACKAGES=(
-    cleartype-fonts
+    cleartype-calibri-fonts
+    cleartype-cambria-fonts
+    cleartype-candara-fonts
+    cleartype-constantia-fonts
+    cleartype-corbel-fonts
     ms-core-fonts
     ms-core-tahoma-fonts
 )

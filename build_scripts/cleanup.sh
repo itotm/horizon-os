@@ -107,6 +107,11 @@ REMOVE_PYTHON_QT=(
     python3-shiboken6
 )
 
+# The static Noto Serif duplicates google-noto-serif-vf-fonts, which stays.
+REMOVE_FONTS=(
+    google-noto-serif-fonts
+)
+
 REMOVE_HARDWARE=(
     device-mapper-multipath
     fprintd
@@ -131,6 +136,7 @@ dnf5 -y remove \
     "${REMOVE_GUEST_TOOLS[@]}" \
     "${REMOVE_ACCESSIBILITY[@]}" \
     "${REMOVE_PYTHON_QT[@]}" \
+    "${REMOVE_FONTS[@]}" \
     "${REMOVE_HARDWARE[@]}" \
     "${REMOVE_ZRAM[@]}"
 
