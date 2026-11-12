@@ -24,6 +24,11 @@ on:
         required: false
         default: true
         type: boolean
+      enable_extended:
+        description: "Extended (Proton Mail Bridge, MEGAsync, aMule, Piper)"
+        required: false
+        default: true
+        type: boolean
       enable_virttools:
         description: "Virtualization Tools"
         required: false
@@ -61,6 +66,10 @@ on:
         default: true
         type: boolean
       enable_standard:
+        required: false
+        default: true
+        type: boolean
+      enable_extended:
         required: false
         default: true
         type: boolean
@@ -235,6 +244,7 @@ jobs:
             --build-arg IMAGE_VERSION=${{ steps.date.outputs.version }} \
             --build-arg ENABLE_COMMON=${{ inputs.enable_common }} \
             --build-arg ENABLE_STANDARD=${{ inputs.enable_standard }} \
+            --build-arg ENABLE_EXTENDED=${{ inputs.enable_extended }} \
             --build-arg ENABLE_VIRTTOOLS=${{ inputs.enable_virttools }} \
             --build-arg ENABLE_DEVTOOLS=${{ inputs.enable_devtools }} \
             --build-arg ENABLE_EXPERIMENTAL=${{ inputs.enable_experimental }} \

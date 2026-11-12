@@ -1,7 +1,8 @@
 ---
 # HorizonOS without virtualization (libvirt, QEMU, virt-manager, Distrobox,
-# cockpit-machines) and developer tools (VS Code, gh), for PCs that only need
-# the desktop. Same build as build.yml, published as
+# cockpit-machines), developer tools (VS Code, gh) and extended apps (Proton
+# Mail Bridge, MEGAsync, aMule, Piper), for PCs that only need the desktop.
+# Same build as build.yml, published as
 #   ghcr.io/itotm/horizon-os:lite        (followed by installed systems)
 #   ghcr.io/itotm/horizon-os:lite-<version>
 # Install with: sudo bootc switch ghcr.io/itotm/horizon-os:lite
@@ -34,6 +35,7 @@ jobs:
       fedora_version: ${{ inputs.fedora_version || '45' }}
       # only a Fedora 45 build moves the "lite" tag
       default_fedora_version: "45"
+      enable_extended: false
       enable_virttools: false
       enable_devtools: false
     secrets: inherit

@@ -12,7 +12,6 @@ dnf5 -y remove "${REMOVE_PACKAGES[@]}"
 dnf5 -y config-manager setopt fedora-cisco-openh264.enabled=1
 
 INSTALL_PACKAGES=(
-    amule
     btrfs-assistant
     du-dust
     duf
@@ -39,7 +38,6 @@ INSTALL_PACKAGES=(
     ncdu
     nvtop
     openh264
-    piper
     policycoreutils-gui
     powerstat
     powertop

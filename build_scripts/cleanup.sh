@@ -32,10 +32,10 @@ REMOVE_FIRMWARE=(
     brcmfmac-firmware
     cirrus-audio-firmware
     intel-audio-firmware
+    intel-npu-firmware
     intel-vsc-firmware
     iwlegacy-firmware
     iwlwifi-dvm-firmware
-    iwlwifi-mld-firmware
     libertas-firmware
     nvidia-gpu-firmware
     nxpwireless-firmware
@@ -91,8 +91,28 @@ REMOVE_GUEST_TOOLS=(
     virtualbox-guest-additions
 )
 
-REMOVE_FIREFOX_LANGPACKS=(
-    firefox-langpacks
+REMOVE_ACCESSIBILITY=(
+    brltty
+    espeak-ng
+    orca
+    python3-brlapi
+    python3-speechd
+    speech-dispatcher
+    speech-dispatcher-espeak-ng
+    speech-dispatcher-utils
+)
+
+REMOVE_PYTHON_QT=(
+    python3-pyside6
+    python3-shiboken6
+)
+
+REMOVE_HARDWARE=(
+    device-mapper-multipath
+    fprintd
+    fprintd-pam
+    libfprint
+    plasma-thunderbolt
 )
 
 # Swap is zswap in front of a swap file (horizon-swapfile, horizon-zswap.conf):
@@ -109,8 +129,14 @@ dnf5 -y remove \
     "${REMOVE_AWS[@]}" \
     "${REMOVE_PRINTERS[@]}" \
     "${REMOVE_GUEST_TOOLS[@]}" \
-    "${REMOVE_FIREFOX_LANGPACKS[@]}" \
+    "${REMOVE_ACCESSIBILITY[@]}" \
+    "${REMOVE_PYTHON_QT[@]}" \
+    "${REMOVE_HARDWARE[@]}" \
     "${REMOVE_ZRAM[@]}"
+
+# Firefox: keep only the Italian langpack. The Fedora wrapper installs the one
+# matching the session locale, so the others are never used.
+find /usr/lib64/firefox/langpacks -name 'langpack-*.xpi' ! -name 'langpack-it@firefox.mozilla.org.xpi' -delete
 
 # Locales: keep only en and it. Install the individual langpacks first (they
 # coexist with glibc-all-langpacks), then remove the full package. Do not use

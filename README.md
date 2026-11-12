@@ -38,7 +38,8 @@ sudo bootc switch ghcr.io/itotm/horizon-os:latest
 sudo bootc switch docker.io/itotm/horizon-os:latest
 sudo bootc switch quay.io/itotm/horizon-os:latest
 
-# lite: without virtualization (libvirt, QEMU, virt-manager, Distrobox) and developer tools (VS Code, gh)
+# lite: without virtualization (libvirt, QEMU, virt-manager, Distrobox), developer tools (VS Code, gh)
+# and extended apps (Proton Mail Bridge, MEGAsync, aMule, Piper)
 sudo bootc switch ghcr.io/itotm/horizon-os:lite
 ```
 

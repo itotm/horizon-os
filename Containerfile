@@ -1,6 +1,7 @@
 ARG FEDORA_VERSION=45
 ARG ENABLE_COMMON=true
 ARG ENABLE_STANDARD=true
+ARG ENABLE_EXTENDED=true
 ARG ENABLE_VIRTTOOLS=true
 ARG ENABLE_DEVTOOLS=true
 ARG ENABLE_EXPERIMENTAL=false
@@ -23,6 +24,7 @@ ENV FEDORA_VERSION=${FEDORA_VERSION}
 
 ARG ENABLE_COMMON
 ARG ENABLE_STANDARD
+ARG ENABLE_EXTENDED
 ARG ENABLE_VIRTTOOLS
 ARG ENABLE_DEVTOOLS
 ARG ENABLE_EXPERIMENTAL
@@ -33,6 +35,9 @@ LABEL org.opencontainers.image.source="https://github.com/itotm/horizon-os"
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_STANDARD /ctx/standard
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
+    /ctx/runner.sh ENABLE_EXTENDED /ctx/extended
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx --mount=type=cache,dst=/var/cache --mount=type=cache,dst=/var/log --mount=type=tmpfs,dst=/tmp \
     /ctx/runner.sh ENABLE_VIRTTOOLS /ctx/virttools
