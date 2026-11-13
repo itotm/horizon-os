@@ -40,6 +40,7 @@ dnf5 -y install \
 # The release zip also carries eot/svg/woff web copies; only the TTFs are kept.
 curl -fsSL --retry 3 -o /tmp/selawik.zip \
     https://github.com/microsoft/Selawik/releases/download/1.01/Selawik_Release.zip
+echo "3f62c51e05e3b5a1e6241cf92a371f0be2ea1183aa87b30718bbd40832a8d423  /tmp/selawik.zip" | sha256sum -c -
 unzip -j /tmp/selawik.zip '*.ttf' -d /usr/share/fonts/selawik
 
 # Documents and web pages asking for Segoe UI get Selawik. binding="same"
@@ -74,4 +75,5 @@ ln -s /usr/share/fontconfig/conf.avail/30-selawik-segoe-ui.conf /etc/fonts/conf.
 # files but pulls in texlive-base, luatex and Perl (~87 MiB instead of ~7 MiB).
 curl -fsSL --retry 3 -o /tmp/latin-modern.zip \
     https://www.gust.org.pl/projects/e-foundry/latin-modern/download/lm2.004otf.zip
+echo "5b0236051d3728be6616f1b274e3b910473875b5a3ef9382f0ef00384ddb161b  /tmp/latin-modern.zip" | sha256sum -c -
 unzip -j /tmp/latin-modern.zip '*.otf' -d /usr/share/fonts/latin-modern
