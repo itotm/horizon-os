@@ -1,6 +1,11 @@
 #!/bin/bash
 set -oue pipefail
 
+# stdout is the result, read by horizon-update: true (new image staged),
+# false (nothing to do) or failed (bootc upgrade returned an error)
+
+LOG_FILE="${LOG_FILE:-/var/log/horizon-update.log}"
+
 if ! command -v bootc &> /dev/null; then
     logger "bootc not found"
     echo "false"
@@ -8,9 +13,19 @@ if ! command -v bootc &> /dev/null; then
 fi
 
 logger "System update: bootc"
-bootc_output=$(bootc upgrade 2>&1) || true
+if bootc_output=$(bootc upgrade 2>&1); then
+    bootc_rc=0
+else
+    bootc_rc=$?
+fi
 
-if echo "$bootc_output" | grep -qi "staged\|queued\|updated"; then
+# keep bootc's own output: without it a failed upgrade leaves no trace
+printf '%s\n' "$bootc_output" | tee -a "$LOG_FILE" | logger -t horizon-update-bootc
+
+if [ "$bootc_rc" -ne 0 ]; then
+    logger -p user.err "bootc upgrade failed (exit $bootc_rc)"
+    echo "failed"
+elif echo "$bootc_output" | grep -qi "staged\|queued\|updated"; then
     logger "bootc updated"
     echo "true"
 else

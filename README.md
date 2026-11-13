@@ -13,7 +13,7 @@ A custom bootc image built with Universal Blue template and based on Fedora Kino
 - [Apps](./sys_files/usr/libexec/horizon-install-flatpaks) from Flathub (removed Fedora flatpak repository)
 - Cockpit, QEmu, Distrobox, VSCode, Syncthing, Backrest and Tailscale preinstalled
 - swap with zswap with zstd instead of zram
-- [System Monitor page](./sys_files/usr/libexec/horizon-configure-systemmonitor) with this PC's hardware, generated at first login ([plasma-systemmonitor](https://github.com/itotm/plasma-systemmonitor))
+- [System Monitor page](./sys_files/usr/libexec/horizon-configure-systemmonitor) with this PC's hardware, generated automatically
 - Italian locales and various dictionaries
 - scheduled to update weekly
 - designed to be modular (fork the repo to try!)

@@ -10,10 +10,15 @@ fi
 
 export LOG_FILE="/var/log/horizon-update.log"
 
-BOOTC_UPDATED=$(/usr/libexec/horizon-update-bootc)
+BOOTC_STATUS=$(/usr/libexec/horizon-update-bootc)
 
-if [ "$BOOTC_UPDATED" = true ]; then
+if [ "$BOOTC_STATUS" = true ]; then
     /usr/libexec/horizon-notify "Update Completed" "Reboot to apply bootc updates."
+elif [ "$BOOTC_STATUS" = failed ]; then
+    /usr/libexec/horizon-notify "Update Failed" "bootc upgrade failed. Details: journalctl -t horizon-update-bootc"
+    logger -p user.err "System update: failed"
+    # leave the unit in failed state too, so systemctl --failed shows it
+    exit 1
 fi
 
 logger "System update: completed"
