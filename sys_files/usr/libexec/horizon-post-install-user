@@ -4,6 +4,7 @@ set -oue pipefail
 logger "HorizonOS user post install"
 
 /usr/libexec/horizon-configure-bash
+/usr/libexec/horizon-configure-vscode
 /usr/libexec/horizon-configure-plasma
 /usr/libexec/horizon-configure-systemmonitor
 /usr/libexec/horizon-configure-login

@@ -1,0 +1,91 @@
+#!/bin/bash
+set -oue pipefail
+
+logger "Configuring VS Code for user"
+
+SETTINGS_DIR="$HOME/.config/Code/User"
+SETTINGS_FILE="$SETTINGS_DIR/settings.json"
+
+# settings.json is JSONC (comments, trailing commas), so it cannot be merged
+# reliably with jq: only seed it when the user does not have one yet.
+if [ -e "$SETTINGS_FILE" ]; then
+    logger "VS Code settings already present, leaving them untouched"
+    exit 0
+fi
+
+mkdir -p "$SETTINGS_DIR"
+
+cat > "$SETTINGS_FILE" <<'SETTINGS'
+{
+  // Appearance
+  "workbench.colorTheme": "Light+",
+  "editor.fontFamily": "'Cascadia Mono SemiLight'",
+  "editor.allowVariableFonts": false,
+  "editor.lineNumbers": "off",
+  "editor.minimap.enabled": false,
+  "editor.rulers": [
+    {
+      "column": 120,
+      "color": "#ff0000"
+    }
+  ],
+  "editor.stickyScroll.enabled": false,
+  "workbench.tree.enableStickyScroll": false,
+  "terminal.integrated.stickyScroll.enabled": false,
+  "workbench.experimental.modernUI": false,
+  "workbench.modernUIFrostedGlass": false,
+  "debug.toolBarLocation": "commandCenter",
+
+  // Editing and files
+  "files.autoSave": "onFocusChange",
+  "editor.formatOnSave": true,
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+  "window.restoreWindows": "none",
+
+  // Git
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "git.autofetch": true,
+  "git.fetchOnPull": true,
+  "git.replaceTagsWhenPull": true,
+  "git.useCommitInputAsStashMessage": true,
+
+  // Updates, telemetry, trust
+  // The image is immutable: VS Code is updated with the system, not by itself
+  "update.mode": "none",
+  "telemetry.feedback.enabled": false,
+  "telemetry.editStats.enabled": false,
+  "security.workspace.trust.enabled": false,
+  "extensions.verifySignature": false,
+
+  // Containers (podman is the container engine of the image)
+  "dev.containers.dockerPath": "podman",
+
+  // JSON schemas
+  "json.schemaDownload.trustedDomains": {
+    "https://schemastore.azurewebsites.net/": true,
+    "https://raw.githubusercontent.com/microsoft/vscode/": true,
+    "https://raw.githubusercontent.com/devcontainers/spec/": true,
+    "https://www.schemastore.org/": true,
+    "https://json.schemastore.org/": true,
+    "https://json-schema.org/": true,
+    "https://developer.microsoft.com/json-schemas/": true,
+    "https://raw.githubusercontent.com": true
+  },
+
+  // Chat and Copilot
+  "github.copilot.enable": {
+    "*": false
+  },
+  "github.copilot.nextEditSuggestions.enabled": false,
+  "chat.agent.maxRequests": 1000,
+  "chat.fontSize": 15,
+  "chat.viewSessions.orientation": "stacked",
+  "chat.titleBar.openInAgentsWindow.enabled": false,
+  "chat.welcomePage.signIn.enabled": false,
+  "chat.welcomePage.agentsWindowSectionStyle": "none"
+}
+SETTINGS
+
+logger "VS Code configuration complete"
