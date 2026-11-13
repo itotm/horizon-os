@@ -4,7 +4,10 @@ set -oue pipefail
 rpm --import https://packages.microsoft.com/keys/microsoft.asc
 echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\nautorefresh=1\ntype=rpm-md\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" | tee /etc/yum.repos.d/vscode.repo > /dev/null
 
-dnf5 -y install code
+# openssl3-libs provides libssl.so.3: the extension signature verifier bundled
+# with VS Code (vsce-sign, .NET) only knows OpenSSL <= 3 and aborts on Fedora 45
+# (OpenSSL 4 ships only libssl.so.4), so every extension install fails verification.
+dnf5 -y install code openssl3-libs
 
 echo "----------> Adding the Open in VSCode service menu"
 # Generated here rather than shipped in sys_files: KIO ignores TryExec in
