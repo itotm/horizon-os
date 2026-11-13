@@ -1,6 +1,11 @@
 #!/bin/bash
 set -oue pipefail
 
+# VS Code is only in the image when it is built with ENABLE_DEVTOOLS
+if ! rpm -q --quiet code; then
+    exit 0
+fi
+
 logger "Configuring VS Code for user"
 
 SETTINGS_DIR="$HOME/.config/Code/User"
