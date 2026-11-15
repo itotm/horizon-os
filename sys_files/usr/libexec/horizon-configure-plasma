@@ -20,7 +20,6 @@ kwriteconfig6 --file kdeglobals --group "KDE" --key "AnimationDurationFactor" 0.
 kwriteconfig6 --file kdeglobals --group "KDE" --key "ShowIconsOnPushButtons" false
 
 # KWin
-kwriteconfig6 --file kwinrc --group "Plugins" --key "diminactiveEnabled" true
 kwriteconfig6 --file kwinrc --group "org.kde.kdecoration2" --key "ShowToolTips" false
 
 # Sound
