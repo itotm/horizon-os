@@ -9,8 +9,15 @@ SERVICES=(
     "cockpit.socket"
     "podman.socket"
     "sshd"
-    "tailscaled"
 )
+
+# Hydrascale is only in the image when it is built with ENABLE_EXTENDED, and
+# then it runs every tailnet in place of the system tailscaled
+if [ -x /usr/bin/hydrascale ]; then
+    SERVICES+=("hydrascale.service")
+else
+    SERVICES+=("tailscaled")
+fi
 
 for service in "${SERVICES[@]}"; do
     systemctl enable "${service}" 2>/dev/null || true

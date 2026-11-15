@@ -1,0 +1,18 @@
+[Unit]
+Description=Keep the directly connected networks off the Hydrascale routes
+Documentation=man:ip-rule(8)
+# Started by hydrascale.service (Wants=), stopped and restarted with it. In an
+# image without Hydrascale (lite) nothing starts it.
+PartOf=hydrascale.service
+Before=hydrascale.service
+
+# Hydrascale writes its host routes into table 53, which the kernel reads at the
+# priority 32000, before the main table. A subnet route of a tailnet could then
+# take the traffic of the LAN. This rule reads the main table first but ignores
+# its default route: the LAN, libvirt and podman networks stay direct, while the
+# tailnet peers and the accepted subnet routes still reach table 53.
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/ip rule add priority 31000 lookup main suppress_prefixlength 0
+ExecStop=/usr/sbin/ip rule del priority 31000 lookup main suppress_prefixlength 0
