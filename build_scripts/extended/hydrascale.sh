@@ -3,16 +3,18 @@ set -oue pipefail
 
 # Hydrascale runs one tailscaled per tailnet, each in its own network
 # namespace, so the host joins several tailnets at once. It is not packaged
-# in Fedora: install the latest release binary. tailscaled itself comes from
+# in Fedora: install the latest release binary of the itotm/hydrascale fork
+# (upstream Crank-Git/Hydrascale plus a peers view, light theme, console
+# password and host_ipv6). tailscaled itself comes from
 # standard/tailscale.sh. The lite image (no ENABLE_EXTENDED) keeps the system
 # tailscaled instead: see horizon-configure-services.
 # The latest tag is read from the redirect of releases/latest rather than from
 # api.github.com, whose anonymous rate limit is shared by all the runners.
 HYDRASCALE_TAG=$(curl --http1.1 -fsSLI -o /dev/null -w '%{url_effective}' \
-  "https://github.com/Crank-Git/Hydrascale/releases/latest")
+  "https://github.com/itotm/hydrascale/releases/latest")
 HYDRASCALE_TAG="${HYDRASCALE_TAG##*/}"
 HYDRASCALE_VERSION="${HYDRASCALE_TAG#v}"
-HYDRASCALE_URL="https://github.com/Crank-Git/Hydrascale/releases/download/${HYDRASCALE_TAG}"
+HYDRASCALE_URL="https://github.com/itotm/hydrascale/releases/download/${HYDRASCALE_TAG}"
 HYDRASCALE_TGZ="hydrascale_${HYDRASCALE_VERSION}_linux_amd64.tar.gz"
 echo "----------> Installing Hydrascale ${HYDRASCALE_VERSION}"
 
