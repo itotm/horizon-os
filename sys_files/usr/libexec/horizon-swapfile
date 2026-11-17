@@ -44,12 +44,23 @@ if [ ! -e "${FILE}" ]; then
         if [ ! -d "${DIR}" ]; then
             btrfs subvolume create "${DIR}"
         fi
+        # Some installs set the btrfs compression property on /var itself;
+        # a new subvolume and its files inherit it, and the kernel refuses
+        # NOCOW on a compressed file (EINVAL). Clear it on the directory first.
+        btrfs property set "${DIR}" compression ""
         btrfs filesystem mkswapfile --size "${SIZE_GIB}G" "${FILE}.new"
     else
         install -d -m 0700 "${DIR}"
         fallocate -l "${SIZE_GIB}G" "${FILE}.new"
         chmod 0600 "${FILE}.new"
         mkswap "${FILE}.new"
+    fi
+    # mkswapfile can fail on NOCOW and still exit 0 with an empty file: never
+    # promote a file without a full swap area to the final name.
+    if [ "$(stat -c %s "${FILE}.new")" -lt $(( SIZE_GIB * 1024 * 1024 * 1024 )) ]; then
+        rm -f "${FILE}.new"
+        logger "Swap file not created: ${FILE}.new is incomplete"
+        exit 1
     fi
     mv "${FILE}.new" "${FILE}"
 fi
