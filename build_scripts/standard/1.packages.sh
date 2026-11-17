@@ -50,6 +50,7 @@ INSTALL_PACKAGES=(
     tmux
     traceroute
     vlc
+    vlc-plugin-samba
     xsane
     yt-dlp
 )
