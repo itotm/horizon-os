@@ -23,6 +23,26 @@ Icon=vscode
 Exec=code %u
 DESKTOP
 
+echo "----------> Raising the open-file soft limit for VS Code windows"
+# Chromium gives its renderers the soft RLIMIT_NOFILE VS Code was started
+# with: 1024 under systemd. A window that receives many large IPC messages
+# needs two descriptors per shared-memory buffer; once it runs out, buffers
+# arrive truncated and the window crashes with SIGBUS ("code 135").
+# Start VS Code with a soft limit of 65536 from the menu, the URL handler
+# and the code command.
+for f in /usr/share/applications/com.microsoft.VSCode.desktop /usr/share/applications/com.microsoft.VSCode.UrlHandler.desktop; do
+    sed -i 's|^Exec=/usr/share/code/code |Exec=prlimit --nofile=65536: /usr/share/code/code |' "$f"
+    if grep -q '^Exec=/usr/share/code/code' "$f"; then
+        echo "$f still starts VS Code without prlimit" >&2
+        exit 1
+    fi
+done
+sed -i 's|^ELECTRON_RUN_AS_NODE=1 "\$ELECTRON" "\$CLI" "\$@"$|ulimit -Sn 65536 2>/dev/null\n&|' /usr/share/code/bin/code
+if ! grep -q '^ulimit -Sn 65536' /usr/share/code/bin/code; then
+    echo "/usr/share/code/bin/code no longer matches the expected launch line" >&2
+    exit 1
+fi
+
 echo "----------> Keeping VS Code alive when one of its processes is OOM-killed"
 # If the kernel OOM-kills one process inside VS Code (e.g. a runaway ESLint),
 # keep the rest of VS Code and its Claude Code sessions alive
