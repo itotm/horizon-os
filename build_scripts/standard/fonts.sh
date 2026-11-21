@@ -9,6 +9,7 @@ FONT_PACKAGES=(
     alerque-libertinus-fonts
     cascadia-code-fonts
     cascadia-mono-fonts
+    dejavu-sans-fonts
     fira-code-fonts
     fontawesome-fonts-all
     google-roboto-fonts
@@ -28,12 +29,22 @@ TERRA_FONT_PACKAGES=(
     cleartype-candara-fonts
     cleartype-constantia-fonts
     cleartype-corbel-fonts
-    ms-core-fonts
+    ms-core-andale-fonts
+    ms-core-arial-fonts
+    ms-core-courier-fonts
+    ms-core-georgia-fonts
+    ms-core-impact-fonts
     ms-core-tahoma-fonts
+    ms-core-times-fonts
+    ms-core-trebuchet-fonts
+    ms-core-verdana-fonts
+    ms-core-webdings-fonts
 )
+
 dnf5 -y install \
-    --nogpgcheck \
     --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' \
+    --setopt=terra.gpgcheck=1 \
+    --setopt="terra.gpgkey=https://repos.fyralabs.com/terra$(rpm -E %fedora)/key.asc" \
     "${TERRA_FONT_PACKAGES[@]}"
 
 # Selawik: Microsoft's open-source, metric-compatible stand-in for Segoe UI.

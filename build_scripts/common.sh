@@ -83,6 +83,7 @@ ln -sf /dev/null /etc/NetworkManager/dispatcher.d/04-iscsi
 
 cat > /etc/xdg/kcm-about-distrorc <<EOF
 [General]
+LogoPath=/usr/share/pixmaps/horizon-os-logo.png
 Variant=HorizonOS ${IMAGE_VERSION}
 Website=https://github.com/itotm/horizon-os
 EOF
@@ -112,9 +113,10 @@ echo "----------> Pruning build residue from /var"
 # only, and every later boot gets whatever the machine already has. Regular
 # files left in /var are therefore stale by design, and these are pure build
 # artifacts anyway (dnf's repo cache and its countme stamps, sepolgen's map
-# used only by the audit2allow policy-authoring tool).
+# used only by the audit2allow policy-authoring tool, authselect's checksum).
 rm -rf /var/lib/dnf/repos
 rm -f /var/lib/sepolgen/perm_map
+rm -f /var/lib/authselect/checksum
 
 echo "----------> Generating tmpfiles.d entries for /var"
 # rpm-ostree does this conversion during compose; installing with dnf5 from a
