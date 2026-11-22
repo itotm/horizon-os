@@ -102,11 +102,6 @@ REMOVE_ACCESSIBILITY=(
     speech-dispatcher-utils
 )
 
-REMOVE_PYTHON_QT=(
-    python3-pyside6
-    python3-shiboken6
-)
-
 # The static Noto Serif duplicates google-noto-serif-vf-fonts, which stays.
 REMOVE_FONTS=(
     google-noto-serif-fonts
@@ -135,7 +130,6 @@ dnf5 -y remove \
     "${REMOVE_PRINTERS[@]}" \
     "${REMOVE_GUEST_TOOLS[@]}" \
     "${REMOVE_ACCESSIBILITY[@]}" \
-    "${REMOVE_PYTHON_QT[@]}" \
     "${REMOVE_FONTS[@]}" \
     "${REMOVE_HARDWARE[@]}" \
     "${REMOVE_ZRAM[@]}"

@@ -44,7 +44,7 @@ TERRA_FONT_PACKAGES=(
 dnf5 -y install \
     --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' \
     --setopt=terra.gpgcheck=1 \
-    --setopt="terra.gpgkey=https://repos.fyralabs.com/terra$(rpm -E %fedora)/key.asc" \
+    --setopt='terra.gpgkey=https://repos.fyralabs.com/terra$releasever/key.asc' \
     "${TERRA_FONT_PACKAGES[@]}"
 
 # Selawik: Microsoft's open-source, metric-compatible stand-in for Segoe UI.

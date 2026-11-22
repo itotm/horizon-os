@@ -392,32 +392,58 @@ jobs:
           set -euo pipefail
 
           CUTOFF_DATE=$(date -u -d '30 days ago' +%s)
+          VERSIONS_FILE="${RUNNER_TEMP}/ghcr-versions.tsv"
           # jq condition true for any tag in KEEP_TAGS: . == "latest" or . == "lite" ...
           KEEP_FILTER=$(printf '. == "%s" or ' ${KEEP_TAGS})
           KEEP_FILTER="${KEEP_FILTER% or }"
           echo "Fetching versions for ${PACKAGE_NAME}..."
 
           # `gh api` paginates on its own and fails the step on a non-2xx response,
-          # unlike a bare `curl -s`. The tags in KEEP_TAGS are excluded by exact
-          # match rather than a substring match on the joined list, so tags
-          # such as `latest-foo` are not treated as protected. Signatures
-          # (tagged sha256-<digest>.sig) are kept too: their timestamp never
-          # moves, so the one covering `latest` would age out while the image
-          # itself stays, breaking verification on every installed system.
+          # unlike a bare `curl -s`. All versions are listed before anything is
+          # deleted. Per version: id, digest, last update, whether it carries a
+          # tag in KEEP_TAGS (exact match, so `latest-foo` is not protected), the
+          # digest a signature (tagged sha256-<digest>.sig) covers, and the tags.
+          # Empty fields are written as "-": read would merge two tabs in a row.
           gh api --paginate "/user/packages/container/${PACKAGE_NAME}/versions" \
             --jq ".[]
-                  | select((.metadata.container.tags // []) | any(${KEEP_FILTER}) | not)
-                  | select((.metadata.container.tags // []) | any(startswith(\"sha256-\")) | not)
-                  | [.id, .updated_at, ((.metadata.container.tags // []) | join(\",\"))]
+                  | (.metadata.container.tags // []) as \$t
+                  | [.id, .name, .updated_at,
+                     (\$t | any(${KEEP_FILTER}) | tostring),
+                     (\$t | map(select(test(\"^sha256-[0-9a-f]{64}[.]sig\$\")) | .[7:71]) | first // \"-\"),
+                     (\$t | join(\",\") | if . == \"\" then \"-\" else . end)]
                   | @tsv" \
-          | while IFS=$'\t' read -r VERSION_ID UPDATED_AT TAGS; do
-              VERSION_TS=$(date -u -d "$UPDATED_AT" +%s 2>/dev/null || echo 0)
-              [ "$VERSION_TS" -lt "$CUTOFF_DATE" ] || continue
+            > "$VERSIONS_FILE"
 
-              echo "Deleting version ID: ${VERSION_ID} (tags: ${TAGS:-<untagged>}, updated: ${UPDATED_AT})"
+          # Old versions. Kept tags never age out, and signatures are left to the
+          # next pass: their timestamp never moves, so the one covering `latest`
+          # would go while the image stays, breaking verification on every
+          # installed system. An unreadable date counts as recent.
+          KEPT_DIGESTS=" "
+          while IFS=$'\t' read -r VERSION_ID DIGEST UPDATED_AT KEEP SIGNED TAGS; do
+            [ "$SIGNED" = "-" ] || continue
+            VERSION_TS=$(date -u -d "$UPDATED_AT" +%s 2>/dev/null || echo "$CUTOFF_DATE")
+            if [ "$KEEP" = "false" ] && [ "$VERSION_TS" -lt "$CUTOFF_DATE" ]; then
+              echo "Deleting version ID: ${VERSION_ID} (tags: ${TAGS/#-/<untagged>}, updated: ${UPDATED_AT})"
               gh api --silent --method DELETE \
                 "/user/packages/container/${PACKAGE_NAME}/versions/${VERSION_ID}"
-            done
+            else
+              KEPT_DIGESTS+="${DIGEST} "
+            fi
+          done < "$VERSIONS_FILE"
+
+          # Signatures of images no longer in the package. With no image left at
+          # all something went wrong with the listing: touch nothing.
+          if [ "$KEPT_DIGESTS" = " " ]; then
+            echo "No image left, signatures not touched."
+            exit 0
+          fi
+          while IFS=$'\t' read -r VERSION_ID _ _ _ SIGNED TAGS; do
+            [ "$SIGNED" != "-" ] || continue
+            [[ "$KEPT_DIGESTS" != *" sha256:${SIGNED} "* ]] || continue
+            echo "Deleting orphaned signature: version ID ${VERSION_ID} (${TAGS})"
+            gh api --silent --method DELETE \
+              "/user/packages/container/${PACKAGE_NAME}/versions/${VERSION_ID}"
+          done < "$VERSIONS_FILE"
 
           echo "GHCR cleanup complete."
 
@@ -479,45 +505,65 @@ jobs:
             echo "Tagged ${REPO}:${tag} -> ${DIGEST}"
           done
 
+      # Tags are removed one by one through the Hub API, never with
+      # `skopeo delete`: that removes the manifest a tag points to, and with it
+      # every other tag on the same digest (a kept tag included), so the next
+      # delete of one of those fails because the image is already gone.
+      # All tags are listed before anything is deleted, so deleting does not
+      # shift the pages still to read.
       - name: Delete old images from Docker Hub
         if: steps.push_dockerhub.outcome == 'success' && steps.date.outputs.push_dockerhub == 'true'
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
-          DOCKERHUB_REPO="${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}"
+          set -euo pipefail
+          DOCKERHUB_REPO="${DOCKERHUB_USERNAME}/${IMAGE_NAME}"
+          API="https://hub.docker.com/v2/repositories/${DOCKERHUB_REPO}/tags"
           CUTOFF_DATE=$(date -u -d '15 days ago' +%s)
+          TAGS_FILE="${RUNNER_TEMP}/dockerhub-tags.tsv"
 
-          # Get auth token for listing tags
-          TOKEN=$(curl -s -H "Content-Type: application/json" \
-            -X POST -d '{"username": "${{ secrets.DOCKERHUB_USERNAME }}", "password": "${{ secrets.DOCKERHUB_TOKEN }}"}' \
-            "https://hub.docker.com/v2/users/login/" | jq -r '.token')
+          TOKEN=$(jq -n --arg u "$DOCKERHUB_USERNAME" --arg p "$DOCKERHUB_TOKEN" '{username: $u, password: $p}' \
+            | curl -fsS -H "Content-Type: application/json" -X POST -d @- "https://hub.docker.com/v2/users/login/" \
+            | jq -r '.token')
 
           echo "Fetching tags for ${DOCKERHUB_REPO}..."
-          PAGE_URL="https://hub.docker.com/v2/repositories/${DOCKERHUB_REPO}/tags/?page_size=100"
-          while [ "$PAGE_URL" != "null" ] && [ -n "$PAGE_URL" ]; do
-            RESPONSE=$(curl -s -H "Authorization: Bearer ${TOKEN}" "$PAGE_URL")
-
-            echo "$RESPONSE" | jq -c '.results[]?' | while read -r TAG; do
-              TAG_NAME=$(echo "$TAG" | jq -r '.name')
-              LAST_UPDATED=$(echo "$TAG" | jq -r '.last_updated')
-              TAG_TS=$(date -u -d "$LAST_UPDATED" +%s 2>/dev/null || echo 0)
-
-              # Keep the tags in KEEP_TAGS and the signatures
-              # (sha256-<digest>.sig): the one covering a kept tag never gets a
-              # newer timestamp and would otherwise be removed while the image stays.
-              case " ${{ env.KEEP_TAGS }} " in
-                *" ${TAG_NAME} "*) continue ;;
-              esac
-              case "$TAG_NAME" in
-                sha256-*) continue ;;
-              esac
-
-              if [ "$TAG_TS" -lt "$CUTOFF_DATE" ] 2>/dev/null; then
-                echo "Deleting tag: ${TAG_NAME} (updated: ${LAST_UPDATED})"
-                sudo skopeo delete docker://docker.io/${DOCKERHUB_REPO}:${TAG_NAME}
-              fi
-            done
-
-            PAGE_URL=$(echo "$RESPONSE" | jq -r '.next // "null"')
+          : > "$TAGS_FILE"
+          PAGE_URL="${API}/?page_size=100"
+          while [ -n "$PAGE_URL" ]; do
+            RESPONSE=$(curl -fsS -H "Authorization: Bearer ${TOKEN}" "$PAGE_URL")
+            jq -r '.results[] | [.name, .digest, .last_updated] | @tsv' <<< "$RESPONSE" >> "$TAGS_FILE"
+            PAGE_URL=$(jq -r '.next // empty' <<< "$RESPONSE")
           done
+
+          # Old tags. The tags in KEEP_TAGS never age out, and the signatures
+          # (sha256-<digest>.sig) are left to the next pass: their timestamp
+          # never moves, so the one covering a kept tag would go while the
+          # image stays. An unreadable date counts as recent.
+          KEPT_DIGESTS=" "
+          while IFS=$'\t' read -r TAG_NAME DIGEST LAST_UPDATED; do
+            case "$TAG_NAME" in sha256-*) continue ;; esac
+            TAG_TS=$(date -u -d "$LAST_UPDATED" +%s 2>/dev/null || echo "$CUTOFF_DATE")
+            if [[ " ${KEEP_TAGS} " != *" ${TAG_NAME} "* ]] && [ "$TAG_TS" -lt "$CUTOFF_DATE" ]; then
+              echo "Deleting tag: ${TAG_NAME} (updated: ${LAST_UPDATED})"
+              curl -fsS -X DELETE -H "Authorization: Bearer ${TOKEN}" "${API}/${TAG_NAME}/"
+            else
+              KEPT_DIGESTS+="${DIGEST} "
+            fi
+          done < "$TAGS_FILE"
+
+          # Signatures of images no remaining tag points to. With no tag left
+          # at all something went wrong with the listing: touch nothing.
+          if [ "$KEPT_DIGESTS" = " " ]; then
+            echo "No tag left, signatures not touched."
+            exit 0
+          fi
+          while IFS=$'\t' read -r TAG_NAME _ _; do
+            [[ "$TAG_NAME" =~ ^sha256-([0-9a-f]{64})\.sig$ ]] || continue
+            [[ "$KEPT_DIGESTS" != *" sha256:${BASH_REMATCH[1]} "* ]] || continue
+            echo "Deleting orphaned signature: ${TAG_NAME}"
+            curl -fsS -X DELETE -H "Authorization: Bearer ${TOKEN}" "${API}/${TAG_NAME}/"
+          done < "$TAGS_FILE"
 
           echo "Docker Hub cleanup complete."
 
@@ -572,43 +618,52 @@ jobs:
             echo "Tagged ${REPO}:${tag} -> ${DIGEST}"
           done
 
+      # Same as the Docker Hub cleanup, through the Quay API.
       - name: Delete old images from Quay.io
         if: steps.push_quay.outcome == 'success' && steps.date.outputs.push_quay == 'true'
+        env:
+          QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}
+          QUAY_NAMESPACE: ${{ secrets.QUAY_NAMESPACE }}
         run: |
-          QUAY_REPO="${{ secrets.QUAY_NAMESPACE }}/${{ env.IMAGE_NAME }}"
+          set -euo pipefail
+          QUAY_REPO="${QUAY_NAMESPACE}/${IMAGE_NAME}"
+          API="https://quay.io/api/v1/repository/${QUAY_REPO}/tag"
           CUTOFF_DATE=$(date -u -d '15 days ago' +%s)
+          TAGS_FILE="${RUNNER_TEMP}/quay-tags.tsv"
 
           echo "Fetching tags for ${QUAY_REPO}..."
+          : > "$TAGS_FILE"
           PAGE=1
           while true; do
-            RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.QUAY_TOKEN }}" \
-              "https://quay.io/api/v1/repository/${QUAY_REPO}/tag/?page=${PAGE}&limit=100&onlyActiveTags=true")
-
-            # The tags in KEEP_TAGS and the signatures (sha256-<digest>.sig) are
-            # kept: the signature covering a kept tag never gets a newer
-            # timestamp and would otherwise be removed while the image stays.
-            TAGS=$(echo "$RESPONSE" | jq -r --arg keep "${{ env.KEEP_TAGS }}" '($keep | split(" ")) as $k
-              | .tags[]?
-              | select(.name as $n | $k | index($n) | not)
-              | select(.name | startswith("sha256-") | not)
-              | "\(.name) \(.start_ts)"')
-
-            if [ -z "$TAGS" ]; then
-              break
-            fi
-
-            echo "$TAGS" | while read -r TAG_NAME TAG_TS; do
-              if [ "$TAG_TS" -lt "$CUTOFF_DATE" ] 2>/dev/null; then
-                echo "Deleting tag: ${TAG_NAME} (created: $(date -u -d @${TAG_TS} +%Y-%m-%d))"
-                sudo skopeo delete docker://quay.io/${QUAY_REPO}:${TAG_NAME}
-              fi
-            done
-
-            HAS_MORE=$(echo "$RESPONSE" | jq -r '.has_additional // false')
-            if [ "$HAS_MORE" != "true" ]; then
-              break
-            fi
+            RESPONSE=$(curl -fsS -H "Authorization: Bearer ${QUAY_TOKEN}" \
+              "${API}/?page=${PAGE}&limit=100&onlyActiveTags=true")
+            jq -r '.tags[] | [.name, .manifest_digest, .start_ts] | @tsv' <<< "$RESPONSE" >> "$TAGS_FILE"
+            [ "$(jq -r '.has_additional // false' <<< "$RESPONSE")" = "true" ] || break
             PAGE=$((PAGE + 1))
           done
 
-          echo "Cleanup complete."
+          # Old tags; kept tags and signatures as in the Docker Hub step.
+          KEPT_DIGESTS=" "
+          while IFS=$'\t' read -r TAG_NAME DIGEST TAG_TS; do
+            case "$TAG_NAME" in sha256-*) continue ;; esac
+            if [[ " ${KEEP_TAGS} " != *" ${TAG_NAME} "* ]] && [ "$TAG_TS" -lt "$CUTOFF_DATE" ]; then
+              echo "Deleting tag: ${TAG_NAME} (created: $(date -u -d "@${TAG_TS}" +%Y-%m-%d))"
+              curl -fsS -X DELETE -H "Authorization: Bearer ${QUAY_TOKEN}" "${API}/${TAG_NAME}"
+            else
+              KEPT_DIGESTS+="${DIGEST} "
+            fi
+          done < "$TAGS_FILE"
+
+          # Signatures of images no remaining tag points to.
+          if [ "$KEPT_DIGESTS" = " " ]; then
+            echo "No tag left, signatures not touched."
+            exit 0
+          fi
+          while IFS=$'\t' read -r TAG_NAME _ _; do
+            [[ "$TAG_NAME" =~ ^sha256-([0-9a-f]{64})\.sig$ ]] || continue
+            [[ "$KEPT_DIGESTS" != *" sha256:${BASH_REMATCH[1]} "* ]] || continue
+            echo "Deleting orphaned signature: ${TAG_NAME}"
+            curl -fsS -X DELETE -H "Authorization: Bearer ${QUAY_TOKEN}" "${API}/${TAG_NAME}"
+          done < "$TAGS_FILE"
+
+          echo "Quay.io cleanup complete."

@@ -4,7 +4,7 @@ set -oue pipefail
 MEGA_FEDORA=$(curl --http1.1 -fsSL "https://mega.nz/linux/repo/" \
   | grep -o 'href="Fedora_[0-9]*/"' \
   | grep -o '[0-9]*' \
-  | awk -v max="${FEDORA_VERSION}" '$1 <= max' \
+  | awk -v max="$(rpm -E %fedora)" '$1 <= max' \
   | sort -n \
   | tail -n1)
 echo "----------> Using MEGA repository for Fedora ${MEGA_FEDORA}"

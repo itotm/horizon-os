@@ -8,11 +8,11 @@ on:
       fedora_version:
         description: "Fedora base image"
         required: false
-        default: "45"
+        default: "rawhide"
         type: choice
         options:
-          - "44"
           - "45"
+          - "46"
           - "rawhide"
       rechunk:
         description: "Rechunk method"
@@ -113,7 +113,7 @@ jobs:
           sudo buildah build \
             --format oci \
             --file ./Containerfile \
-            --build-arg FEDORA_VERSION=${{ github.event.inputs.fedora_version || '45' }} \
+            --build-arg FEDORA_VERSION=${{ github.event.inputs.fedora_version || 'rawhide' }} \
             --build-arg BUILD_NUMBER=${{ github.run_number }} \
             --build-arg IMAGE_VERSION=${{ steps.date.outputs.version }} \
             --build-arg ENABLE_COMMON=true \
@@ -131,7 +131,7 @@ jobs:
           # container it commits, so the later label pass would record our own
           # intermediate :build tag as the base. Capture the real base here,
           # while it is still in local storage, and carry it forward.
-          BASE_IMAGE="quay.io/fedora/fedora-kinoite:${{ github.event.inputs.fedora_version || '45' }}"
+          BASE_IMAGE="quay.io/fedora/fedora-kinoite:${{ github.event.inputs.fedora_version || 'rawhide' }}"
           BASE_INFO=$(sudo buildah inspect --type image "$BASE_IMAGE")
           BASE_DIGEST=$(jq -r '.FromImageDigest // empty' <<< "$BASE_INFO")
           BASE_VERSION=$(jq -r '.OCIv1.config.Labels["org.opencontainers.image.version"] // empty' <<< "$BASE_INFO")
