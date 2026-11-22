@@ -41,10 +41,13 @@ TERRA_FONT_PACKAGES=(
     ms-core-webdings-fonts
 )
 
+# "45", or "rawhide" on Rawhide, as Terra names its repositories. dnf expands
+# $releasever in the repository URL but not in the key URL.
+RELEASEVER=$(dnf5 --dump-variables | sed -n 's/^releasever = //p')
 dnf5 -y install \
-    --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' \
+    --repofrompath "terra,https://repos.fyralabs.com/terra${RELEASEVER}" \
     --setopt=terra.gpgcheck=1 \
-    --setopt='terra.gpgkey=https://repos.fyralabs.com/terra$releasever/key.asc' \
+    --setopt="terra.gpgkey=https://repos.fyralabs.com/terra${RELEASEVER}/key.asc" \
     "${TERRA_FONT_PACKAGES[@]}"
 
 # Selawik: Microsoft's open-source, metric-compatible stand-in for Segoe UI.
