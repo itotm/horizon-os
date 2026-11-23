@@ -263,7 +263,7 @@ jobs:
       - name: Run Rechunker
         id: rechunk
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-        uses: projectbluefin/actions/bootc-build/chunka@fdd67230905f523fa64f9b043a5151293978dec4 # v1
+        uses: projectbluefin/actions/bootc-build/chunka@9eccc77361d4e1bdc8c412dd3b6573d8680d2246 # v1
         with:
           # Use the local-only tag, not the ghcr.io-qualified one: buildah's --from
           # treats a registry-qualified reference to a mutable tag (e.g. `:latest`)
