@@ -618,16 +618,21 @@ jobs:
             echo "Tagged ${REPO}:${tag} -> ${DIGEST}"
           done
 
-      # Same as the Docker Hub cleanup, through the Quay API.
+      # Same as the Docker Hub cleanup. Tags are listed through the Quay API (the
+      # repository is public) and deleted through the registry API: the Quay API
+      # only accepts OAuth tokens for that, while QUAY_TOKEN is the registry
+      # password. Deleting by tag name leaves the other tags on the same digest.
       - name: Delete old images from Quay.io
         if: steps.push_quay.outcome == 'success' && steps.date.outputs.push_quay == 'true'
         env:
+          QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
           QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}
           QUAY_NAMESPACE: ${{ secrets.QUAY_NAMESPACE }}
         run: |
           set -euo pipefail
           QUAY_REPO="${QUAY_NAMESPACE}/${IMAGE_NAME}"
           API="https://quay.io/api/v1/repository/${QUAY_REPO}/tag"
+          REGISTRY="https://quay.io/v2/${QUAY_REPO}/manifests"
           CUTOFF_DATE=$(date -u -d '15 days ago' +%s)
           TAGS_FILE="${RUNNER_TEMP}/quay-tags.tsv"
 
@@ -635,12 +640,15 @@ jobs:
           : > "$TAGS_FILE"
           PAGE=1
           while true; do
-            RESPONSE=$(curl -fsS -H "Authorization: Bearer ${QUAY_TOKEN}" \
-              "${API}/?page=${PAGE}&limit=100&onlyActiveTags=true")
+            RESPONSE=$(curl -fsS "${API}/?page=${PAGE}&limit=100&onlyActiveTags=true")
             jq -r '.tags[] | [.name, .manifest_digest, .start_ts] | @tsv' <<< "$RESPONSE" >> "$TAGS_FILE"
             [ "$(jq -r '.has_additional // false' <<< "$RESPONSE")" = "true" ] || break
             PAGE=$((PAGE + 1))
           done
+
+          TOKEN=$(curl -fsS -u "${QUAY_USERNAME}:${QUAY_TOKEN}" \
+            "https://quay.io/v2/auth?service=quay.io&scope=repository:${QUAY_REPO}:pull,push" \
+            | jq -r '.token')
 
           # Old tags; kept tags and signatures as in the Docker Hub step.
           KEPT_DIGESTS=" "
@@ -648,7 +656,7 @@ jobs:
             case "$TAG_NAME" in sha256-*) continue ;; esac
             if [[ " ${KEEP_TAGS} " != *" ${TAG_NAME} "* ]] && [ "$TAG_TS" -lt "$CUTOFF_DATE" ]; then
               echo "Deleting tag: ${TAG_NAME} (created: $(date -u -d "@${TAG_TS}" +%Y-%m-%d))"
-              curl -fsS -X DELETE -H "Authorization: Bearer ${QUAY_TOKEN}" "${API}/${TAG_NAME}"
+              curl -fsS -X DELETE -H "Authorization: Bearer ${TOKEN}" "${REGISTRY}/${TAG_NAME}"
             else
               KEPT_DIGESTS+="${DIGEST} "
             fi
@@ -663,7 +671,7 @@ jobs:
             [[ "$TAG_NAME" =~ ^sha256-([0-9a-f]{64})\.sig$ ]] || continue
             [[ "$KEPT_DIGESTS" != *" sha256:${BASH_REMATCH[1]} "* ]] || continue
             echo "Deleting orphaned signature: ${TAG_NAME}"
-            curl -fsS -X DELETE -H "Authorization: Bearer ${QUAY_TOKEN}" "${API}/${TAG_NAME}"
+            curl -fsS -X DELETE -H "Authorization: Bearer ${TOKEN}" "${REGISTRY}/${TAG_NAME}"
           done < "$TAGS_FILE"
 
           echo "Quay.io cleanup complete."

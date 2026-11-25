@@ -65,3 +65,4 @@ Some scripts written and/or modified by Claude and Copilot.
 ---
 
 [![Latest build](https://github.com/itotm/horizon-os/actions/workflows/build.yml/badge.svg)](https://github.com/itotm/horizon-os/actions/workflows/build.yml)
+[![Docker Hub pulls](https://img.shields.io/docker/pulls/itotm/horizon-os?logo=docker&label=Docker%20Hub%20pulls)](https://hub.docker.com/r/itotm/horizon-os)
