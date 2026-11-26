@@ -20,7 +20,9 @@ FLATPAK_PACKAGES=(
     com.calibre_ebook.calibre
     com.github.PintaProject.Pinta
     com.github.tchx84.Flatseal
+    com.rustdesk.RustDesk
     com.usebottles.bottles
+    com.yacreader.YACReader
     fr.handbrake.ghb
     hu.irl.cameractrls
     io.github.flattool.Warehouse
